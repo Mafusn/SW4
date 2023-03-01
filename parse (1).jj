@@ -1,0 +1,70 @@
+PARSER_BEGIN(Parser)
+
+public class Parser {
+    public static void main(String[] args) {
+        try {
+            Parser parser = new Parser(new java.io.FileReader("code.txt"));
+	    parser.prog();
+
+            SimpleNode root = (SimpleNode) parser.jjtree.rootNode();
+            root.dump("");
+
+            System.out.println("Syntax is good");
+        } catch (Throwable e) {
+            // Catching Throwable is ugly but JavaCC throws Error objects!
+            System.out.println("Syntax error: " + e.getMessage());
+        }
+    }
+}
+
+PARSER_END(Parser)
+
+SKIP:
+    { " "
+    | "\t"
+    | "\n"
+    | "\r"
+    }
+
+TOKEN: /*OPERATORS*/
+    { < PLUS : "+" >
+    | < MINUS : "-" >
+    | < FLOATDCL : "f" >
+    | < INTDCL : "i" >
+    | < PRINT : "p" >
+    | < ASSIGN : "=" >
+    }
+
+TOKEN:
+    { < INUM : (< DIGIT >)+ >
+    | < FNUM : (< DIGIT >)+ (".") (< DIGIT >)+ >
+    | < #DIGIT : [ "0"-"9" ] >
+    | < ID : ["a"-"e"]|["g"-"h"]|["j"-"o"]|["q"-"z"] >
+    }
+
+
+void prog() :
+{}
+{(dcl())+ (stmt())* }
+
+void dcl() :
+{}
+{ < FLOATDCL > <ID >
+| < INTDCL > <ID > }
+
+ void stmt() :
+{}
+{ < ID ><ASSIGN > val() (expr())?
+| < PRINT > <ID > }
+
+void val() :
+{}
+{ <INUM>
+| <FNUM>
+| < ID> }
+
+
+void expr() :
+{}
+{ <PLUS> val() (expr())?
+| <MINUS> val() (expr())?}
