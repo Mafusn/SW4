@@ -1,0 +1,4 @@
+int a;
+a = 24;
+print(a);
+BYE;

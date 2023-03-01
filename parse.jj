@@ -1,70 +1,87 @@
 PARSER_BEGIN(Parser)
 
 public class Parser {
-    public static void main(String[] args) {
-        try {
-            Parser parser = new Parser(new java.io.FileReader("code.txt"));
-	    parser.prog();
+   public static void main(String[] args) {
+       try {
+           Parser parser = new Parser(new java.io.FileReader("code.txt"));
+          parser.prog();
 
-            SimpleNode root = (SimpleNode) parser.jjtree.rootNode();
-            root.dump("");
+           SimpleNode root = (SimpleNode) parser.jjtree.rootNode();
+           root.dump("");
 
-            System.out.println("Syntax is good");
-        } catch (Throwable e) {
-            // Catching Throwable is ugly but JavaCC throws Error objects!
-            System.out.println("Syntax error: " + e.getMessage());
-        }
-    }
+           System.out.println("Syntax is good");
+       } catch (Throwable e) {
+           // Catching Throwable is ugly but JavaCC throws Error objects!
+           System.out.println("Syntax error: " + e.getMessage());
+       }
+   }
 }
 
 PARSER_END(Parser)
 
 SKIP:
-    { " "
-    | "\t"
-    | "\n"
-    | "\r"
-    }
+{ " "
+ | "\t"
+ | "\n"
+ | "\r"
+}
 
-TOKEN: /*OPERATORS*/
-    { < PLUS : "+" >
-    | < MINUS : "-" >
-    | < FLOATDCL : "f" >
-    | < INTDCL : "i" >
-    | < PRINT : "p" >
-    | < ASSIGN : "=" >
-    }
+TOKEN : /* Numbers */
+{ <INTDCL: "int">
+ | <INT: (<MINUS>)? (<DIGIT>)>
+ | <FLOATDCL: "float">
+ | <FLOAT: (<MINUS>)? (<DIGIT>)+ (".") (<DIGIT>)+>
+ | <#DIGIT: ("0" | ["1"-"9"](["0"-"9"])*)>
+ | <PLUS: "+">
+ | <MINUS: "-">
+}
 
-TOKEN:
-    { < INUM : (< DIGIT >)+ >
-    | < FNUM : (< DIGIT >)+ (".") (< DIGIT >)+ >
-    | < #DIGIT : [ "0"-"9" ] >
-    | < ID : ["a"-"e"]|["g"-"h"]|["j"-"o"]|["q"-"z"] >
-    }
+TOKEN: /* LOGIC */
+{
+   <IF: "if">
+ | <ELSE: "else">
+ | <ELSEIF: "elif">
+}
+
+TOKEN : /* Operators and constructs */
+{ <TRUE: "true" >
+ | <FALSE: "false" >
+ | <ASSIGN: "=">
+ | <LPAREN: "(">
+ | <RPAREN: ")">
+ | <COMMENT : "/" (~["/"] | "/" ~["/"])* "*/" >
+ | <EOL: ";">
+ | <END_OF_FILE: "BYE">
+ | <PRINT: "print">
+}
+
+
+TOKEN : /* ID */
+{ <ID: (["a"-"z", "A"-"Z", "_", "0"-"9"])> }
 
 
 void prog() :
 {}
-{(dcl())+ (stmt())* }
+{(dcl())+ (stmt())* <END_OF_FILE> <EOL>}
 
 void dcl() :
 {}
-{ < FLOATDCL > <ID >
-| < INTDCL > <ID > }
+{ < FLOATDCL > <ID > <EOL>
+| < INTDCL > <ID > <EOL>}
 
- void stmt() :
+void stmt() :
 {}
-{ < ID ><ASSIGN > val() (expr())?
-| < PRINT > <ID > }
+{ < ID ><ASSIGN > val() (expr())? <EOL>
+| < PRINT > "(" <ID > ")" <EOL>}
 
 void val() :
 {}
-{ <INUM>
-| <FNUM>
-| < ID> }
+{ <INT>
+| <FLOAT>
+| <ID> }
 
 
 void expr() :
 {}
-{ <PLUS> val() (expr())?
-| <MINUS> val() (expr())?}
+{ <PLUS> val() (expr())? <EOL>
+| <MINUS> val() (expr())? <EOL>}
