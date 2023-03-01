@@ -29,25 +29,33 @@ public interface ParserConstants {
   /** RegularExpression Id. */
   int ELSEIF = 14;
   /** RegularExpression Id. */
-  int TRUE = 15;
+  int OR = 15;
   /** RegularExpression Id. */
-  int FALSE = 16;
+  int AND = 16;
   /** RegularExpression Id. */
-  int ASSIGN = 17;
+  int TRUE = 17;
   /** RegularExpression Id. */
-  int LPAREN = 18;
+  int FALSE = 18;
   /** RegularExpression Id. */
-  int RPAREN = 19;
+  int ASSIGN = 19;
   /** RegularExpression Id. */
-  int COMMENT = 20;
+  int LPAREN = 20;
   /** RegularExpression Id. */
-  int EOL = 21;
+  int RPAREN = 21;
   /** RegularExpression Id. */
-  int END_OF_FILE = 22;
+  int LCURL = 22;
   /** RegularExpression Id. */
-  int PRINT = 23;
+  int RCURL = 23;
   /** RegularExpression Id. */
-  int ID = 24;
+  int COMMENT = 24;
+  /** RegularExpression Id. */
+  int EOL = 25;
+  /** RegularExpression Id. */
+  int END_OF_FILE = 26;
+  /** RegularExpression Id. */
+  int PRINT = 27;
+  /** RegularExpression Id. */
+  int ID = 28;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -69,11 +77,15 @@ public interface ParserConstants {
     "\"if\"",
     "\"else\"",
     "\"elif\"",
+    "\"||\"",
+    "\"&&\"",
     "\"true\"",
     "\"false\"",
     "\"=\"",
     "\"(\"",
     "\")\"",
+    "\"{\"",
+    "\"}\"",
     "<COMMENT>",
     "\";\"",
     "\"BYE\"",

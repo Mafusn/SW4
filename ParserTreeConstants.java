@@ -5,7 +5,9 @@ public interface ParserTreeConstants
   public int JJTDCL = 1;
   public int JJTSTMT = 2;
   public int JJTVAL = 3;
-  public int JJTEXPR = 4;
+  public int JJTIFEXPR = 4;
+  public int JJTEXPR = 5;
+  public int JJTEND_OF_FILE = 6;
 
 
   public String[] jjtNodeName = {
@@ -13,7 +15,9 @@ public interface ParserTreeConstants
     "dcl",
     "stmt",
     "val",
+    "ifexpr",
     "expr",
+    "end_of_file",
   };
 }
-/* JavaCC - OriginalChecksum=78c685bcff92028a8d0b2383180d532c (do not edit this line) */
+/* JavaCC - OriginalChecksum=603a7c7d40b9bd9625239f815b8f5f30 (do not edit this line) */

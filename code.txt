@@ -1,4 +1,13 @@
 int a;
 a = 24;
+
+if (a = 24 || a = 23){
+    a = 12;
+} elif (a = 12) {
+    a = 11;
+} else {
+    a = 1;
+};
+
 print(a);
 BYE;

@@ -25,9 +25,9 @@ PARSER_END(Parser)
 
 SKIP:
 { " "
- | "\t"
- | "\n"
- | "\r"
+| "\t"
+| "\n"
+| "\r"
 }
 
 TOKEN : /* Numbers */
@@ -45,6 +45,8 @@ TOKEN: /* LOGIC */
    <IF: "if">
  | <ELSE: "else">
  | <ELSEIF: "elif">
+ | <OR: "||">
+ | <AND: "&&">
 }
 
 TOKEN : /* Operators and constructs */
@@ -53,6 +55,8 @@ TOKEN : /* Operators and constructs */
  | <ASSIGN: "=">
  | <LPAREN: "(">
  | <RPAREN: ")">
+ | <LCURL: "{">
+ | <RCURL: "}">
  | <COMMENT : "/" (~["/"] | "/" ~["/"])* "*/" >
  | <EOL: ";">
  | <END_OF_FILE: "BYE">
@@ -72,7 +76,7 @@ void prog() :
 /*@egen*/}
 {/*@bgen(jjtree) prog */
  try {
-/*@egen*/(dcl())+ (stmt())* <END_OF_FILE> <EOL>/*@bgen(jjtree)*/
+/*@egen*/(dcl())+ (stmt())* end_of_file() <EOL>/*@bgen(jjtree)*/
  } catch (Throwable jjte000) {
    if (jjtc000) {
      jjtree.clearNodeScope(jjtn000);
@@ -120,7 +124,8 @@ void stmt() :
 {/*@bgen(jjtree) stmt */
   try {
 /*@egen*/ < ID ><ASSIGN > val() (expr())? <EOL>
-| < PRINT > "(" <ID > ")" <EOL>/*@bgen(jjtree)*/
+| < PRINT > "(" <ID > ")" <EOL>
+| <IF> <LPAREN> ifexpr() <RPAREN> <LCURL> stmt() <RCURL> ( <ELSEIF> <LPAREN> ifexpr() <RPAREN> <LCURL> stmt() <RCURL> )* ( <ELSE> <LCURL> stmt() <RCURL> )? <EOL>/*@bgen(jjtree)*/
   } catch (Throwable jjte000) {
     if (jjtc000) {
       jjtree.clearNodeScope(jjtn000);
@@ -160,6 +165,38 @@ void val() :
   }
 /*@egen*/ }
 
+void ifexpr():
+{/*@bgen(jjtree) ifexpr */
+  SimpleNode jjtn000 = new SimpleNode(JJTIFEXPR);
+  boolean jjtc000 = true;
+  jjtree.openNodeScope(jjtn000);
+/*@egen*/}
+{/*@bgen(jjtree) ifexpr */
+  try {
+/*@egen*/ <ID> "=" val() (ifexpr())?
+| <OR> ifexpr()
+| <AND> ifexpr()/*@bgen(jjtree)*/
+  } catch (Throwable jjte000) {
+    if (jjtc000) {
+      jjtree.clearNodeScope(jjtn000);
+      jjtc000 = false;
+    } else {
+      jjtree.popNode();
+    }
+    if (jjte000 instanceof RuntimeException) {
+      throw (RuntimeException)jjte000;
+    }
+    if (jjte000 instanceof ParseException) {
+      throw (ParseException)jjte000;
+    }
+    throw (Error)jjte000;
+  } finally {
+    if (jjtc000) {
+      jjtree.closeNodeScope(jjtn000, true);
+    }
+  }
+/*@egen*/ }
+
 
 void expr() :
 {/*@bgen(jjtree) expr */
@@ -169,8 +206,8 @@ void expr() :
 /*@egen*/}
 {/*@bgen(jjtree) expr */
   try {
-/*@egen*/ <PLUS> val() (expr())? <EOL>
-| <MINUS> val() (expr())? <EOL>/*@bgen(jjtree)*/
+/*@egen*/ <PLUS> val() (expr())?
+| <MINUS> val() (expr())?/*@bgen(jjtree)*/
   } catch (Throwable jjte000) {
     if (jjtc000) {
       jjtree.clearNodeScope(jjtn000);
@@ -191,3 +228,21 @@ void expr() :
     }
   }
 /*@egen*/}
+
+void end_of_file() :
+{/*@bgen(jjtree) end_of_file */
+  SimpleNode jjtn000 = new SimpleNode(JJTEND_OF_FILE);
+  boolean jjtc000 = true;
+  jjtree.openNodeScope(jjtn000);
+/*@egen*/}
+{/*@bgen(jjtree) end_of_file */
+ try {
+/*@egen*/
+ <END_OF_FILE>/*@bgen(jjtree)*/
+ } finally {
+   if (jjtc000) {
+     jjtree.closeNodeScope(jjtn000, true);
+   }
+ }
+/*@egen*/
+}
