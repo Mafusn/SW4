@@ -24,36 +24,36 @@ SKIP:
 | "\t"
 | "\n"
 | "\r"
+| <COMMENT : "/" (~["/"] | "/" ~["/"])* "*/" >
 }
 
 TOKEN : /* Numbers */
-{ <INTDCL: "int">
- | <INT: (<MINUS>)? (<DIGIT>)>
+{  <INTDCL: "int">
+ | <INT: ( < DIGIT > )>
  | <FLOATDCL: "float">
- | <FLOAT: (<MINUS>)? (<DIGIT>)+ (".") (<DIGIT>)+>
- | <#DIGIT: ("0" | ["1"-"9"](["0"-"9"])*)>
+ | <FLOAT: ( < MINUS > )? ( < DIGIT > )+ (".") ( < DIGIT > )+>
+ | <#DIGIT: ( "0" | ["1"-"9"] ( ["0"-"9"] )* ) >
  | <PLUS: "+">
  | <MINUS: "-">
 }
 
+
 TOKEN: /* LOGIC */
-{
-   <IF: "if">
- | <ELSE: "else">
- | <ELSEIF: "elif">
- | <OR: "||">
- | <AND: "&&">
+{  <RARROW: ">">
+ | <LARROW: "<">
+ | <BOOLDCL: "bool">
+ | <TRUE: "true" >
+ | <FALSE: "false" >
 }
 
 TOKEN : /* Operators and constructs */
-{ <TRUE: "true" >
- | <FALSE: "false" >
- | <ASSIGN: "=">
+{ <ASSIGN: "=">
  | <LPAREN: "(">
  | <RPAREN: ")">
+ /*
  | <LCURL: "{">
  | <RCURL: "}">
- | <COMMENT : "/" (~["/"] | "/" ~["/"])* "*/" >
+ */
  | <EOL: ";">
  | <END_OF_FILE: "BYE">
  | <PRINT: "print">
@@ -61,44 +61,50 @@ TOKEN : /* Operators and constructs */
 
 
 TOKEN : /* ID */
-{ <ID: (["a"-"z", "A"-"Z", "_", "0"-"9"])> }
+{ <ID: (["a"-"z", "A"-"Z", "_"]) (["a"-"z", "A"-"Z", "_", "0"-"9"])*> }
 
 
 void prog() :
 {}
-{(dcl())+ (stmt())* end_of_file() <EOL>}
+{ ( ( dcl() | stmt() ) < EOL > )* end_of_file() <EOL>}
 
 void dcl() :
 {}
-{ < FLOATDCL > <ID > <EOL>
-| < INTDCL > <ID > <EOL>}
+{
+( < FLOATDCL > | < INTDCL > | < BOOLDCL > ) < ID > ( < ASSIGN > val() ( expr() )? )?
+}
 
 void stmt() :
 {}
-{ < ID ><ASSIGN > val() (expr())? <EOL>
-| < PRINT > "(" <ID > ")" <EOL>
-| <IF> <LPAREN> ifexpr() <RPAREN> <LCURL> stmt() <RCURL> ( <ELSEIF> <LPAREN> ifexpr() <RPAREN> <LCURL> stmt() <RCURL> )* ( <ELSE> <LCURL> stmt() <RCURL> )? <EOL>}
+{ < ID > < ASSIGN > val() ( expr() )?
+| < PRINT > < LPAREN > < ID > < RPAREN >
+}
 
 void val() :
-{}
-{ <INT>
-| <FLOAT>
-| <ID> }
-
-void ifexpr():
-{}
-{ <ID> "=" val() (ifexpr())?
-| <OR> ifexpr()
-| <AND> ifexpr() }
+{
+     // Check for consecutive MINUS tokens
+     Token nextToken = getToken(1);
+     if (token.image.equals("-") && nextToken.image.equals("-")) {
+       throw new ParseException("Encountered '--' at line " + token.beginLine + ", column " + token.beginColumn + '.');
+     }
+}
+{ (<MINUS>)? ( < INT > | < FLOAT > )
+| < TRUE > | < FALSE >
+/*
+| < LPAREN > expr() < RPAREN >
+ */
+| < ID >
+}
 
 
 void expr() :
 {}
-{ <PLUS> val() (expr())?
-| <MINUS> val() (expr())?}
+{
+( < PLUS > | < MINUS > | ( < LARROW > ( < ASSIGN > )? ) | ( < RARROW > ( < ASSIGN > )? ) ) val() ( expr() )?
+}
 
 void end_of_file() :
 {}
 {
- <END_OF_FILE>
+ < END_OF_FILE >
 }
