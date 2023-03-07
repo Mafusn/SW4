@@ -1,13 +1,13 @@
 PARSER_BEGIN(Parser)
 
+import AST.*;
+
 public class Parser {
    public static void main(String[] args) {
-       try {
-           Parser parser = new Parser(new java.io.FileReader("code.txt"));
-           parser.prog();
+       Visitor prettyPrint = new PrettyPrint();
 
-           SimpleNode root = (SimpleNode) parser.jjtree.rootNode();
-           root.dump("");
+       try {
+           new Parser(new java.io.FileReader("code.txt")).prog(prettyPrint);
 
            System.out.println("Syntax is good");
        } catch (Throwable e) {
@@ -64,24 +64,30 @@ TOKEN : /* ID */
 { <ID: (["a"-"z", "A"-"Z", "_"]) (["a"-"z", "A"-"Z", "_", "0"-"9"])*> }
 
 
-void prog() :
-{}
-{ ( ( dcl() | stmt() ) < EOL > )* end_of_file() <EOL>}
+void prog(Visitor prettyPrint) :
+{Node progNode = new ProgNode();
+progNode.accept(prettyPrint);}
+{ ( ( dcl(prettyPrint) | stmt(prettyPrint) ) < EOL > )* end_of_file() <EOL>}
 
-void dcl() :
-{}
+void dcl(Visitor prettyPrint) :
+{ Node nodeDCL = new DclNode();
+ nodeDCL.accept(prettyPrint);
+ }
 {
-( < FLOATDCL > | < INTDCL > | < BOOLDCL > ) < ID > ( < ASSIGN > val() ( expr() )? )?
+( < FLOATDCL > | < INTDCL > | < BOOLDCL > ) < ID > ( < ASSIGN > val(prettyPrint) ( expr(prettyPrint) )? )?
 }
 
-void stmt() :
-{}
-{ < ID > < ASSIGN > val() ( expr() )?
+void stmt(Visitor prettyPrint) :
+{Node stmtDCL = new StmtNode();
+  stmtDCL.accept(prettyPrint);
+  }
+{ < ID > < ASSIGN > val(prettyPrint) ( expr(prettyPrint) )?
 | < PRINT > < LPAREN > < ID > < RPAREN >
 }
 
-void val() :
-{
+void val(Visitor prettyPrint) :
+{    Node valDCL = new ValNode();
+       valDCL.accept(prettyPrint);
      // Check for consecutive MINUS tokens
      Token nextToken = getToken(1);
      if (token.image.equals("-") && nextToken.image.equals("-")) {
@@ -97,14 +103,17 @@ void val() :
 }
 
 
-void expr() :
-{}
+void expr(Visitor prettyPrint) :
 {
-( < PLUS > | < MINUS > | ( < LARROW > ( < ASSIGN > )? ) | ( < RARROW > ( < ASSIGN > )? ) ) val() ( expr() )?
+    Node exprDCL = new ExprNode();
+    exprDCL.accept(prettyPrint);
+}
+{
+( < PLUS > | < MINUS > | ( < LARROW > ( < ASSIGN > )? ) | ( < RARROW > ( < ASSIGN > )? ) ) val(prettyPrint) ( expr(prettyPrint) )?
 }
 
 void end_of_file() :
-{}
+{System.out.println("BYE!");}
 {
  < END_OF_FILE >
 }
