@@ -1,6 +1,6 @@
 package AST;
 
-public class PrettyPrint extends Visitor {
+public class PrettyPrint implements Visitor {
     public void visit(ProgNode v) {
         System.out.println("ProgNode");
     }
