@@ -4,10 +4,10 @@ import AST.*;
 
 public class Parser {
    public static void main(String[] args) {
-       Visitor prettyPrint = new PrettyPrint();
+       Visitor v = new PrettyPrint();
 
        try {
-           new Parser(new java.io.FileReader("code.txt")).prog(prettyPrint);
+           new Parser(new java.io.FileReader("code.txt")).prog(v);
 
            System.out.println("Syntax is good");
        } catch (Throwable e) {
@@ -75,12 +75,12 @@ TOKEN : /* ID */
 
 void prog(Visitor v) :
 {Node progNode = new ProgNode();
-progNode.accept(prettyPrint);}
+progNode.accept(v);}
 { ( ( dcl(v) | stmt(v) ) )* end_of_file() }
 
-void dcl(Visitor prettyPrint) :
+void dcl(Visitor v) :
 { Node nodeDCL = new DclNode();
- nodeDCL.accept(prettyPrint);
+ nodeDCL.accept(v);
  }
 {
 ( < FLOATDCL > | < INTDCL > | < BOOLDCL > ) < ID > ( < ASSIGN > val(v) ( expr(v) )? )? < END_OF_LINE >
@@ -91,7 +91,7 @@ void stmt(Visitor v) :
   stmtDCL.accept(v);}
 { < ID > < ASSIGN > val(v) ( expr(v) )? < END_OF_LINE >
 | < PRINT > < LPAREN > < ID > < RPAREN > < END_OF_LINE >
-| ifStmt()
+| ifStmt(v)
 }
 
 void val(Visitor v) :
@@ -155,6 +155,6 @@ void factor() :
 }
 
 void end_of_file() :
-{{System.out.println("BYE!");}
+{System.out.println("BYE!");}
 { < END_OF_FILE > < END_OF_LINE > }
 
