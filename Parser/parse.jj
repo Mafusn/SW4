@@ -1,13 +1,13 @@
 PARSER_BEGIN(Parser)
 
+import AST.*;
+
 public class Parser {
    public static void main(String[] args) {
-       try {
-           Parser parser = new Parser(new java.io.FileReader("code.txt"));
-           parser.prog();
+       Visitor prettyPrint = new PrettyPrint();
 
-           SimpleNode root = (SimpleNode) parser.jjtree.rootNode();
-           root.dump("");
+       try {
+           new Parser(new java.io.FileReader("code.txt")).prog(prettyPrint);
 
            System.out.println("Syntax is good");
        } catch (Throwable e) {
@@ -73,26 +73,30 @@ TOKEN : /* Operators and constructs */
 TOKEN : /* ID */
 { <ID: (["a"-"z", "A"-"Z", "_"]) (["a"-"z", "A"-"Z", "_", "0"-"9"])*> }
 
+void prog(Visitor v) :
+{Node progNode = new ProgNode();
+progNode.accept(prettyPrint);}
+{ ( ( dcl(v) | stmt(v) ) )* end_of_file() }
 
-void prog() :
-{}
-{ ( ( dcl() | stmt() ) )* end_of_file() }
-
-void dcl() :
-{}
+void dcl(Visitor prettyPrint) :
+{ Node nodeDCL = new DclNode();
+ nodeDCL.accept(prettyPrint);
+ }
 {
-( < FLOATDCL > | < INTDCL > | < BOOLDCL > ) < ID > ( < ASSIGN > val() ( expr() )? )? < END_OF_LINE >
+( < FLOATDCL > | < INTDCL > | < BOOLDCL > ) < ID > ( < ASSIGN > val(v) ( expr(v) )? )? < END_OF_LINE >
 }
 
-void stmt() :
-{}
-{ < ID > < ASSIGN > val() ( expr() )? < END_OF_LINE >
+void stmt(Visitor v) :
+{Node stmtDCL = new StmtNode();
+  stmtDCL.accept(v);}
+{ < ID > < ASSIGN > val(v) ( expr(v) )? < END_OF_LINE >
 | < PRINT > < LPAREN > < ID > < RPAREN > < END_OF_LINE >
 | ifStmt()
 }
 
-void val() :
-{
+void val(Visitor v) :
+{   Node valDCL = new ValNode();
+    valDCL.accept(v);
     // Check for consecutive MINUS tokens
     Token nextToken = getToken(1);
     if (token.image.equals("-") && nextToken.image.equals("-")) {
@@ -106,13 +110,13 @@ void val() :
 | < ID >
 }
 
-void expr() :
+void expr(Visitor v) :
 {}
-{ ( < PLUS > | < MINUS > | < LT > | < GT > | < GE > | < LE > ) val() ( expr() )? }
+{ ( < PLUS > | < MINUS > | < LT > | < GT > | < GE > | < LE > ) val(v) ( expr(v) )? }
 
-void ifStmt() :
+void ifStmt(Visitor v) :
 {}
-{ < IF > < LPAREN > condition() < RPAREN > < LBRACE > stmt() < RBRACE > ( < ELSE > < LBRACE > stmt() < RBRACE >)? }
+{ < IF > < LPAREN > condition() < RPAREN > < LBRACE > stmt(v) < RBRACE > ( < ELSE > < LBRACE > stmt(v) < RBRACE >)? }
 
 void condition() :
 {}
@@ -151,6 +155,6 @@ void factor() :
 }
 
 void end_of_file() :
-{}
+{{System.out.println("BYE!");}
 { < END_OF_FILE > < END_OF_LINE > }
 
