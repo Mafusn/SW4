@@ -1,13 +1,13 @@
 PARSER_BEGIN(Parser)
 
+import AST.*;
+
 public class Parser {
    public static void main(String[] args) {
-       try {
-           Parser parser = new Parser(new java.io.FileReader("code.txt"));
-           parser.prog();
+       Visitor v = new PrettyPrint();
 
-           SimpleNode root = (SimpleNode) parser.jjtree.rootNode();
-           root.dump("");
+       try {
+           new Parser(new java.io.FileReader("code.txt")).prog(v);
 
            System.out.println("Syntax is good");
        } catch (Throwable e) {
@@ -68,6 +68,32 @@ TOKEN : /* Operators and constructs */
 TOKEN : /* ID */
 { <ID: (["a"-"z", "A"-"Z", "_"]) (["a"-"z", "A"-"Z", "_", "0"-"9"])*> }
 
+/*
+void prog(Visitor v) :
+{Node progNode = new ProgNode();
+progNode.accept(v);}
+{ ( ( dcl(v) | stmt(v) ) )* end_of_file() }
+
+void dcl(Visitor v) :
+{ Node nodeDCL = new DclNode();
+ nodeDCL.accept(v);
+ }
+{
+( < FLOATDCL > | < INTDCL > | < BOOLDCL > ) < ID > ( < ASSIGN > val(v) ( expr(v) )? )? < END_OF_LINE >
+}
+
+void stmt(Visitor v) :
+{Node stmtDCL = new StmtNode();
+  stmtDCL.accept(v);}
+{ < ID > < ASSIGN > val(v) ( expr(v) )? < END_OF_LINE >
+| < PRINT > < LPAREN > < ID > < RPAREN > < END_OF_LINE >
+| ifStmt(v)
+}
+
+void val(Visitor v) :
+{   Node valDCL = new ValNode();
+    valDCL.accept(v);
+*/
 void prog() :
 {}
 { ( ( dcl() | stmt() ) )* end_of_file() end_of_line() }
@@ -111,12 +137,19 @@ void val() :
 | id()
 }
 
-void expr() :
+void expr(Visitor v) :
 {}
+/*
+{ ( < PLUS > | < MINUS > | < LT > | < GT > | < GE > | < LE > ) val(v) ( expr(v) )? }
+*/
 { ( plus() | minus() | lt() | gt() | ge() | le() ) val() ( expr() )? }
 
-void ifStmt() :
+
+void ifStmt(Visitor v) :
 {}
+/*
+{ < IF > < LPAREN > condition() < RPAREN > < LBRACE > stmt(v) < RBRACE > ( < ELSE > < LBRACE > stmt(v) < RBRACE >)? }
+*/
 { ifToken() lParen() condition() rParen() lBrace() stmt() rBrace() ( elseToken() lBrace() stmt() rBrace() )? }
 
 void condition() :
@@ -266,6 +299,10 @@ void end_of_line() :
 { < END_OF_LINE > }
 
 void end_of_file() :
+/*
+{System.out.println("BYE!");}
+{ < END_OF_FILE > < END_OF_LINE > }
+*/
 {}
 { < END_OF_FILE > }
 
