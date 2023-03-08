@@ -1,13 +1,24 @@
-int a;
-a = 24;
-
-if (a = 24 || a = 23){
-    a = 12;
-} elif (a = 12) {
-    a = 11;
+int a = 2 + 4;
+a = -24;
+boolean test;
+boolean bool = true;
+a = 24-(-5);
+test = 5 >= 10;
+test = 5 < 10;
+if (test == test)
+{
+    x = 2+2;
+}
+if (true)
+{
+    if (x >= 2)
+    {
+        x = 2+2;
+    }
 } else {
-    a = 1;
-};
-
+    if ((x+x) > y){
+        print(y);
+    }
+}
 print(a);
 BYE;

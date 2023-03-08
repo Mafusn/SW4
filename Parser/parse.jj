@@ -24,81 +24,133 @@ SKIP:
 | "\t"
 | "\n"
 | "\r"
+| <COMMENT : "/*" (~["/"] | "/" ~["/"])* "*/" >
 }
 
 TOKEN : /* Numbers */
 { <INTDCL: "int">
- | <INT: (<MINUS>)? (<DIGIT>)>
- | <FLOATDCL: "float">
- | <FLOAT: (<MINUS>)? (<DIGIT>)+ (".") (<DIGIT>)+>
- | <#DIGIT: ("0" | ["1"-"9"](["0"-"9"])*)>
- | <PLUS: "+">
- | <MINUS: "-">
+| <INT: ( < DIGIT > )>
+| <FLOATDCL: "float">
+| <FLOAT: ( < DIGIT > ) (".") ( < DIGIT > )>
+| <#DIGIT: ( "0" | ["1"-"9"] ( ["0"-"9"] )* ) >
+| <PLUS: "+">
+| <MINUS: "-">
 }
 
 TOKEN: /* LOGIC */
-{
-   <IF: "if">
- | <ELSE: "else">
- | <ELSEIF: "elif">
- | <OR: "||">
- | <AND: "&&">
+{ <IF: "if">
+| <ELSE: "else">
+| <LBRACE: "{">
+| <RBRACE: "}">
+| <AND: "&&">
+| <OR: "||">
+| <NOT: "!">
+| <EQ: "==">
+| <NE: "!=">
+| <LT: "<">
+| <LE: "<=">
+| <GT: ">">
+| <GE: ">=">
+| <BOOLDCL: "boolean">
+| <TRUE: "true" >
+| <FALSE: "false" >
 }
 
 TOKEN : /* Operators and constructs */
-{ <TRUE: "true" >
- | <FALSE: "false" >
- | <ASSIGN: "=">
- | <LPAREN: "(">
- | <RPAREN: ")">
- | <LCURL: "{">
- | <RCURL: "}">
- | <COMMENT : "/" (~["/"] | "/" ~["/"])* "*/" >
- | <EOL: ";">
- | <END_OF_FILE: "BYE">
- | <PRINT: "print">
+{ <ASSIGN: "=">
+| <LPAREN: "(">
+| <RPAREN: ")">
+/*
+| <LCURL: "{">
+| <RCURL: "}">
+*/
+| <END_OF_LINE: ";">
+| <END_OF_FILE: "BYE">
+| <PRINT: "print">
 }
 
 
 TOKEN : /* ID */
-{ <ID: (["a"-"z", "A"-"Z", "_", "0"-"9"])> }
+{ <ID: (["a"-"z", "A"-"Z", "_"]) (["a"-"z", "A"-"Z", "_", "0"-"9"])*> }
 
 
 void prog() :
 {}
-{(dcl())+ (stmt())* end_of_file() <EOL>}
+{ ( ( dcl() | stmt() ) )* end_of_file() }
 
 void dcl() :
 {}
-{ < FLOATDCL > <ID > <EOL>
-| < INTDCL > <ID > <EOL>}
+{
+( < FLOATDCL > | < INTDCL > | < BOOLDCL > ) < ID > ( < ASSIGN > val() ( expr() )? )? < END_OF_LINE >
+}
 
 void stmt() :
 {}
-{ < ID ><ASSIGN > val() (expr())? <EOL>
-| < PRINT > "(" <ID > ")" <EOL>
-| <IF> <LPAREN> ifexpr() <RPAREN> <LCURL> stmt() <RCURL> ( <ELSEIF> <LPAREN> ifexpr() <RPAREN> <LCURL> stmt() <RCURL> )* ( <ELSE> <LCURL> stmt() <RCURL> )? <EOL>}
+{ < ID > < ASSIGN > val() ( expr() )? < END_OF_LINE >
+| < PRINT > < LPAREN > < ID > < RPAREN > < END_OF_LINE >
+| ifStmt()
+}
 
 void val() :
-{}
-{ <INT>
-| <FLOAT>
-| <ID> }
-
-void ifexpr():
-{}
-{ <ID> "=" val() (ifexpr())?
-| <OR> ifexpr()
-| <AND> ifexpr() }
-
+{
+    // Check for consecutive MINUS tokens
+    Token nextToken = getToken(1);
+    if (token.image.equals("-") && nextToken.image.equals("-")) {
+        throw new ParseException("Encountered more than one '-' at line " + token.beginLine + ", column " + token.beginColumn + '.');
+    }
+}
+{ ( < MINUS > )? ( < INT > | < FLOAT > )
+| < TRUE >
+| < FALSE >
+| < LPAREN > ( < MINUS > )? ( < INT > | < FLOAT > ) < RPAREN >
+| < ID >
+}
 
 void expr() :
 {}
-{ <PLUS> val() (expr())?
-| <MINUS> val() (expr())?}
+{ ( < PLUS > | < MINUS > | < LT > | < GT > | < GE > | < LE > ) val() ( expr() )? }
+
+void ifStmt() :
+{}
+{ < IF > < LPAREN > condition() < RPAREN > < LBRACE > stmt() < RBRACE > ( < ELSE > < LBRACE > stmt() < RBRACE >)? }
+
+void condition() :
+{}
+{ comparison() ( conditionTail() )? }
+
+void conditionTail() :
+{}
+{ < AND > comparison() ( conditionTail() )?
+| < OR > comparison() ( conditionTail() )?
+}
+
+void comparison() :
+{}
+{ term() ( comparisonTail() )? }
+
+void comparisonTail() :
+{}
+{ ( < EQ > | < NE > | < LT > | < LE > | < GT > | < GE > ) term() ( comparisonTail() )? }
+
+void term() :
+{}
+{ factor() ( termTail() )? }
+
+void termTail() :
+{}
+{ ( < PLUS > | < MINUS > ) factor() ( termTail() )? }
+
+void factor() :
+{}
+{ < INT >
+| < FLOAT >
+| < LPAREN > term() < RPAREN >
+| < ID >
+| < TRUE >
+| < FALSE >
+}
 
 void end_of_file() :
 {}
-{
- <END_OF_FILE>
-}
+{ < END_OF_FILE > < END_OF_LINE > }
+
