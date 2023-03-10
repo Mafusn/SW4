@@ -1,10 +1,45 @@
 package AST;
 
+import java.util.ArrayList;
+
 public class ExprNode extends Node {
-    public void accept(Visitor v) {
-        v.visit(this);
+    private ArrayList<Node> children;
+
+    public ExprNode(PlusNode plus, MinusNode minus, LTNode ltNode, GTNode gtNode, GENode geNode, LENode leNode, ValNode val, ExprNode expr) {
+        this.children = new ArrayList<>();
+
+        if (plus != null) {
+            this.addChild(plus);
+        }
+        if (minus != null) {
+            this.addChild(minus);
+        }
+        if (ltNode != null) {
+            this.addChild(ltNode);
+        }
+        if (gtNode != null) {
+            this.addChild(gtNode);
+        }
+        if (geNode != null) {
+            this.addChild(geNode);
+        }
+        if (leNode != null) {
+            this.addChild(leNode);
+        }
+        if (val != null) {
+            this.addChild(val);
+        }
+        if (expr != null) {
+            this.addChild(expr);
+        }
     }
 
-    public ExprNode() {
+    @Override
+    public void addChild(Node child) {
+        this.children.add(child);
+    }
+
+    public void accept(Visitor v) {
+        v.visit(this);
     }
 }
