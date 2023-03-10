@@ -17,7 +17,6 @@ public class PrettyPrint implements Visitor {
         System.out.println("    ValNode");
     }
 
-
     public PrettyPrint() {
     }
 }
