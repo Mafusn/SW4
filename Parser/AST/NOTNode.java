@@ -2,10 +2,10 @@ package AST;
 
 import java.util.ArrayList;
 
-public class EQNode extends Node {
+public class NOTNode extends Node {
     private ArrayList<Node> children;
 
-    public EQNode(Node a, Node b) {
+    public NOTNode(Node a, Node b) {
         this.children = new ArrayList<>();
 
         if (a != null) {
@@ -21,12 +21,11 @@ public class EQNode extends Node {
     }
 
     @Override
+    public void accept(Visitor v) {
+        v.visit(this);
+    }
+    @Override
     public void addChild(Node child) {
         this.children.add(child);
-    }
-
-    @Override
-    public void accept(Visitor v) {
-
     }
 }

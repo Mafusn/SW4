@@ -7,6 +7,10 @@ public class FalseNode extends Node {
         this.token = token;
     }
 
+    public String getToken() {
+        return token;
+    }
+
     @Override
     public void addChild(Node child) {
 

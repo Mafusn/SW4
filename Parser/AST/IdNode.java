@@ -1,16 +1,16 @@
 package AST;
 
 public class IdNode extends Node {
-    private String id;
-    public IdNode(String id) {
-        this.id = id;
+    private String token;
+    public IdNode(String token) {
+        this.token = token;
     }
     @Override
     public void addChild(Node child) {
 
     }
-    public String getId() {
-        return id;
+    public String getToken() {
+        return token;
     }
 
     @Override

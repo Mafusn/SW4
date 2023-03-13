@@ -1,19 +1,31 @@
 package AST;
 
-public class ANDNode extends Node {
-    private String token;
+import java.util.ArrayList;
 
-    public ANDNode(String token) {
-        this.token = token;
+public class ANDNode extends Node {
+    private ArrayList<Node> children;
+
+    public ANDNode(Node a, Node b) {
+        this.children = new ArrayList<>();
+
+        if (a != null) {
+            this.addChild(a);
+        }
+        if (b != null) {
+            this.addChild(b);
+        }
     }
 
-    @Override
-    public void addChild(Node child) {
-
+    public ArrayList<Node> getChildren() {
+        return children;
     }
 
     @Override
     public void accept(Visitor v) {
 
+    }
+    @Override
+    public void addChild(Node child) {
+        this.children.add(child);
     }
 }

@@ -4,19 +4,9 @@ import java.util.ArrayList;
 
 public class DclNode extends Node {
     private final ArrayList<Node> children;
-    TypeNode type;
-    IdNode id;
-    ValNode val;
-    AssignNode assign;
-    ExprNode expr;
 
-    public DclNode(TypeNode type, IdNode id, ValNode val, AssignNode assign, ExprNode expr) {
+    public DclNode(Node type, Node id, Node val, Node assign, Node expr) {
         this.children = new ArrayList<>();
-        this.type = type;
-        this.id = id;
-        this.val = val;
-        this.assign = assign;
-        this.expr = expr;
 
         if (type != null) {
             this.addChild(type);
@@ -33,26 +23,6 @@ public class DclNode extends Node {
                 this.addChild(expr);
             }
         }
-    }
-
-    public TypeNode getType() {
-        return type;
-    }
-
-    public IdNode getId() {
-        return id;
-    }
-
-    public ValNode getVal() {
-        return val;
-    }
-
-    public AssignNode getAssign() {
-        return assign;
-    }
-
-    public ExprNode getExpr() {
-        return expr;
     }
 
     public ArrayList<Node> getChildren() {

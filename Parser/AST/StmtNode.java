@@ -5,7 +5,7 @@ import java.util.ArrayList;
 public class StmtNode extends Node {
     private final ArrayList<Node> children;
 
-    public StmtNode(IdNode id, AssignNode assign, ValNode val, ExprNode expr) {
+    public StmtNode(Node id, Node assign, Node val, Node expr) {
         this.children = new ArrayList<>();
 
         if (id != null) {
@@ -22,15 +22,9 @@ public class StmtNode extends Node {
         }
     }
 
-    public StmtNode(PrintStmtNode printStmt) {
-        this.children = new ArrayList<>();
 
-        if (printStmt != null) {
-            this.addChild(printStmt);
-        }
-    }
 
-    public StmtNode(IfStmtNode ifStmt) {
+    public StmtNode(Node ifStmt) {
         this.children = new ArrayList<>();
 
         if (ifStmt != null) {

@@ -6,7 +6,7 @@ import java.util.ArrayList;
 public class ConditionNode extends Node {
     private ArrayList<Node> children;
 
-    public ConditionNode(ComparisonNode comparison, ConditionTailNode conditionTail) {
+    public ConditionNode(Node comparison, Node conditionTail) {
         this.children = new ArrayList<>();
 
         if (comparison != null) {
@@ -17,12 +17,16 @@ public class ConditionNode extends Node {
         }
     }
 
+    public ArrayList<Node> getChildren() {
+        return children;
+    }
+
     @Override
     public void addChild(Node child) {
         this.children.add(child);
     }
     @Override
     public void accept(Visitor v) {
-
+        v.visit(this);
     }
 }

@@ -5,21 +5,7 @@ import java.util.ArrayList;
 public class ConditionTailNode extends Node {
     private ArrayList<Node> children;
 
-    public ConditionTailNode(ANDNode andNode, ComparisonNode comparison, ConditionTailNode conditionTail) {
-        this.children = new ArrayList<>();
-
-        if (andNode != null) {
-            this.addChild(andNode);
-        }
-        if (comparison != null) {
-            this.addChild(comparison);
-        }
-        if (conditionTail != null) {
-            this.addChild(conditionTail);
-        }
-    }
-
-    public ConditionTailNode(ORNode orNode, ComparisonNode comparison, ConditionTailNode conditionTail) {
+    public ConditionTailNode(Node orNode, Node comparison, Node conditionTail) {
         this.children = new ArrayList<>();
 
         if (orNode != null) {
@@ -31,6 +17,10 @@ public class ConditionTailNode extends Node {
         if (conditionTail != null) {
             this.addChild(conditionTail);
         }
+    }
+
+    public ArrayList<Node> getChildren() {
+        return children;
     }
 
     @Override

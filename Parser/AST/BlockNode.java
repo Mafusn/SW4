@@ -2,23 +2,20 @@ package AST;
 
 import java.util.ArrayList;
 
-public class TermNode extends Node {
+public class BlockNode extends Node {
     private ArrayList<Node> children;
 
-    public TermNode(FactorNode factor, TermTailNode termTail) {
+    public BlockNode() {
         this.children = new ArrayList<>();
+    }
 
-        if (factor != null) {
-            this.addChild(factor);
-        }
-        if (termTail != null) {
-            this.addChild(termTail);
-        }
+    public ArrayList<Node> getChildren() {
+        return children;
     }
 
     @Override
     public void accept(Visitor v) {
-
+        v.visit(this);
     }
 
     @Override

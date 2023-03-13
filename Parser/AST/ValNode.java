@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 public class ValNode extends Node {
     private ArrayList<Node> children;
-    public ValNode(MinusNode minusNode, IntNode intNode, FloatNode floatNode) {
+    public ValNode(Node minusNode, Node intNode, Node floatNode) {
         this.children = new ArrayList<>();
 
         if (minusNode != null) {
@@ -18,7 +18,7 @@ public class ValNode extends Node {
         }
     }
 
-    public ValNode(TrueNode trueNode) {
+    public ValNode(Node trueNode) {
         this.children = new ArrayList<>();
 
         if (trueNode != null) {
@@ -26,15 +26,9 @@ public class ValNode extends Node {
         }
     }
 
-    public ValNode(FalseNode falseNode) {
-        this.children = new ArrayList<>();
 
-        if (falseNode != null) {
-            this.addChild(falseNode);
-        }
-    }
 
-    public ValNode(LParenNode lParenNode, MinusNode minusNode, IntNode intNode, FloatNode floatNode, RParenNode rParenNode) {
+    public ValNode(Node lParenNode, Node minusNode, Node intNode, Node floatNode, Node rParenNode) {
         this.children = new ArrayList<>();
 
         if (lParenNode != null) {
@@ -53,14 +47,7 @@ public class ValNode extends Node {
             this.addChild(rParenNode);
         }
     }
-
-    public ValNode(IdNode idNode) {
-        this.children = new ArrayList<>();
-
-        if (idNode != null) {
-            this.addChild(idNode);
-        }
-    }
+    
 
     public void accept(Visitor v) {
         v.visit(this);

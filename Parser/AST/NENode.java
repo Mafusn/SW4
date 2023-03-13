@@ -1,10 +1,23 @@
 package AST;
 
-public class NENode extends Node {
-    private String token;
+import java.util.ArrayList;
 
-    public NENode(String token) {
-        this.token = token;
+public class NENode extends Node {
+    private ArrayList<Node> children;
+
+    public NENode(Node a, Node b) {
+        this.children = new ArrayList<>();
+
+        if (a != null) {
+            this.addChild(a);
+        }
+        if (b != null) {
+            this.addChild(b);
+        }
+    }
+
+    public ArrayList<Node> getChildren() {
+        return children;
     }
 
     @Override
@@ -13,6 +26,6 @@ public class NENode extends Node {
     }
     @Override
     public void addChild(Node child) {
-
+        this.children.add(child);
     }
 }

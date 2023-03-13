@@ -21,154 +21,245 @@ public class PrettyPrint implements Visitor {
     }
 
     public void visit(ProgNode node) {
-        System.out.println("ProgNode");
+        System.out.println(node.getClass().getSimpleName());
         indent();
-        for (Node child : node.getChildren()) {
-            child.accept(this);
-            System.out.println();
-        }
-        unindent();
-    }
-    public void visit(DclNode node) {
         for (Node child : node.getChildren()) {
             printIndent();
-            System.out.print(child.getClass().getSimpleName());
-            System.out.print(" ");
             child.accept(this);
-            System.out.println();
         }
+        unindent();
+        System.out.println();
+    }
+    public void visit(DclNode node) {
+
     }
 
-    public void visit(TypeNode node) {
-        indent();
-        node.getChild().accept(this);
-        unindent();
-    }
     public void visit(StmtNode v) {
 
     }
+
     public void visit(ExprNode v) {
 
     }
-    public void visit(PrintStmtNode v) {
 
-    }
-    public void visit(ValNode v) {
-
-    }
-    public void visit(IfStmtNode v) {
-
-    }
-    public void visit(ConditionNode v) {
-
-    }
     public void visit(ConditionTailNode v) {
 
     }
-    public void visit(ComparisonNode v) {
 
-    }
-    public void visit(ComparisonTailNode v) {
-
-    }
-    public void visit(TermNode v) {
-
-    }
-    public void visit(TermTailNode v) {
-
-    }
-    public void visit(FactorNode v) {
-
+    public void visit(AssignNode node) {
+        System.out.println(node.getClass().getSimpleName());
+        indent();
+        for (Node child : node.getChildren()) {
+            printIndent();
+            child.accept(this);
+        }
+        unindent();
     }
 
-    /* Terminal Nodes */
-
-    public void visit(LParenNode v) {
+    public void visit(ValNode v) {
 
     }
-    public void visit(RParenNode v) {
 
+    public void visit(IfStmtNode node) {
+        System.out.println(node.getClass().getSimpleName());
+        indent();
+        for (Node child : node.getChildren()) {
+            printIndent();
+            child.accept(this);
+        }
+        unindent();
     }
-    public void visit(LBraceNode v) {
 
+    public void visit(ConditionNode node) {
+        System.out.println(node.getClass().getSimpleName());
+        indent();
+        for (Node child : node.getChildren()) {
+            printIndent();
+            child.accept(this);
+        }
+        unindent();
     }
-    public void visit(RBraceNode v) {
 
-    }
-    public void visit(PrintNode v) {
+    public void visit(NOTNode node) {
+        System.out.println(node.getClass().getSimpleName());
+        indent();
+        for (Node child : node.getChildren()) {
+            printIndent();
+            child.accept(this);
 
+        }
+        unindent();
     }
-    public void visit(ANDNode v) {
 
+    public void visit(BlockNode node) {
+        System.out.println(node.getClass().getSimpleName());
+        indent();
+        for (Node child : node.getChildren()) {
+            printIndent();
+            child.accept(this);
+        }
+        unindent();
     }
-    public void visit(ORNode v) {
 
-    }
-    public void visit(EQNode v) {
-
-    }
-    public void visit(NENode v) {
-
-    }
-    public void visit(GTNode v) {
-
-    }
-    public void visit(LTNode v) {
-
-    }
-    public void visit(GENode v) {
-
-    }
-    public void visit(LENode v) {
-
-    }
-    public void visit(MinusNode v) {
-
-    }
-    public void visit(PlusNode v) {
-
-    }
-    public void visit(IfNode v) {
-
-    }
-    public void visit(ElseNode v) {
-
-    }
-    public void visit(IntDclNode node) {
-        System.out.println();
-        printIndent();
+    public void visit(PrintNode node) {
         System.out.print(node.getClass().getSimpleName());
         System.out.print(" ");
-        System.out.print(node.getToken());
+        System.out.println(node.getToken());
     }
+
+    public void visit(ANDNode node) {
+        System.out.println(node.getClass().getSimpleName());
+        indent();
+        for (Node child : node.getChildren()) {
+            printIndent();
+            child.accept(this);
+        }
+        unindent();
+    }
+
+    public void visit(ORNode node) {
+        System.out.println(node.getClass().getSimpleName());
+        indent();
+        for (Node child : node.getChildren()) {
+            printIndent();
+            child.accept(this);
+        }
+        unindent();
+    }
+
+    public void visit(EQNode node) {
+        System.out.println(node.getClass().getSimpleName());
+        indent();
+        for (Node child : node.getChildren()) {
+            printIndent();
+            child.accept(this);
+        }
+        unindent();
+    }
+
+    public void visit(NENode node) {
+        System.out.println(node.getClass().getSimpleName());
+        indent();
+        for (Node child : node.getChildren()) {
+            printIndent();
+            child.accept(this);
+        }
+        unindent();
+    }
+
+    public void visit(GTNode node) {
+        System.out.println(node.getClass().getSimpleName());
+        indent();
+        for (Node child : node.getChildren()) {
+            printIndent();
+            child.accept(this);
+        }
+        unindent();
+    }
+
+    public void visit(LTNode node) {
+        System.out.println(node.getClass().getSimpleName());
+        indent();
+        for (Node child : node.getChildren()) {
+            printIndent();
+            child.accept(this);
+        }
+        unindent();
+    }
+
+    public void visit(GENode node) {
+        System.out.println(node.getClass().getSimpleName());
+        indent();
+        for (Node child : node.getChildren()) {
+            printIndent();
+            child.accept(this);
+        }
+        unindent();
+    }
+
+    public void visit(LENode node) {
+        System.out.println(node.getClass().getSimpleName());
+        indent();
+        for (Node child : node.getChildren()) {
+            printIndent();
+            child.accept(this);
+        }
+        unindent();
+    }
+
+    public void visit(MinusNode node) {
+        System.out.println(node.getClass().getSimpleName());
+        indent();
+        for (Node child : node.getChildren()) {
+            printIndent();
+            child.accept(this);
+        }
+        unindent();
+    }
+
+    public void visit(PlusNode node) {
+        System.out.println(node.getClass().getSimpleName());
+        indent();
+        for (Node child : node.getChildren()) {
+            printIndent();
+            child.accept(this);
+        }
+        unindent();
+    }
+
+    public void visit(IntDclNode node) {
+        System.out.print(node.getClass().getSimpleName());
+        System.out.print(" ");
+        System.out.println(node.getToken());
+    }
+
     public void visit(FloatDclNode node) {
-        System.out.print(node.getToken());
+        System.out.print(node.getClass().getSimpleName());
+        System.out.print(" ");
+        System.out.println(node.getToken());
     }
+
     public void visit(BoolDclNode node) {
-        System.out.print(node.getToken());
+        System.out.print(node.getClass().getSimpleName());
+        System.out.print(" ");
+        System.out.println(node.getToken());
     }
+
     public void visit(IntNode node) {
-
+        System.out.print(node.getClass().getSimpleName());
+        System.out.print(" ");
+        System.out.println(node.getToken());
     }
-    public void visit(FloatNode v) {
 
+    public void visit(FloatNode node) {
+        System.out.print(node.getClass().getSimpleName());
+        System.out.print(" ");
+        System.out.println(node.getToken());
     }
-    public void visit(TrueNode v) {
 
+    public void visit(TrueNode node) {
+        System.out.print(node.getClass().getSimpleName());
+        System.out.print(" ");
+        System.out.println(node.getToken());
     }
-    public void visit(FalseNode v) {
-
+    public void visit(FalseNode node) {
+        System.out.print(node.getClass().getSimpleName());
+        System.out.print(" ");
+        System.out.println(node.getToken());
     }
     public void visit(IdNode node) {
-        System.out.print(node.getId());
+        System.out.print(node.getClass().getSimpleName());
+        System.out.print(" ");
+        System.out.println(node.getToken());
     }
-    public void visit(AssignNode v) {
 
-    }
-    public void visit(EOLNode v) {
-
-    }
-    public void visit(EOFNode v) {
-
+    public void visit(IfElseStmtNode node) {
+        System.out.println(node.getClass().getSimpleName());
+        indent();
+        for (Node child : node.getChildren()) {
+            printIndent();
+            child.accept(this);
+        }
+        unindent();
     }
 }

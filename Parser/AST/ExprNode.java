@@ -5,7 +5,7 @@ import java.util.ArrayList;
 public class ExprNode extends Node {
     private ArrayList<Node> children;
 
-    public ExprNode(PlusNode plus, MinusNode minus, LTNode ltNode, GTNode gtNode, GENode geNode, LENode leNode, ValNode val, ExprNode expr) {
+    public ExprNode(Node plus, Node minus, Node ltNode, Node gtNode, Node geNode, Node leNode, Node val, Node expr) {
         this.children = new ArrayList<>();
 
         if (plus != null) {

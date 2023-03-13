@@ -1,11 +1,12 @@
 package AST;
 
+
 import java.util.ArrayList;
 
-public class AssignNode extends Node {
+public class IfElseStmtNode extends Node {
     private ArrayList<Node> children;
 
-    public AssignNode(Node a, Node b, Node c) {
+    public IfElseStmtNode(Node a, Node b, Node c) {
         this.children = new ArrayList<>();
 
         if (a != null) {
@@ -16,17 +17,6 @@ public class AssignNode extends Node {
         }
         if (c != null) {
             this.addChild(c);
-        }
-    }
-
-    public AssignNode(Node a, Node b) {
-        this.children = new ArrayList<>();
-
-        if (a != null) {
-            this.addChild(a);
-        }
-        if (b != null) {
-            this.addChild(b);
         }
     }
 
@@ -44,3 +34,5 @@ public class AssignNode extends Node {
         v.visit(this);
     }
 }
+
+
