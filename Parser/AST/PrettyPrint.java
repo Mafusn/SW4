@@ -16,6 +16,9 @@ public class PrettyPrint implements Visitor {
     public void visit(ValNode v) {
         System.out.println("    ValNode");
     }
+    public void visit(IfNode v) {
+        System.out.println("    IfNode");
+    }
 
     public PrettyPrint() {
     }

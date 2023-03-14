@@ -6,4 +6,5 @@ public interface Visitor {
     void visit(StmtNode v);
     void visit(ExprNode v);
     void visit(ValNode v);
+    void visit(IfNode v);
 }

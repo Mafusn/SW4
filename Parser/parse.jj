@@ -111,11 +111,13 @@ void val(Visitor v) :
 }
 
 void expr(Visitor v) :
-{}
+{ Node exprNode = new ExprNode();
+  exprNode.accept(v);}
 { ( < PLUS > | < MINUS > | < LT > | < GT > | < GE > | < LE > ) val(v) ( expr(v) )? }
 
 void ifStmt(Visitor v) :
-{}
+{ Node ifNode = new IfNode();
+  ifNode.accept(v);}
 { < IF > < LPAREN > condition() < RPAREN > < LBRACE > stmt(v) < RBRACE > ( < ELSE > < LBRACE > stmt(v) < RBRACE >)? }
 
 void condition() :
