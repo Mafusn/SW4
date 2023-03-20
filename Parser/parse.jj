@@ -3,20 +3,17 @@ PARSER_BEGIN(Parser)
 import AST.*;
 
 public class Parser {
-   public static void main(String[] args) {
-       try {
-           Visitor prettyPrint = new PrettyPrint();
+    public static void main(String[] args) {
+        try {
+            Parser parser = new Parser(new java.io.FileReader("code.txt"));
+	        Node prog = parser.prog();
 
-           Parser parser = new Parser(new java.io.FileReader("code.txt"));
-           Node root = parser.prog();
-           root.accept(prettyPrint);
-
-           System.out.println("Syntax is good");
-       } catch (Throwable e) {
-           // Catching Throwable is ugly but JavaCC throws Error objects!
-           System.out.println("Syntax error: " + e.getMessage());
-       }
-   }
+            System.out.println("Syntax is good");
+        } catch (Throwable e) {
+            // Catching Throwable is ugly but JavaCC throws Error objects!
+            System.out.println("Syntax error: " + e.getMessage());
+        }
+    }
 }
 
 PARSER_END(Parser)
@@ -31,9 +28,9 @@ SKIP:
 
 TOKEN : /* Numbers */
 { <INTDCL: "int">
-| <INT: ( < MINUS > )? ( < DIGIT > )>
+| <INT: ( < DIGIT > )>
 | <FLOATDCL: "float">
-| <FLOAT: ( < MINUS > )? ( < DIGIT > ) (".") ( < DIGIT > )>
+| <FLOAT: ( < DIGIT > ) (".") ( < DIGIT > )>
 | <#DIGIT: ( "0" | ["1"-"9"] ( ["0"-"9"] )* ) >
 | <PLUS: "+">
 | <MINUS: "-">
@@ -70,13 +67,14 @@ TOKEN : /* Operators and constructs */
 TOKEN : /* ID */
 { <ID: (["a"-"z", "A"-"Z", "_"]) (["a"-"z", "A"-"Z", "_", "0"-"9"])*> }
 
+
 Node prog() :
 {
-    Node prog = new ProgNode();
-    Node dcl;
-    Node stmt;
-}
-{ ( ( dcl = dcl() { prog.addChild(dcl); } | stmt = stmt() { prog.addChild(stmt); } ) )* < END_OF_FILE > < END_OF_LINE >
+ Prog prog = new Prog();
+ Node dcl;
+ Node stmt;
+ }
+{( dcl = dcl() { prog.addChild(dcl); } | stmt = stmt() { prog.addChild(stmt); } )* < END_OF_FILE > < END_OF_LINE >
 {
     return prog;
 }
@@ -84,206 +82,92 @@ Node prog() :
 
 Node dcl() :
 {
-    boolean dclWithVal = false;
-    boolean dclWithValAndExpr = false;
-    Token t;
-    Node val = null;
-    Node expr = null;
-}
-{ < INTDCL > t = < ID > ( < ASSIGN > val = val() (( expr = expr() { dclWithValAndExpr = true; } ))? { dclWithVal = true; } )? < END_OF_LINE >
+ boolean hasExpr = false;
+ Node expr = null;
+ Token t;
+ }
+{ < FLOATDCL > t = < ID > ( < ASSIGN > expr = expr() { hasExpr = true; } )? < END_OF_LINE >
 {
-    IntDclNode intDclNode = new IntDclNode(t.image);
-    if (dclWithValAndExpr) {return new AssignNode(intDclNode, val, expr);}
-    if (dclWithVal) {return new AssignNode(intDclNode, val);}
-    return intDclNode;
-}
-| < FLOATDCL > t = < ID > ( < ASSIGN > val = val() (( expr = expr() { dclWithValAndExpr = true; } ))? { dclWithVal = true; } )? < END_OF_LINE >
+    if (hasExpr) {
+        FloatDcl floatDcl = new FloatDcl(t.image);
+        return new Assigning(floatDcl, expr);
+    } else {
+        return new FloatDcl(t.image);
+    }
+ }
+| < INTDCL > t = < ID > ( < ASSIGN > expr = expr() { hasExpr = true; } )? < END_OF_LINE >
 {
-    FloatDclNode floatDclNode = new FloatDclNode(t.image);
-    if (dclWithValAndExpr) {return new AssignNode(floatDclNode, val, expr);}
-    if (dclWithVal) {return new AssignNode(floatDclNode, val);}
-    return floatDclNode;
+    if (hasExpr) {
+        IntDcl intDcl = new IntDcl(t.image);
+        return new Assigning(intDcl, expr);
+    } else {
+        return new IntDcl(t.image);
+    }
 }
-| < BOOLDCL > t = < ID > ( < ASSIGN > val = val() (( expr = expr() { dclWithValAndExpr = true; } ))? { dclWithVal = true; } )? < END_OF_LINE >
+| < BOOLDCL > t = < ID > ( < ASSIGN > expr = expr() { hasExpr = true; } )? < END_OF_LINE >
 {
-    BoolDclNode boolDclNode = new BoolDclNode(t.image);
-    if (dclWithValAndExpr) {return new AssignNode(boolDclNode, val, expr);}
-    if (dclWithVal) {return new AssignNode(boolDclNode, val);}
-    return boolDclNode;
+    if (hasExpr) {
+        BoolDcl boolDcl = new BoolDcl(t.image);
+        return new Assigning(boolDcl, expr);
+    } else {
+        return new BoolDcl(t.image);
+    }
 }
 }
 
 Node stmt() :
 {
-    boolean withExpr = false;
-    boolean withElse = false;
-    Node val = null;
-    Node expr = null;
-    Node condition = null;
-    Node elseNode = null;
-    Node ifBlock = null;
-    Node elseBlock = null;
+    boolean withELse = false;
+    Node expr;
     Token t;
 }
-{ t = < ID > < ASSIGN > val = val() ( expr = expr() { withExpr = true; } )? < END_OF_LINE >
+{ t = < ID > < ASSIGN > expr = expr() < END_OF_LINE >
 {
-    IdNode idNode = new IdNode(t.image);
-    if (withExpr) { return new AssignNode(idNode, val, expr); }
-    else { return new AssignNode(idNode, val); }
+    Id id = new Id(t.image);
+    return new Assigning(id, expr);
 }
 | < PRINT > < LPAREN > t = < ID > < RPAREN > < END_OF_LINE >
 {
-    return new PrintNode(t.image);
-}
-| < IF > < LPAREN > condition = condition() < RPAREN > < LBRACE > ifBlock = block() < RBRACE >
-  ( < ELSE > < LBRACE > elseBlock = block() < RBRACE > { withElse = true; } )?
-{
-    if (withElse) { return new IfElseStmtNode(condition, ifBlock, elseBlock); }
-    return new IfStmtNode(condition, ifBlock);
+    return new Print(t.image);
 }
 }
 
-Node block() :
+Node expr() :
 {
-    BlockNode blockNode = new BlockNode();
-    Node dcl = null;
-    Node stmt = null;
-}
+    boolean hasExpr = false;
+    Node expr = null;
+    Node val;
+    Token op = null;
+ }
+{ val = val() ( ( op = < PLUS > | op = < MINUS > ) expr = expr() { hasExpr = true; } )?
 {
-    ( dcl = dcl() { blockNode.addChild(dcl); } | stmt = stmt() { blockNode.addChild(stmt); } )*
-{
-    return blockNode;
+    if (hasExpr) {
+        return new Computing(op.image, val, expr);
+    } else {
+        return val;
+    }
 }
 }
 
 Node val() :
 {
-    boolean withNot = false;
-    Node val = null;
-    Node expr = null;
     Token t;
-    // Check for consecutive MINUS tokens
-    Token nextToken = getToken(1);
-    if (token.image.equals("-") && nextToken.image.equals("-")) {
-        throw new ParseException("Encountered more than one '-' at line " + token.beginLine + ", column " + token.beginColumn + '.');
-    }
-}
+ }
 { t = < INT >
 {
-    return new IntNode(t.image);
+    return new IntNum(t.image);
 }
 | t = < FLOAT >
 {
-    return new FloatNode(t.image);
-}
-| t = < TRUE >
-{
-    return new TrueNode(t.image);
-}
-| t = < FALSE >
-{
-    return new FalseNode(t.image);
+    return new FloatNum(t.image);
 }
 | t = < ID >
 {
-    return new IdNode(t.image);
+    return new Id(t.image);
 }
-| < NOT > val = val()
+| (t = < TRUE > | t = < FALSE >)
 {
-    return new NOTNode(val, expr);
-}
-| < LPAREN > val() ( expr() )? < RPAREN >
-
-}
-
-Node expr() :
-{
-    Node val = null;
-    Node expr = null;
-}
-{ < PLUS > val = val() ( expr = expr() )?
-{
-    return new PlusNode(val, expr);
-}
-| < MINUS > val = val() ( expr = expr() )?
-{
-    return new MinusNode(val, expr);
-}
-| < LT > val = val() ( expr = expr() )?
-{
-    return new LTNode(val, expr);
-}
-| < GT > val = val() ( expr = expr() )?
-{
-    return new GTNode(val, expr);
-}
-| < LE > val = val() ( expr = expr() )?
-{
-    return new LENode(val, expr);
+    return new Bool(t.image);
 }
 }
 
-Node condition() :
-{
-    Node comparison = null;
-    Node conditionTail = null;
-    Node val;
-}
-{ val = val() ( conditionTail = conditionTail() )?
-{
-    return new ConditionNode(val, conditionTail);
-}
-}
-
-Node conditionTail() :
-{
-    Node operator = null;
-    Node conditionTail = null;
-    Token t;
-    Node val;
-}
-{ < MINUS > val = val() ( conditionTail = conditionTail() )?
-{
-    return new MinusNode(val, conditionTail);
-}
-| < PLUS > val = val() ( conditionTail = conditionTail() )?
-{
-    return new PlusNode(val, conditionTail);
-}
-| < EQ > val = val() ( conditionTail = conditionTail() )?
-{
-    return new EQNode(val, conditionTail);
-}
-| < NE > val = val() ( conditionTail = conditionTail() )?
-{
-    return new NENode(val, conditionTail);
-}
-| < LT > val = val() ( conditionTail = conditionTail() )?
-{
-    return new LTNode(val, conditionTail);
-}
-| < LE > val = val() ( conditionTail = conditionTail() )?
-{
-    return new LENode(val, conditionTail);
-}
-| < GT > val = val() ( conditionTail = conditionTail() )?
-{
-    return new GTNode(val, conditionTail);
-}
-| < GE > val = val() ( conditionTail = conditionTail() )?
-{
-    return new GENode(val, conditionTail);
-}
-| < AND > val = val() ( conditionTail = conditionTail() )?
-{
-    return new ANDNode(val, conditionTail);
-}
-| < OR > val = val() ( conditionTail = conditionTail() )?
-{
-    return new ORNode(val, conditionTail);
-}
-| ( < NOT > )? < LPAREN > val = val() ( conditionTail = conditionTail() )? < RPAREN >
-{
-    return new NOTNode(val, conditionTail);
-}
-}
