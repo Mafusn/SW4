@@ -132,7 +132,7 @@ Node stmt() :
 }
 }
 
-Node expr2() :
+Node expr() :
 {
     boolean hasExpr = false;
     Node expr = null;
@@ -146,72 +146,6 @@ Node expr2() :
     } else {
         return val;
     }
-}
-}
-
-Node expr() :
-{
-    boolean hasExpr = false;
-    Node term;
-    Node expr = null;
-    Token op = null;
- }
-{ term = term() (( op = <AND> | op = <OR> ) expr = expr() { hasExpr = true; } )?
-{
-    if (hasExpr) {
-        return new BinOperator(op.image, term, expr);
-    } else {
-        return term;
-    }
-}
-}
-
-Node term() :
-{
-    boolean hasTerm = false;
-     Node addTerm;
-     Node term = null;
-     Token op = null;
- }
-{addTerm = addTerm() (( op = <LT> | op = <GT> | op = <GE> | op = <LE> )term = term() { hasTerm = true; })?
-{
-    if (hasTerm) {
-        return new BinOperator(op.image, addTerm, term);
-    } else {
-        return addTerm;
-    }
-}
-}
-
-Node addTerm() :
-{
-    boolean hasAddTerm = false;
-    Node factor;
-    Node addTerm = null;
-    Token op = null;
- }
-{ factor = factor() ((op = <PLUS> | op = <MINUS> ) addTerm = addTerm() { hasAddTerm = true; })?
-{
-    if (hasAddTerm) {
-        return new Computing(op.image, factor, addTerm);
-    } else {
-        return factor;
-    }
-}
-}
-
-Node factor() :
-{
-    Node val;
-    Node expr;
- }
-{ <LPAREN> expr = expr() <RPAREN>
-{
-    return expr;
-}
-| val = val()
-{
-    return val;
 }
 }
 
