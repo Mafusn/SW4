@@ -71,8 +71,8 @@ TOKEN : /* ID */
 Node prog() :
 {
  Prog prog = new Prog();
- Node dcl;
- Node stmt;
+ Node dcl = null;
+ Node stmt = null;
  }
 {( dcl = dcl() { prog.addChild(dcl); } | stmt = stmt() { prog.addChild(stmt); } )* < END_OF_FILE > < END_OF_LINE >
 {
@@ -117,8 +117,10 @@ Node dcl() :
 
 Node stmt() :
 {
-    boolean withELse = false;
+    boolean withElse = false;
     Node expr;
+    Node ifBlock;
+    Node elseBlock = null;
     Token t;
 }
 { t = < ID > < ASSIGN > expr = expr() < END_OF_LINE >
@@ -130,22 +132,26 @@ Node stmt() :
 {
     return new Print(t.image);
 }
+| < IF > < LPAREN > expr = expr() < RPAREN > < LBRACE > ifBlock = block() < RBRACE > ( < ELSE > < LBRACE > elseBlock = block() < RBRACE > { withElse = true; })?
+{
+    if (withElse) {
+        return new IfElse(expr, ifBlock, elseBlock);
+    } else {
+        return new If(expr, ifBlock);
+    }
+}
 }
 
-Node expr2() :
+Node block() :
 {
-    boolean hasExpr = false;
-    Node expr = null;
-    Node val;
-    Token op = null;
- }
-{ val = val() ( ( op = < PLUS > | op = < MINUS > ) expr = expr() { hasExpr = true; } )?
+   Block block = new Block();
+   Node dcl = null;
+   Node stmt = null;
+}
 {
-    if (hasExpr) {
-        return new Computing(op.image, val, expr);
-    } else {
-        return val;
-    }
+( dcl = dcl() { block.addChild(dcl); } | stmt = stmt() { block.addChild(stmt); } )*
+{
+    return block;
 }
 }
 

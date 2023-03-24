@@ -1,12 +1,12 @@
 package AST;
 
-public class BinOperator extends Node {
-    String operation;
+public class IfElse extends Node {
+    Node condition;
     Node child1;
     Node child2;
 
-    public BinOperator(String operation, Node child1, Node child2){
-        this.operation = operation;
+    public IfElse(Node condition, Node child1, Node child2){
+        this.condition = condition;
         this.child1 = child1;
         this.child2 = child2;
     }

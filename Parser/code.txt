@@ -1,7 +1,6 @@
 int a = (x<(y+5-3>10)||(true));
 a = 24;
-/*
-if (!x < y) {
+if (x < y) {
     x = x + y;
     print(x);
     if (true) {
@@ -10,6 +9,5 @@ if (!x < y) {
 } else {
     int x = 10;
 }
-*/
 print(a);
 BYE;
