@@ -71,10 +71,9 @@ TOKEN : /* ID */
 Node prog() :
 {
  Prog prog = new Prog();
- Node dcl = null;
  Node stmt = null;
  }
-{( dcl = dcl() { prog.addChild(dcl); } | stmt = stmt() { prog.addChild(stmt); } )* < END_OF_FILE > < END_OF_LINE >
+{( stmt = stmt() { prog.addChild(stmt); } )* < END_OF_FILE > < END_OF_LINE >
 {
     return prog;
 }
@@ -86,7 +85,7 @@ Node dcl() :
  Node expr = null;
  Token t;
  }
-{ < FLOATDCL > t = < ID > ( < ASSIGN > expr = expr() { hasExpr = true; } )? < END_OF_LINE >
+{ < FLOATDCL > t = < ID > ( < ASSIGN > expr = expr() { hasExpr = true; } )?
 {
     if (hasExpr) {
         FloatDcl floatDcl = new FloatDcl(t.image);
@@ -95,7 +94,7 @@ Node dcl() :
         return new FloatDcl(t.image);
     }
  }
-| < INTDCL > t = < ID > ( < ASSIGN > expr = expr() { hasExpr = true; } )? < END_OF_LINE >
+| < INTDCL > t = < ID > ( < ASSIGN > expr = expr() { hasExpr = true; } )?
 {
     if (hasExpr) {
         IntDcl intDcl = new IntDcl(t.image);
@@ -104,7 +103,7 @@ Node dcl() :
         return new IntDcl(t.image);
     }
 }
-| < BOOLDCL > t = < ID > ( < ASSIGN > expr = expr() { hasExpr = true; } )? < END_OF_LINE >
+| < BOOLDCL > t = < ID > ( < ASSIGN > expr = expr() { hasExpr = true; } )?
 {
     if (hasExpr) {
         BoolDcl boolDcl = new BoolDcl(t.image);
@@ -117,10 +116,9 @@ Node dcl() :
 
 Node stmt() :
 {
-    boolean withElse = false;
+    Node ifStmt;
+    Node dcl;
     Node expr;
-    Node ifBlock;
-    Node elseBlock = null;
     Token t;
 }
 { t = < ID > < ASSIGN > expr = expr() < END_OF_LINE >
@@ -132,7 +130,24 @@ Node stmt() :
 {
     return new Print(t.image);
 }
-| < IF > < LPAREN > expr = expr() < RPAREN > < LBRACE > ifBlock = block() < RBRACE > ( < ELSE > < LBRACE > elseBlock = block() < RBRACE > { withElse = true; })?
+| ifStmt = ifStmt()
+{
+return ifStmt;
+}
+| dcl = dcl() < END_OF_LINE >
+{
+    return dcl;
+}
+}
+Node ifStmt() :
+{
+ Node expr;
+ Node ifBlock;
+ Node elseBlock = null;
+ boolean withElse = false;
+}
+{
+< IF > < LPAREN > expr = expr() < RPAREN > < LBRACE > ifBlock = block() < RBRACE > ( < ELSE > < LBRACE > elseBlock = block() < RBRACE > { withElse = true; })?
 {
     if (withElse) {
         return new IfElse(expr, ifBlock, elseBlock);
@@ -145,11 +160,10 @@ Node stmt() :
 Node block() :
 {
    Block block = new Block();
-   Node dcl = null;
    Node stmt = null;
 }
 {
-( dcl = dcl() { block.addChild(dcl); } | stmt = stmt() { block.addChild(stmt); } )*
+( stmt = stmt() { block.addChild(stmt); } )*
 {
     return block;
 }
@@ -158,48 +172,96 @@ Node block() :
 Node expr() :
 {
     boolean hasExpr = false;
-    Node term;
+    Node andTerm;
     Node expr = null;
     Token op = null;
- }
-{ term = term() (( op = <AND> | op = <OR> ) expr = expr() { hasExpr = true; } )?
+}
+{ andTerm = andTerm() (( op = <OR> ) expr = expr() { hasExpr = true; } )?
 {
     if (hasExpr) {
-        return new BinOperator(op.image, term, expr);
+        return new BinOperator(op.image, andTerm, expr);
     } else {
-        return term;
+        return andTerm;
     }
 }
 }
 
-Node term() :
+Node andTerm() :
+{
+    boolean hasAnd = false;
+    Node equalityTerm;
+    Node andTerm = null;
+    Token op = null;
+}
+{equalityTerm = equalityTerm() (( op = <AND>) andTerm = andTerm() {hasAnd = true;})?
+{
+    if (hasAnd) {
+        return new BinOperator(op.image, equalityTerm, andTerm);
+    } else {
+        return equalityTerm;
+    }
+}
+}
+
+Node equalityTerm() :
+{
+    boolean hasEq = false;
+    Node relationalTerm;
+    Node equalityTerm = null;
+    Token op = null;
+}
+{relationalTerm = relationalTerm() (( op = <EQ> | op = <NE>) equalityTerm = equalityTerm() {hasEq = true;})?
+{
+    if (hasEq) {
+        return new BinOperator(op.image, relationalTerm, equalityTerm);
+    } else {
+        return relationalTerm;
+    }
+}
+}
+Node relationalTerm() :
 {
     boolean hasTerm = false;
-     Node addTerm;
-     Node term = null;
+     Node additiveTerm;
+     Node relationalTerm = null;
      Token op = null;
  }
-{addTerm = addTerm() (( op = <LT> | op = <GT> | op = <GE> | op = <LE> )term = term() { hasTerm = true; })?
+{additiveTerm = additiveTerm() (( op = <LT> | op = <GT> | op = <GE> | op = <LE> )relationalTerm = relationalTerm() { hasTerm = true; })?
 {
     if (hasTerm) {
-        return new BinOperator(op.image, addTerm, term);
+        return new BinOperator(op.image, additiveTerm, relationalTerm);
     } else {
-        return addTerm;
+        return additiveTerm;
     }
 }
 }
 
-Node addTerm() :
+Node additiveTerm() :
 {
-    boolean hasAddTerm = false;
-    Node factor;
-    Node addTerm = null;
+    boolean hasAdditiveTerm = false;
+    Node notTerm;
+    Node additiveTerm = null;
     Token op = null;
  }
-{ factor = factor() ((op = <PLUS> | op = <MINUS> ) addTerm = addTerm() { hasAddTerm = true; })?
+{ notTerm = notTerm() ((op = <PLUS> | op = <MINUS> ) additiveTerm = additiveTerm() { hasAdditiveTerm = true; })?
 {
-    if (hasAddTerm) {
-        return new Computing(op.image, factor, addTerm);
+    if (hasAdditiveTerm) {
+        return new Computing(op.image, notTerm, additiveTerm);
+    } else {
+        return notTerm;
+    }
+}
+}
+Node notTerm() :
+{
+    Node factor;
+    boolean hasNotTerm = false;
+}
+{
+ ( <NOT> { hasNotTerm = true; })? factor = factor()
+{
+    if (hasNotTerm) {
+        return new Not(factor);
     } else {
         return factor;
     }
