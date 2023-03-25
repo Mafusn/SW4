@@ -1,7 +1,6 @@
 package AST;
 
 public class Not extends Node{
-
     Node child;
 
     public Not(Node child) {
@@ -10,7 +9,7 @@ public class Not extends Node{
 
     @Override
     public void accept(Visitor v) {
-
+        v.visit(this);
     }
 
 
