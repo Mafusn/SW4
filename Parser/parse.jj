@@ -5,10 +5,14 @@ import AST.*;
 public class Parser {
     public static void main(String[] args) {
         try {
-            Visitor prettyPrinter = new PrettyPrint();
             Parser parser = new Parser(new java.io.FileReader("code.txt"));
-	        Node prog = parser.prog();
-            prog.accept(prettyPrinter);
+            Node prog = parser.prog();
+
+            PrettyPrint prettyPrint = new PrettyPrint();
+            SymbolTableFilling symbolTableFilling = new SymbolTableFilling();
+
+            prog.accept(prettyPrint);
+            prog.accept(symbolTableFilling);
 
             System.out.println("Syntax is good");
         } catch (Throwable e) {

@@ -1,0 +1,18 @@
+int a;
+float b = 4.5 + 5.5;
+boolean c = true;
+if (2 < a) {
+    print(a);
+} else {
+    a = a + 1;
+}
+if (2 + 4 > a||(b == a - 3)&&!c) {
+    int x = 0;
+    if (true) {
+        x = x + 1;
+    } else {
+        x = x - 1;
+    }
+    print(x);
+}
+BYE;
