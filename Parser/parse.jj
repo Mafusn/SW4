@@ -5,7 +5,7 @@ import AST.*;
 public class Parser {
     public static void main(String[] args) {
         try {
-            Parser parser = new Parser(new java.io.FileReader("Parser/code.txt"));
+            Parser parser = new Parser(new java.io.FileReader("code.txt"));
             Node prog = parser.prog();
 
             PrettyPrint prettyPrint = new PrettyPrint();
