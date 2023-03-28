@@ -14,6 +14,8 @@ public class Parser {
             prog.accept(prettyPrint);
             prog.accept(symbolTableFilling);
 
+            System.out.println(prettyPrint.getResult());
+
             System.out.println("Syntax is good");
         } catch (Throwable e) {
             // Catching Throwable is ugly but JavaCC throws Error objects!

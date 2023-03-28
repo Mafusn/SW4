@@ -10,6 +10,7 @@ if (2 + 4 > a||(b == a - 3)&&!c) {
     int x = 0;
     if (true) {
         x = x + 1;
+        int q;
     } else {
         x = x - 1;
     }
