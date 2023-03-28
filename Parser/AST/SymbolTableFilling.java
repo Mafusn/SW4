@@ -1,6 +1,14 @@
 package AST;
 
+import java.util.Hashtable;
+
 public class SymbolTableFilling implements Visitor {
+
+    private Hashtable<String,Integer> SymbolTable = new Hashtable<String,Integer>();
+
+    public Hashtable<String, Integer> getSymbolTable() {
+        return SymbolTable;
+    }
 
     @Override
     public void visit(Assigning node) {
@@ -27,8 +35,8 @@ public class SymbolTableFilling implements Visitor {
 
     @Override
     public void visit(BoolDcl node) {
-        if (Node.SymbolTable.get(node.id) == null) {
-            Node.SymbolTable.put(node.id,Node.BOOLTYPE);
+        if (SymbolTable.get(node.id) == null) {
+            SymbolTable.put(node.id,Node.BOOLTYPE);
         } else {
             error("variable " + node.id + " is already declared");
         }
@@ -41,8 +49,8 @@ public class SymbolTableFilling implements Visitor {
 
     @Override
     public void visit(FloatDcl node) {
-        if (Node.SymbolTable.get(node.id) == null) {
-            Node.SymbolTable.put(node.id,Node.FLTTYPE);
+        if (SymbolTable.get(node.id) == null) {
+            SymbolTable.put(node.id,Node.FLTTYPE);
         } else {
             error("variable " + node.id + " is already declared");
         }
@@ -71,8 +79,8 @@ public class SymbolTableFilling implements Visitor {
 
     @Override
     public void visit(IntDcl node) {
-        if (Node.SymbolTable.get(node.id) == null) {
-            Node.SymbolTable.put(node.id,Node.INTTYPE);
+        if (SymbolTable.get(node.id) == null) {
+            SymbolTable.put(node.id,Node.INTTYPE);
         } else {
             error("variable " + node.id + " is already declared");
         }

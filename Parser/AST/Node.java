@@ -8,7 +8,5 @@ public abstract class Node {
     INTTYPE   = 1,
     BOOLTYPE  = 2;
 
-    public static Hashtable<String,Integer> SymbolTable = new Hashtable<String,Integer>();
-
     public abstract void accept(Visitor v);
 }
