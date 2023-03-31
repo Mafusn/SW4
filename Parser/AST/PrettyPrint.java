@@ -1,5 +1,7 @@
 package AST;
 
+import AST.Types.Type;
+
 public class PrettyPrint implements Visitor {
     private StringBuilder sb = new StringBuilder();
     private int indentLevel = 0;
@@ -46,10 +48,11 @@ public class PrettyPrint implements Visitor {
     }
 
     @Override
-    public void visit(BinOperator node) {
+    public Type visit(BinOperator node) {
         node.child1.accept(this);
         sb.append(" " + node.operation + " ");
         node.child2.accept(this);
+        return null;
     }
 
     @Override
@@ -74,10 +77,11 @@ public class PrettyPrint implements Visitor {
     }
 
     @Override
-    public void visit(Computing node) {
+    public Type visit(Computing node) {
         node.child1.accept(this);
         sb.append(" " + node.operation + " ");
         node.child2.accept(this);
+        return null;
     }
 
     @Override

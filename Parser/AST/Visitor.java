@@ -1,12 +1,14 @@
 package AST;
 
+import AST.Types.Type;
+
 public interface Visitor {
     void visit(Assigning node);
-    void visit(BinOperator node);
+    Type visit(BinOperator node);
     void visit(Block node);
     void visit(Bool node);
     void visit(BoolDcl node);
-    void visit(Computing node);
+    Type visit(Computing node);
     void visit(FloatDcl node);
     void visit(FloatNum node);
     void visit(Id node);

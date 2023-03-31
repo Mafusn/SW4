@@ -1,4 +1,4 @@
-int a;
+int a = 2;
 float b = 4.5 + 5.5;
 boolean c = true;
 if (2 < a) {
@@ -6,7 +6,7 @@ if (2 < a) {
 } else {
     a = a + 1;
 }
-if (2 + 4 > a||(b == a - 3)&&!c) {
+if (2 + 4 > a || (b == a - 3) && !c) {
     int x = 0;
     if (true) {
         x = x + 1;
