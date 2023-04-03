@@ -10,9 +10,11 @@ public class Parser {
 
             PrettyPrint prettyPrint = new PrettyPrint();
             SymbolTableFilling symbolTableFilling = new SymbolTableFilling();
+            TypeChecking typeChecking = new TypeChecking(symbolTableFilling);
 
             prog.accept(prettyPrint);
             prog.accept(symbolTableFilling);
+            prog.accept(typeChecking);
 
             System.out.println(prettyPrint.getResult());
 
