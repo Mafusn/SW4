@@ -1,5 +1,7 @@
 package AST;
 
+import AST.Types.Type;
+
 public class Print extends Node {
     String id;
 
@@ -7,5 +9,13 @@ public class Print extends Node {
         id = i;
     }
 
-    public void accept(Visitor v){v.visit(this);}
+    public Type accept(Visitor v){v.visit(this);
+        return null;
+    }
+
+    @Override
+    public Type getType(SymbolTableFilling symbolTable) {
+        return null;
+    }
+
 }

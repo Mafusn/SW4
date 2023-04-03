@@ -1,5 +1,8 @@
 package AST;
 
+import AST.Types.IntType;
+import AST.Types.Type;
+
 public class IntNum extends Node {
     String value;
 
@@ -7,5 +10,12 @@ public class IntNum extends Node {
         this.value = value;
     }
 
-    public void accept(Visitor v){v.visit(this);}
+    public Type accept(Visitor v){v.visit(this);
+        return new IntType();
+    }
+
+    @Override
+    public Type getType(SymbolTableFilling symbolTable) {
+        return new IntType();
+    }
 }

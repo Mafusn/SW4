@@ -1,5 +1,7 @@
 package AST;
 
+import AST.Types.Type;
+
 import java.util.ArrayList;;
 public class Prog extends Node {
     ArrayList<Node> children;
@@ -12,5 +14,12 @@ public class Prog extends Node {
         this.children.add(child);
     }
 
-    public void accept(Visitor v){v.visit(this);}
+    public Type accept(Visitor v){v.visit(this);
+        return null;
+    }
+
+    @Override
+    public Type getType(SymbolTableFilling symbolTable) {
+        return null;
+    }
 }

@@ -1,6 +1,26 @@
 package AST;
 
+import AST.Types.BooleanType;
+import AST.Types.FloatType;
+import AST.Types.IntType;
+import AST.Types.Type;
+
+import java.util.HashMap;
+import java.util.Map;
+
 public class SymbolTableFilling implements Visitor {
+
+    private Map<String,Symbol> symbolTable = new HashMap<>();
+
+    public Map<String, Symbol> getSymbolTable() {
+        return symbolTable;
+    }
+
+    public Symbol lookup(String id) {
+        return symbolTable.get(id);
+    }
+
+    private int scopeLevel = 0;
 
     @Override
     public void visit(Assigning node) {
@@ -9,8 +29,9 @@ public class SymbolTableFilling implements Visitor {
     }
 
     @Override
-    public void visit(BinOperator node) {
+    public Type visit(BinOperator node) {
 
+        return null;
     }
 
     @Override
@@ -27,22 +48,22 @@ public class SymbolTableFilling implements Visitor {
 
     @Override
     public void visit(BoolDcl node) {
-        if (Node.SymbolTable.get(node.id) == null) {
-            Node.SymbolTable.put(node.id,Node.BOOLTYPE);
+        if (symbolTable.get(node.id) == null) {
+            symbolTable.put(node.id, new Symbol(node.id, new BooleanType(), scopeLevel));
         } else {
             error("variable " + node.id + " is already declared");
         }
     }
 
     @Override
-    public void visit(Computing node) {
-
+    public Type visit(Computing node) {
+        return null;
     }
 
     @Override
     public void visit(FloatDcl node) {
-        if (Node.SymbolTable.get(node.id) == null) {
-            Node.SymbolTable.put(node.id,Node.FLTTYPE);
+        if (symbolTable.get(node.id) == null) {
+            symbolTable.put(node.id, new Symbol(node.id, new FloatType(), scopeLevel));
         } else {
             error("variable " + node.id + " is already declared");
         }
@@ -54,8 +75,9 @@ public class SymbolTableFilling implements Visitor {
     }
 
     @Override
-    public void visit(Id node) {
+    public Type visit(Id node) {
 
+        return null;
     }
 
     @Override
@@ -71,8 +93,8 @@ public class SymbolTableFilling implements Visitor {
 
     @Override
     public void visit(IntDcl node) {
-        if (Node.SymbolTable.get(node.id) == null) {
-            Node.SymbolTable.put(node.id,Node.INTTYPE);
+        if (symbolTable.get(node.id) == null) {
+            symbolTable.put(node.id, new Symbol(node.id, new IntType(), scopeLevel));
         } else {
             error("variable " + node.id + " is already declared");
         }
@@ -84,8 +106,9 @@ public class SymbolTableFilling implements Visitor {
     }
 
     @Override
-    public void visit(Not node) {
+    public Type visit(Not node) {
 
+        return null;
     }
 
     @Override

@@ -1,5 +1,9 @@
 package AST;
 
+import AST.Types.FloatType;
+import AST.Types.IntType;
+import AST.Types.Type;
+
 public class FloatNum extends Node {
     String value;
 
@@ -7,5 +11,12 @@ public class FloatNum extends Node {
         this.value = value;
     }
 
-    public void accept(Visitor v){v.visit(this);}
+    public Type accept(Visitor v){v.visit(this);
+        return new FloatType();
+    }
+
+    @Override
+    public Type getType(SymbolTableFilling symbolTable) {
+        return new FloatType();
+    }
 }

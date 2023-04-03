@@ -1,5 +1,7 @@
 package AST;
 
+import AST.Types.Type;
+
 public class Not extends Node{
     Node child;
 
@@ -8,9 +10,17 @@ public class Not extends Node{
     }
 
     @Override
-    public void accept(Visitor v) {
-        v.visit(this);
+    public Type accept(Visitor v) {
+        return v.visit(this);
+    }
+
+    @Override
+    public Type getType(SymbolTableFilling symbolTable) {
+        return null;
     }
 
 
+    public Node getExpression() {
+        return child;
+    }
 }

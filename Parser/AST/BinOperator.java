@@ -1,5 +1,8 @@
 package AST;
 
+import AST.Types.BooleanType;
+import AST.Types.Type;
+
 public class BinOperator extends Node {
     String operation;
     Node child1;
@@ -11,5 +14,26 @@ public class BinOperator extends Node {
         this.child2 = child2;
     }
 
-    public void accept(Visitor v){v.visit(this);}
+    public Type accept(Visitor v){v.visit(this);
+        return new BooleanType();
+    }
+
+    @Override
+    public Type getType(SymbolTableFilling symbolTable) {
+        Type leftType = child1.getType(symbolTable);
+        Type rightType = child2.getType(symbolTable);
+        return leftType.getResultType(operation, rightType);
+    }
+
+    public Node getLeftOperand() {
+        return child1;
+    }
+
+    public Node getRightOperand() {
+        return child2;
+    }
+
+    public String getOperator() {
+        return operation;
+    }
 }

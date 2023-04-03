@@ -14,6 +14,8 @@ public class Parser {
             prog.accept(prettyPrint);
             prog.accept(symbolTableFilling);
 
+            System.out.println(prettyPrint.getResult());
+
             System.out.println("Syntax is good");
         } catch (Throwable e) {
             // Catching Throwable is ugly but JavaCC throws Error objects!
@@ -95,7 +97,7 @@ Node dcl() :
 {
     if (hasExpr) {
         FloatDcl floatDcl = new FloatDcl(t.image);
-        return new Assigning(floatDcl, expr);
+        return new Assigning(t.image, floatDcl, expr);
     } else {
         return new FloatDcl(t.image);
     }
@@ -104,7 +106,7 @@ Node dcl() :
 {
     if (hasExpr) {
         IntDcl intDcl = new IntDcl(t.image);
-        return new Assigning(intDcl, expr);
+        return new Assigning(t.image, intDcl, expr);
     } else {
         return new IntDcl(t.image);
     }
@@ -113,7 +115,7 @@ Node dcl() :
 {
     if (hasExpr) {
         BoolDcl boolDcl = new BoolDcl(t.image);
-        return new Assigning(boolDcl, expr);
+        return new Assigning(t.image, boolDcl, expr);
     } else {
         return new BoolDcl(t.image);
     }
@@ -130,7 +132,7 @@ Node stmt() :
 { t = < ID > < ASSIGN > expr = expr() < END_OF_LINE >
 {
     Id id = new Id(t.image);
-    return new Assigning(id, expr);
+    return new Assigning(t.image, id, expr);
 }
 | < PRINT > < LPAREN > t = < ID > < RPAREN > < END_OF_LINE >
 {

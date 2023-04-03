@@ -1,5 +1,8 @@
 package AST;
 
+import AST.Types.BooleanType;
+import AST.Types.Type;
+
 public class Bool extends Node {
     String value;
 
@@ -7,5 +10,12 @@ public class Bool extends Node {
         this.value = value;
     }
 
-    public void accept(Visitor v){v.visit(this);}
+    public Type accept(Visitor v){v.visit(this);
+        return new BooleanType();
+    }
+
+    @Override
+    public Type getType(SymbolTableFilling symbolTable) {
+        return new BooleanType();
+    }
 }
