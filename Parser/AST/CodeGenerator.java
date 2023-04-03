@@ -16,6 +16,9 @@ public class CodeGenerator implements Visitor {
     public void incrementStack(){
         stackAddress++;
     }
+    public String stackAddressToString(){
+        return Integer.toHexString(stackAddress).toUpperCase();
+    }
 
     public CodeGenerator(SymbolTableFilling symbolTable) throws IOException {
         codeBuilder = new StringBuilder();
@@ -33,7 +36,7 @@ public class CodeGenerator implements Visitor {
     @Override
     public void visit(Assigning node) {
         //initializing stack-pointer
-        codeBuilder.append("LDX #$" + Integer.toHexString(stackAddress).toUpperCase() + "\n");
+        codeBuilder.append("LDX #$" + stackAddressToString() + "\n");
         incrementStack();
         incrementStack();
         codeBuilder.append("TXS\n");
@@ -97,10 +100,8 @@ public class CodeGenerator implements Visitor {
 
     @Override
     public void visit(IntNum node) {
-        codeBuilder.append("INX\n");
-        codeBuilder.append("INX\n");
         codeBuilder.append("LDA #" + node.value + "\n");
-        codeBuilder.append("STA $01" + Integer.toHexString(stackAddress).toUpperCase() + ",X\n");
+        codeBuilder.append("STA $01" + stackAddressToString() + ",X\n");
     }
 
     @Override
