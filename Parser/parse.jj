@@ -132,7 +132,7 @@ Node stmt() :
 { t = < ID > < ASSIGN > expr = expr() < END_OF_LINE >
 {
     Id id = new Id(t.image);
-    return new Assigning(id, expr);
+    return new Assigning(t.image, id, expr);
 }
 | < PRINT > < LPAREN > t = < ID > < RPAREN > < END_OF_LINE >
 {

@@ -18,7 +18,7 @@ public class FloatType extends Type{
     @Override
     public boolean isEqual(Type other) {
         // An int is equal to another int
-        return other instanceof IntType;
+        return other instanceof FloatType;
     }
 
     @Override

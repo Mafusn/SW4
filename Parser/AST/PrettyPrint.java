@@ -97,8 +97,9 @@ public class PrettyPrint implements Visitor {
     }
 
     @Override
-    public void visit(Id node) {
+    public Type visit(Id node) {
         sb.append(node.id);
+        return null;
     }
 
     @Override
@@ -138,10 +139,11 @@ public class PrettyPrint implements Visitor {
     }
 
     @Override
-    public void visit(Not node) {
+    public Type visit(Not node) {
         sb.append("!(");
         node.child.accept(this);
         sb.append(")");
+        return null;
     }
 
     @Override

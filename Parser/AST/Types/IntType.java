@@ -7,6 +7,10 @@ public class IntType extends Type{
 
     public IntType() {}
 
+    public static IntType getInstance() {
+        return INSTANCE;
+    }
+
     @Override
     public boolean isAssignable(Type other) {
         // An int is assignable to another int

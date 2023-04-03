@@ -11,8 +11,7 @@ public class Not extends Node{
 
     @Override
     public Type accept(Visitor v) {
-        v.visit(this);
-        return null;
+        return v.visit(this);
     }
 
     @Override

@@ -10,8 +10,7 @@ public class Id extends Node {
         this.id = id;
     }
 
-    public Type accept(Visitor v){v.visit(this);
-        return null;
+    public Type accept(Visitor v){return v.visit(this);
     }
 
     @Override

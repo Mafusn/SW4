@@ -75,8 +75,9 @@ public class SymbolTableFilling implements Visitor {
     }
 
     @Override
-    public void visit(Id node) {
+    public Type visit(Id node) {
 
+        return null;
     }
 
     @Override
@@ -105,8 +106,9 @@ public class SymbolTableFilling implements Visitor {
     }
 
     @Override
-    public void visit(Not node) {
+    public Type visit(Not node) {
 
+        return null;
     }
 
     @Override

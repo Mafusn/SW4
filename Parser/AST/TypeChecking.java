@@ -25,12 +25,15 @@ public class TypeChecking implements Visitor {
 
     @Override
     public Type visit(BinOperator node) {
-        /*System.out.println(node.getLeftOperand() + " " + node.getOperator() + " " + node.getRightOperand());
         Type leftType = node.getLeftOperand().accept(this);
         Type rightType = node.getRightOperand().accept(this);
-        System.out.println(leftType + " " + node.getOperator() + " " + rightType);
-        return leftType.getResultType(node.getOperator(), rightType);*/
-        return null;
+
+        if (!(leftType.isEqual(rightType))) {
+            System.out.println("Binary operator used with incompatible types");
+            return null;
+        }
+
+        return leftType.getResultType(node.getOperator(), rightType);
     }
 
     @Override
@@ -55,8 +58,12 @@ public class TypeChecking implements Visitor {
         Type leftType = node.getLeftOperand().accept(this);
         Type rightType = node.getRightOperand().accept(this);
 
+        if (!(leftType.isEqual(rightType))) {
+            System.out.println("Computing operator used with incompatible types");
+            return null;
+        }
+
         if (leftType instanceof IntType && rightType instanceof IntType) {
-            System.out.println(leftType + " " + node.getOperator() + " " + rightType);
             return new IntType();
         } else if (leftType instanceof FloatType && rightType instanceof FloatType) {
             return new FloatType();
@@ -77,13 +84,14 @@ public class TypeChecking implements Visitor {
     }
 
     @Override
-    public void visit(Id node) {
+    public Type visit(Id node) {
         Symbol symbol = symbolTable.lookup(node.getName());
         if (symbol == null) {
             System.out.println("Undeclared variable: " + node.getName());
         } else {
-            node.setType(symbol.getType());
+            return symbol.getType();
         }
+        return null;
     }
 
     @Override
@@ -120,11 +128,12 @@ public class TypeChecking implements Visitor {
     }
 
     @Override
-    public void visit(Not node) {
+    public Type visit(Not node) {
         Type exprType = node.getExpression().getType(symbolTable);
         if (!(exprType instanceof BooleanType)) {
             System.out.println("Type mismatch in Not operator");
         }
+        return exprType;
     }
 
     @Override

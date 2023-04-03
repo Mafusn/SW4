@@ -14,13 +14,11 @@ public class Computing extends Node {
     }
 
     public Type accept(Visitor v) {
-        v.visit(this);
-        return null;
+        return v.visit(this);
     }
 
     @Override
     public Type getType(SymbolTableFilling symbolTable) {
-        System.out.println(child1.getType(symbolTable) + " " + operation + " " + child2.getType(symbolTable));
         return child1.getType(symbolTable).getResultType(operation, child2.getType(symbolTable));
     }
 
