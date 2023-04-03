@@ -1,0 +1,6 @@
+LDX #$100
+TXS
+DEX
+DEX
+LDA 2
+STA $0100,X

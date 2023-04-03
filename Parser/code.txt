@@ -1,20 +1,2 @@
 int a = 2;
-float b = 4.5 + 5.5;
-int d = 2 + a;
-boolean c = true;
-if (2 < a) {
-    print(a);
-} else {
-    a = a + 1;
-}
-if (2 + 4 > a || (2 == a - 3) && !c) {
-    int x = 0;
-    if (true) {
-        x = x + 1;
-        int q;
-    } else {
-        x = x - 1;
-    }
-    print(x);
-}
 BYE;
