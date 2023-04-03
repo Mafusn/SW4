@@ -11,7 +11,7 @@ import java.io.PrintWriter;
 public class CodeGenerator implements Visitor {
     private StringBuilder codeBuilder;
     private SymbolTableFilling symbolTable;
-    private int stackAddress = 0xff;
+    private int stackAddress = 0x00;
 
     public void incrementStack(){
         stackAddress++;
@@ -100,7 +100,7 @@ public class CodeGenerator implements Visitor {
         codeBuilder.append("INX\n");
         codeBuilder.append("INX\n");
         codeBuilder.append("LDA #" + node.value + "\n");
-        codeBuilder.append("STA $0100,X\n");
+        codeBuilder.append("STA $01" + Integer.toHexString(stackAddress).toUpperCase() + ",X\n");
     }
 
     @Override
