@@ -11,7 +11,7 @@ public class Parser {
             PrettyPrint prettyPrint = new PrettyPrint();
             SymbolTableFilling symbolTableFilling = new SymbolTableFilling();
             TypeChecking typeChecking = new TypeChecking(symbolTableFilling);
-            CodeGenerator codeGenerator = new CodeGenerator(symbolTableFilling);
+            CodeGenerator codeGenerator = new CodeGenerator(symbolTableFilling.getSymbolTable());
 
             prog.accept(prettyPrint);
             prog.accept(symbolTableFilling);

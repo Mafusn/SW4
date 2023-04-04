@@ -6,6 +6,7 @@ public class Symbol {
     private String name;
     private Type type;
     private int scopeLevel;
+    private int memoryAddress;
 
     public Symbol(String name, Type type, int scopeLevel) {
         this.name = name;
@@ -23,5 +24,13 @@ public class Symbol {
 
     public int getScopeLevel() {
         return scopeLevel;
+    }
+
+    public int getMemoryAddress() {
+        return memoryAddress;
+    }
+
+    public void setMemoryAddress(int memoryAddress) {
+        this.memoryAddress = memoryAddress;
     }
 }
