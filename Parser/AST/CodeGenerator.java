@@ -14,7 +14,7 @@ import java.util.Map;
 public class CodeGenerator implements Visitor {
     private StringBuilder codeBuilder;
     private SymbolTableFilling symbolTable;
-    private int stackAddress = 0xff;
+    private int stackAddress = 0x00;
 
     public void decrementStack(){
         System.out.println("decrement stack: " + stackAddress);
@@ -24,8 +24,8 @@ public class CodeGenerator implements Visitor {
         System.out.println("increment stack: " + stackAddress);
         stackAddress++;
     }
-    public String getStackAddress(){
-        return Integer.toHexString(stackAddress);
+    public String stackAddressToString(){
+        return Integer.toHexString(stackAddress).toUpperCase();
     }
 
     public CodeGenerator(SymbolTableFilling symbolTable) {
