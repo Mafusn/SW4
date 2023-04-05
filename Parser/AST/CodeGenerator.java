@@ -1,29 +1,40 @@
 package AST;
 
-import AST.*;
-import AST.Types.IntType;
 import AST.Types.Type;
 
 import java.io.FileNotFoundException;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.HashMap;
-import java.util.Map;
 
 public class CodeGenerator implements Visitor {
     private StringBuilder codeBuilder;
     private SymbolTableFilling symbolTable;
-    private int stackAddress = 0x00;
+    private int stackAddress = 0xff;
+    private int computingCount = 0;
+    private String previousOperator = "";
 
-    public void decrementStack(){
-        System.out.println("decrement stack: " + stackAddress);
+    private void pushAccumulator() {
+        codeBuilder.append("PHA\n");
         stackAddress--;
     }
-    public void incrementStack(){
-        System.out.println("increment stack: " + stackAddress);
+
+    private void pullAccumulator() {
+        codeBuilder.append("PLA\n");
         stackAddress++;
     }
+    private void loadXRegisterWithConst(int value) {
+        codeBuilder.append("LDX #" + value + "\n");
+    }
+
+    private void loadXRegisterWithVariable(String id) {
+        Symbol symbol = symbolTable.lookup(id);
+        codeBuilder.append("LDX " + symbol.getMemoryAddress() + "\n");
+    }
+
+    private void storeXRegisterInVariable(String id) {
+        Symbol symbol = symbolTable.lookup(id);
+        codeBuilder.append("STX " + symbol.getMemoryAddress() + "\n");
+    }
+
     public String stackAddressToString(){
         return Integer.toHexString(stackAddress).toUpperCase();
     }
@@ -62,56 +73,75 @@ public class CodeGenerator implements Visitor {
     @Override
     public void visit(Bool node) {
         if (node.value.equals("true")) {
-            codeBuilder.append("LDA #1\n");
+            loadXRegisterWithConst(1);
         } else {
-            codeBuilder.append("LDA #0\n");
+            loadXRegisterWithConst(0);
         }
     }
 
     @Override
     public void visit(BoolDcl node) {
         symbolTable.lookup(node.id).setMemoryAddress(stackAddress);
-        decrementStack();
+        stackAddress--;
     }
 
     @Override
     public Type visit(Computing node) {
         node.getLeftOperand().accept(this);
-        codeBuilder.append("TAX\n");
-        codeBuilder.append("STX $0100\n");
-        node.getRightOperand().accept(this);
+        if (computingCount > 0) {
+            codeBuilder.append("STX $0100\n");
             codeBuilder.append("CLC\n");
-        if (node.getOperator().equals("+")) {
-            codeBuilder.append("ADC $0100\n");
+            if (previousOperator.equals("+")) {
+                codeBuilder.append("ADC $0100\n");
+            }
+            else {
+                codeBuilder.append("SBC $0100\n");
+                codeBuilder.append("EOR #$FF\n");
+            }
+            previousOperator = node.getOperator();
         } else {
-            codeBuilder.append("SBC $0100\n");
-            codeBuilder.append("EOR #$FF\n");
+            codeBuilder.append("TXA\n");
+            previousOperator = node.getOperator();
         }
+        computingCount++;
+        node.getRightOperand().accept(this);
+        if (node.getRightOperand() instanceof Computing) {
+            return null;
+        } else {
+            codeBuilder.append("STX $0100\n");
+            codeBuilder.append("CLC\n");
+            if (node.getOperator().equals("+")) {
+                codeBuilder.append("ADC $0100\n");
+            } else {
+                codeBuilder.append("SBC $0100\n");
+                codeBuilder.append("EOR #$FF\n");
+            }
+        }
+
         return null;
     }
 
     @Override
     public void visit(FloatDcl node) {
         symbolTable.lookup(node.id).setMemoryAddress(stackAddress);
-        decrementStack();
-        decrementStack();
+        stackAddress--;
+        stackAddress--;
     }
 
     @Override
     public void visit(FloatNum node) {
         // .split("\\.") splits the string at the dot into an array with two entries.
-        String[] s = node.value.split("\\.");
-        codeBuilder.append("LDA #" + s[0] + "\n");
-        codeBuilder.append("PHA\n");
-        decrementStack();
-        codeBuilder.append("LDA #" + s[1] + "\n");
+        String[] parts = node.value.split("\\.");
+        loadXRegisterWithConst(Integer.parseInt(parts[0]));
+        pushAccumulator();
+        loadXRegisterWithConst(Integer.parseInt(parts[1]));
     }
 
     @Override
     public Type visit(Id node) {
         // Man skriver $01 foran adressen fordi den metode man kalder efter er 8-bit og derfor kun 2 decimaler.
         // Når vi skriver $01 foran ender vi i stacken.
-        codeBuilder.append("LDA $01" + Integer.toHexString(symbolTable.lookup(node.id).getMemoryAddress()) + "\n");
+        codeBuilder.append("LDX $01" + Integer.toHexString(symbolTable.lookup(node.id).getMemoryAddress()) + "\n");
         return null;
     }
 
@@ -127,13 +157,14 @@ public class CodeGenerator implements Visitor {
 
     @Override
     public void visit(IntDcl node) {
-        symbolTable.lookup(node.id).setMemoryAddress(stackAddress);
-        decrementStack();
+        Symbol symbol = symbolTable.lookup(node.id);
+        symbol.setMemoryAddress(stackAddress);
+        stackAddress--;
     }
 
     @Override
     public void visit(IntNum node) {
-        codeBuilder.append("LDA #" + node.value + "\n");
+        loadXRegisterWithConst(Integer.parseInt(node.value));
     }
 
     @Override
