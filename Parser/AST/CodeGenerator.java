@@ -87,36 +87,7 @@ public class CodeGenerator implements Visitor {
 
     @Override
     public Type visit(Computing node) {
-        node.getLeftOperand().accept(this);
-        if (computingCount > 0) {
-            codeBuilder.append("STX $0100\n");
-            codeBuilder.append("CLC\n");
-            if (previousOperator.equals("+")) {
-                codeBuilder.append("ADC $0100\n");
-            }
-            else {
-                codeBuilder.append("SBC $0100\n");
-                codeBuilder.append("EOR #$FF\n");
-            }
-            previousOperator = node.getOperator();
-        } else {
-            codeBuilder.append("TXA\n");
-            previousOperator = node.getOperator();
-        }
-        computingCount++;
-        node.getRightOperand().accept(this);
-        if (node.getRightOperand() instanceof Computing) {
-            return null;
-        } else {
-            codeBuilder.append("STX $0100\n");
-            codeBuilder.append("CLC\n");
-            if (node.getOperator().equals("+")) {
-                codeBuilder.append("ADC $0100\n");
-            } else {
-                codeBuilder.append("SBC $0100\n");
-                codeBuilder.append("EOR #$FF\n");
-            }
-        }
+        computingForIntNode(node);
 
         return null;
     }
@@ -183,5 +154,36 @@ public class CodeGenerator implements Visitor {
             n.accept(this);
         }
         System.out.println(stackAddress);
+    }
+
+    public void computingForIntNode(Computing node) {
+        node.getLeftOperand().accept(this);
+        if (computingCount > 0) {
+            codeBuilder.append("STX $0100\n");
+            codeBuilder.append("CLC\n");
+            if (previousOperator.equals("+")) {
+                codeBuilder.append("ADC $0100\n");
+            }
+            else {
+                codeBuilder.append("SBC $0100\n");
+                codeBuilder.append("EOR #$FF\n");
+            }
+            previousOperator = node.getOperator();
+        } else {
+            codeBuilder.append("TXA\n");
+            previousOperator = node.getOperator();
+        }
+        computingCount++;
+        node.getRightOperand().accept(this);
+        if (!(node.getRightOperand() instanceof Computing)) {
+            codeBuilder.append("STX $0100\n");
+            codeBuilder.append("CLC\n");
+            if (node.getOperator().equals("+")) {
+                codeBuilder.append("ADC $0100\n");
+            } else {
+                codeBuilder.append("SBC $0100\n");
+                codeBuilder.append("EOR #$FF\n");
+            }
+        }
     }
 }
