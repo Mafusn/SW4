@@ -10,7 +10,10 @@ public class CodeGenerator implements Visitor {
     private SymbolTableFilling symbolTable;
     private int stackAddress = 0xff;
     private int computingCount = 0;
-    private String previousOperator = "";
+    private int binOperatorCount = 0;
+    private int labelCount = 0;
+    private int ifCount = 0;
+    private String nextOperator = "";
 
     private void incrementStackAddress() {
         stackAddress++;
@@ -64,17 +67,85 @@ public class CodeGenerator implements Visitor {
     public void visit(Assigning node) {
         node.child2.accept(this);
         node.child1.accept(this);
+        if (!(node.child2 instanceof Computing)) {
+            codeBuilder.append("TXA\n");
+        }
         codeBuilder.append("PHA\n");
     }
 
     @Override
     public Type visit(BinOperator node) {
+        if (!(node.getLeftOperand() instanceof BinOperator)) {
+            codeBuilder.append("binOperation" + binOperatorCount + ":\n");
+            binOperatorCount++;
+        } else {
+            nextOperator = node.getOperator();
+        }
+        node.getLeftOperand().accept(this);
+        // Uanset hvad smider vi left operanden på stacken.
+        if (node.getLeftOperand() instanceof Computing) {
+            pushAccumulator();
+        } else if (node.getLeftOperand() instanceof Id ||
+                node.getLeftOperand() instanceof IntNum ||
+                node.getLeftOperand() instanceof FloatNum ||
+                node.getLeftOperand() instanceof Bool) {
+            codeBuilder.append("TXA\n");
+            pushAccumulator();
+        }
+        node.getRightOperand().accept(this);
+        if (node.getRightOperand() instanceof Computing) {
+            codeBuilder.append("TAX\n");
+        }
+        pullAccumulator();
+
+        switch (node.getOperator()) {
+            case "||":
+                codeBuilder.append("STX $0100\n");
+                codeBuilder.append("ORA $0100\n");
+                // BEQ = false
+                // BNE = true
+                break;
+            case "&&":
+                codeBuilder.append("STX $0100\n");
+                codeBuilder.append("AND $0100\n");
+                // BEQ = true
+                // BNE = false
+                break;
+            case "==":
+                codeBuilder.append("STX $0100\n");
+                codeBuilder.append("CMP $0100\n");
+                // BEQ = true
+                // BNE = false
+                break;
+            case "!=":
+                codeBuilder.append("STX $0100\n");
+                codeBuilder.append("CMP $0100\n");
+                // BNE = true
+                // BEQ = false
+                break;
+            case "<", "<=":
+                codeBuilder.append("STX $0100\n");
+                codeBuilder.append("CMP $0100\n");
+                // BCC = true
+                // BCS = false
+                break;
+            case ">", ">=":
+                codeBuilder.append("STX $0100\n");
+                codeBuilder.append("CMP $0100\n");
+                // BCS = true
+                // BCC = false
+                break;
+        }
         return null;
     }
 
     @Override
     public void visit(Block node) {
-
+        for (Node n : node.children) {
+            codeBuilder.append("ifthen" + labelCount + ":\n");
+            n.accept(this);
+            labelCount++;
+        }
     }
 
     @Override
@@ -125,7 +196,10 @@ public class CodeGenerator implements Visitor {
 
     @Override
     public void visit(If node) {
-
+        node.getCondition().accept(this);
+        node.getThenBlock().accept(this);
+        codeBuilder.append("end" + (labelCount - 1) + ":\n");
+        decrementStackAddress();
     }
 
     @Override
