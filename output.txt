@@ -1,25 +1,12 @@
 LDX #1
 TXA
 PHA
-binOperation0:
-LDX #2
-TXA
-PHA
-LDX #3
+LDX #0
 PLA
+CLC
 STX $0100
 CMP $0100
-binOperation1:
-LDX #4
-TXA
-PHA
-LDX #5
-PLA
-STX $0100
-CMP $0100
-PLA
-STX $0100
-ORA $0100
+BEQ ifthen0
 ifthen0:
 LDX #1
 TXA

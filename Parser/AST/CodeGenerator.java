@@ -75,7 +75,7 @@ public class CodeGenerator implements Visitor {
 
     @Override
     public Type visit(BinOperator node) {
-        if (!(node.getLeftOperand() instanceof BinOperator)) {
+        /*if (!(node.getLeftOperand() instanceof BinOperator)) {
             codeBuilder.append("binOperation" + binOperatorCount + ":\n");
             binOperatorCount++;
         } else {
@@ -92,6 +92,7 @@ public class CodeGenerator implements Visitor {
             codeBuilder.append("TXA\n");
             pushAccumulator();
         }
+        nextOperator = node.getOperator();
         node.getRightOperand().accept(this);
         if (node.getRightOperand() instanceof Computing) {
             codeBuilder.append("TAX\n");
@@ -135,7 +136,8 @@ public class CodeGenerator implements Visitor {
                 // BCS = true
                 // BCC = false
                 break;
-        }
+        }*/
+        evaluateBinoperator(node);
         return null;
     }
 
@@ -281,6 +283,78 @@ public class CodeGenerator implements Visitor {
                 codeBuilder.append("SBC $0100\n");
                 codeBuilder.append("EOR #$FF\n");
             }
+        }
+    }
+
+    public void evaluateBinoperator(BinOperator node) {
+        node.getLeftOperand().accept(this);
+        if (node.getLeftOperand() instanceof Id ||
+            node.getLeftOperand() instanceof IntNum ||
+            node.getLeftOperand() instanceof FloatNum ||
+            node.getLeftOperand() instanceof Bool)
+        {
+            codeBuilder.append("TXA\n");
+        }
+        pushAccumulator();
+        node.getRightOperand().accept(this);
+        if (node.getLeftOperand() instanceof Computing) {
+            codeBuilder.append("TAX\n");
+        }
+        pullAccumulator();
+        codeBuilder.append("CLC\n");
+        // || and && mangler at blive fikset, der skal den enkelte operand evalueres
+        // i stedet for det pjat hernede.
+        switch (node.getOperator()) {
+            case "||":
+                codeBuilder.append("STX $0100\n");
+                codeBuilder.append("CMP $0100\n");
+                codeBuilder.append("BEQ ifthen" + labelCount + "\n");
+                break;
+            case "&&":
+                codeBuilder.append("STX $0100\n");
+                codeBuilder.append("CMP $0100\n");
+                codeBuilder.append("BNE end" + labelCount + "\n");
+                break;
+            case "==":
+                codeBuilder.append("STX $0100\n");
+                codeBuilder.append("CMP $0100\n");
+                codeBuilder.append("BEQ ifthen" + labelCount + "\n");
+                break;
+            case "!=":
+                codeBuilder.append("STX $0100\n");
+                codeBuilder.append("CMP $0100\n");
+                codeBuilder.append("BNE ifthen" + labelCount + "\n");
+                break;
+            case "<":
+                codeBuilder.append("STX $0100\n");
+                codeBuilder.append("CMP $0100\n");
+                codeBuilder.append("BEQ end" + labelCount + "\n");
+                codeBuilder.append("BCS end" + labelCount + "\n");
+                // BCC = true
+                // BCS = false
+                break;
+            case "<=":
+                codeBuilder.append("STX $0100\n");
+                codeBuilder.append("CMP $0100\n");
+                codeBuilder.append("BCS end" + labelCount + "\n");
+                // BCS = true
+                // BCC = false
+                break;
+            case ">":
+                codeBuilder.append("STX $0100\n");
+                codeBuilder.append("CMP $0100\n");
+                codeBuilder.append("BEQ end" + labelCount + "\n");
+                codeBuilder.append("BCC end" + labelCount + "\n");
+                // BCS = true
+                // BCC = false
+                break;
+            case ">=":
+                codeBuilder.append("STX $0100\n");
+                codeBuilder.append("CMP $0100\n");
+                codeBuilder.append("BCC end" + labelCount + "\n");
+                // BCS = true
+                // BCC = false
+                break;
         }
     }
 }

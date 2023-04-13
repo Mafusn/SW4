@@ -1,5 +1,4 @@
-int y = 1;
-if (2 < 3 || 4 < 5) {
+if (true || false) {
     int x = 2 + 1;
 }
 BYE;
