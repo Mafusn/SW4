@@ -1,4 +1,7 @@
-if (true || false) {
-    int x = 2 + 1;
+int y = 2;
+int x = 5 + y;
+boolean d = true;
+if (!x > y) {
+    int a = 2 + 2 - 3;
 }
 BYE;

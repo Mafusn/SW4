@@ -1,5 +1,6 @@
 package AST;
 
+import AST.Nodes.*;
 import AST.Types.*;
 
 public class TypeChecking implements Visitor {
@@ -19,26 +20,25 @@ public class TypeChecking implements Visitor {
         // Check that the types match
         if (!symbol.getType().isAssignable(rhsType)) {
             //throw new TypeMismatchException("Type mismatch in assignment");
-            System.out.println("Type mismatch in assignment: " + node.getVariable());
+            error("Type mismatch in assignment " + node.getVariable());
         }
     }
 
     @Override
-    public Type visit(BinOperator node) {
-        Type leftType = node.getLeftOperand().accept(this);
-        Type rightType = node.getRightOperand().accept(this);
+    public void visit(BinOperator node) {
+        Type leftType = node.getLeftOperand().getType(this.symbolTable);
+        Type rightType = node.getRightOperand().getType(this.symbolTable);
 
         if (!(leftType.isEqual(rightType))) {
-            System.out.println("Binary operator used with incompatible types");
-            return null;
+            error("Binary operator used with incompatible types");
         }
 
-        return leftType.getResultType(node.getOperator(), rightType);
+        leftType.getResultType(node.getOperator(), rightType);
     }
 
     @Override
     public void visit(Block node) {
-        for (Node child : node.children) {
+        for (Node child : node.getChildren()) {
             child.accept(this);
         }
     }
@@ -54,22 +54,20 @@ public class TypeChecking implements Visitor {
     }
 
     @Override
-    public Type visit(Computing node) {
-        Type leftType = node.getLeftOperand().accept(this);
-        Type rightType = node.getRightOperand().accept(this);
+    public void visit(Computing node) {
+        Type leftType = node.getLeftOperand().getType(this.symbolTable);
+        Type rightType = node.getRightOperand().getType(this.symbolTable);
 
         if (!(leftType.isEqual(rightType))) {
-            System.out.println("Computing operator used with incompatible types");
-            return null;
+            error("Computing operator used with incompatible types");
         }
 
         if (leftType instanceof IntType && rightType instanceof IntType) {
-            return new IntType();
+            node.setType(new IntType());
         } else if (leftType instanceof FloatType && rightType instanceof FloatType) {
-            return new FloatType();
+            node.setType(new FloatType());
         } else {
-            System.out.println("Computing operator used with incompatible types");
-            return null;
+            error("Computing operator used with incompatible types");
         }
     }
 
@@ -84,22 +82,21 @@ public class TypeChecking implements Visitor {
     }
 
     @Override
-    public Type visit(Id node) {
+    public void visit(Id node) {
         Symbol symbol = symbolTable.lookup(node.getName());
         if (symbol == null) {
-            System.out.println("Undeclared variable: " + node.getName());
+            error("Undeclared variable " + node.getName());
         } else {
-            return symbol.getType();
+            node.setType(symbol.getType());
         }
-        return null;
     }
 
     @Override
     public void visit(If node) {
-        Type conditionType = node.getCondition().accept(this);
+        Type conditionType = node.getCondition().getType(this.symbolTable);
 
         if (!(conditionType instanceof BooleanType)) {
-            System.out.println("If statement condition must be boolean");
+            error("If statement condition must be boolean");
         }
 
         node.getThenBlock().accept(this);
@@ -107,10 +104,10 @@ public class TypeChecking implements Visitor {
 
     @Override
     public void visit(IfElse node) {
-        Type conditionType = node.getCondition().accept(this);
+        Type conditionType = node.getCondition().getType(this.symbolTable);
 
         if (!(conditionType instanceof BooleanType)) {
-            System.out.println("If-else statement condition must be boolean");
+            error("If-else statement condition must be boolean");
         }
 
         node.getThenBlock().accept(this);
@@ -128,12 +125,12 @@ public class TypeChecking implements Visitor {
     }
 
     @Override
-    public Type visit(Not node) {
+    public void visit(Not node) {
         Type exprType = node.getExpression().getType(symbolTable);
         if (!(exprType instanceof BooleanType)) {
-            System.out.println("Type mismatch in Not operator");
+            error("Type mismatch in Not operator");
         }
-        return exprType;
+        node.setType(exprType);
     }
 
     @Override
@@ -143,8 +140,12 @@ public class TypeChecking implements Visitor {
 
     @Override
     public void visit(Prog node) {
-        for(Node n : node.children){
+        for(Node n : node.getChildren()){
             n.accept(this);
         }
+    }
+
+    private void error(String message) {
+        throw new Error(message);
     }
 }

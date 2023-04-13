@@ -1,9 +1,7 @@
 package AST;
 
-import AST.Types.BooleanType;
-import AST.Types.FloatType;
-import AST.Types.IntType;
-import AST.Types.Type;
+import AST.Nodes.*;
+import AST.Types.*;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -24,19 +22,18 @@ public class SymbolTableFilling implements Visitor {
 
     @Override
     public void visit(Assigning node) {
-        node.child1.accept(this);
-        node.child2.accept(this);
+        node.getDeclaration().accept(this);
+        node.getExpression().accept(this);
     }
 
     @Override
-    public Type visit(BinOperator node) {
+    public void visit(BinOperator node) {
 
-        return null;
     }
 
     @Override
     public void visit(Block node) {
-        for(Node n : node.children){
+        for(Node n : node.getChildren()){
             n.accept(this);
         }
     }
@@ -48,24 +45,25 @@ public class SymbolTableFilling implements Visitor {
 
     @Override
     public void visit(BoolDcl node) {
-        if (symbolTable.get(node.id) == null) {
-            symbolTable.put(node.id, new Symbol(node.id, new BooleanType(), scopeLevel));
+        if (symbolTable.get(node.getId()) == null) {
+            symbolTable.put(node.getId(), new Symbol(node.getId(), new BooleanType(), scopeLevel));
         } else {
-            error("variable " + node.id + " is already declared");
+            error("variable " + node.getId() + " is already declared");
         }
     }
 
     @Override
-    public Type visit(Computing node) {
-        return null;
+    public void visit(Computing node) {
+        node.getLeftOperand().accept(this);
+        node.getRightOperand().accept(this);
     }
 
     @Override
     public void visit(FloatDcl node) {
-        if (symbolTable.get(node.id) == null) {
-            symbolTable.put(node.id, new Symbol(node.id, new FloatType(), scopeLevel));
+        if (symbolTable.get(node.getId()) == null) {
+            symbolTable.put(node.getId(), new Symbol(node.getId(), new FloatType(), scopeLevel));
         } else {
-            error("variable " + node.id + " is already declared");
+            error("variable " + node.getId() + " is already declared");
         }
     }
 
@@ -75,28 +73,29 @@ public class SymbolTableFilling implements Visitor {
     }
 
     @Override
-    public Type visit(Id node) {
-
-        return null;
+    public void visit(Id node) {
+        if (symbolTable.get(node.getName()) == null) {
+            error("variable " + node.getName() + " is not declared");
+        }
     }
 
     @Override
     public void visit(If node) {
-        node.child1.accept(this);
+        node.getThenBlock().accept(this);
     }
 
     @Override
     public void visit(IfElse node) {
-        node.child1.accept(this);
-        node.child2.accept(this);
+        node.getThenBlock().accept(this);
+        node.getElseBlock().accept(this);
     }
 
     @Override
     public void visit(IntDcl node) {
-        if (symbolTable.get(node.id) == null) {
-            symbolTable.put(node.id, new Symbol(node.id, new IntType(), scopeLevel));
+        if (symbolTable.get(node.getId()) == null) {
+            symbolTable.put(node.getId(), new Symbol(node.getId(), new IntType(), scopeLevel));
         } else {
-            error("variable " + node.id + " is already declared");
+            error("variable " + node.getId() + " is already declared");
         }
     }
 
@@ -106,9 +105,8 @@ public class SymbolTableFilling implements Visitor {
     }
 
     @Override
-    public Type visit(Not node) {
+    public void visit(Not node) {
 
-        return null;
     }
 
     @Override
@@ -118,7 +116,7 @@ public class SymbolTableFilling implements Visitor {
 
     @Override
     public void visit(Prog node) {
-        for(Node n : node.children){
+        for(Node n : node.getChildren()){
             n.accept(this);
         }
         System.out.println();

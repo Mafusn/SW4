@@ -1,16 +1,19 @@
-package AST;
+package AST.Nodes;
 
+import AST.SymbolTableFilling;
 import AST.Types.Type;
+import AST.Visitor;
 
 public class Id extends Node {
-    String id;
-    Type type;
+    private String id;
+    private Type type;
 
     public Id(String id){
         this.id = id;
     }
 
-    public Type accept(Visitor v){return v.visit(this);
+    public void accept(Visitor v){
+        v.visit(this);
     }
 
     @Override

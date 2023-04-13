@@ -1,31 +1,41 @@
 PARSER_BEGIN(Parser)
 
-import AST.*;
+import AST.*;import AST.Nodes.Node;
 
 public class Parser {
     public static void main(String[] args) {
         try {
-            Parser parser = new Parser(new java.io.FileReader("Parser/code.txt"));
+            Parser parser = new Parser(new java.io.FileReader("code.txt"));
             Node prog = parser.prog();
 
             PrettyPrint prettyPrint = new PrettyPrint();
             SymbolTableFilling symbolTableFilling = new SymbolTableFilling();
             TypeChecking typeChecking = new TypeChecking(symbolTableFilling);
-            CodeGenerator codeGenerator = new CodeGenerator(symbolTableFilling.getSymbolTable());
+            CodeGenerator codeGenerator = new CodeGenerator(symbolTableFilling);
 
             prog.accept(prettyPrint);
+            System.out.println(prettyPrint.getResult());
+            System.out.println();
+            System.out.print("Syntax is good");
             prog.accept(symbolTableFilling);
+            System.out.println("Symbol table is good");
             prog.accept(typeChecking);
+            System.out.println("Type check is good");
             prog.accept(codeGenerator);
+            System.out.println("Code generator is good");
 
             codeGenerator.generateCode();
-            System.out.println(prettyPrint.getResult());
-            System.out.println("Syntax is good");
+
         } catch (Throwable e) {
             // Catching Throwable is ugly but JavaCC throws Error objects!
             System.out.println("Syntax error: " + e.getMessage());
         }
     }
+}}
+}}
+}}
+}}
+}}
 }
 
 PARSER_END(Parser)
@@ -99,13 +109,13 @@ Node dcl() :
  }
 { < FLOATDCL > t = < ID > ( < ASSIGN > expr = expr() { hasExpr = true; } )?
 {
-    if (hasExpr) {
-        FloatDcl floatDcl = new FloatDcl(t.image);
-        return new Assigning(t.image, floatDcl, expr);
-    } else {
-        return new FloatDcl(t.image);
-    }
- }
+   if (hasExpr) {
+       FloatDcl floatDcl = new FloatDcl(t.image);
+       return new Assigning(t.image, floatDcl, expr);
+   } else {
+       return new FloatDcl(t.image);
+   }
+}
 | < INTDCL > t = < ID > ( < ASSIGN > expr = expr() { hasExpr = true; } )?
 {
     if (hasExpr) {

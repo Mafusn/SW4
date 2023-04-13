@@ -1,6 +1,6 @@
 package AST;
 
-import AST.Types.Type;
+import AST.Nodes.*;
 
 public class PrettyPrint implements Visitor {
     private StringBuilder sb = new StringBuilder();
@@ -26,38 +26,32 @@ public class PrettyPrint implements Visitor {
 
     @Override
     public void visit(Assigning node) {
-        if (node.child1.getClass().getName().equals("AST.FloatDcl")) {
-            node.child1.accept(this);
-            sb.append(" = ");
-            node.child2.accept(this);
-        } else if (node.child1.getClass().getName().equals("AST.IntDcl")) {
-            node.child1.accept(this);
-            sb.append(" = ");
-            node.child2.accept(this);
-        } else if (node.child1.getClass().getName().equals("AST.BoolDcl")) {
-            node.child1.accept(this);
-            sb.append(" = ");
-            node.child2.accept(this);
-        } else {
-            sb.append("\n");
-            printIndent();
-            node.child1.accept(this);
-            sb.append(" = ");
-            node.child2.accept(this);
+        switch (node.getDeclaration().getClass().getSimpleName()) {
+            case "FloatDcl", "IntDcl", "BoolDcl" -> {
+                node.getDeclaration().accept(this);
+                sb.append(" = ");
+                node.getExpression().accept(this);
+            }
+            default -> {
+                sb.append("\n");
+                printIndent();
+                node.getDeclaration().accept(this);
+                sb.append(" = ");
+                node.getExpression().accept(this);
+            }
         }
     }
 
     @Override
-    public Type visit(BinOperator node) {
-        node.child1.accept(this);
-        sb.append(" " + node.operation + " ");
-        node.child2.accept(this);
-        return null;
+    public void visit(BinOperator node) {
+        node.getLeftOperand().accept(this);
+        sb.append(" " + node.getOperator() + " ");
+        node.getRightOperand().accept(this);
     }
 
     @Override
     public void visit(Block node) {
-        for(Node n : node.children){
+        for(Node n : node.getChildren()){
             indent();
             n.accept(this);
             unindent();
@@ -66,40 +60,38 @@ public class PrettyPrint implements Visitor {
 
     @Override
     public void visit(Bool node) {
-        sb.append(node.value);
+        sb.append(node.getValue());
     }
 
     @Override
     public void visit(BoolDcl node) {
         sb.append("\n");
         printIndent();
-        sb.append("boolean " + node.id);
+        sb.append("boolean " + node.getId());
     }
 
     @Override
-    public Type visit(Computing node) {
-        node.child1.accept(this);
-        sb.append(" " + node.operation + " ");
-        node.child2.accept(this);
-        return null;
+    public void visit(Computing node) {
+        node.getLeftOperand().accept(this);
+        sb.append(" " + node.getOperator() + " ");
+        node.getRightOperand().accept(this);
     }
 
     @Override
     public void visit(FloatDcl node) {
         sb.append("\n");
         printIndent();
-        sb.append("float " + node.id);
+        sb.append("float " + node.getId());
     }
 
     @Override
     public void visit(FloatNum node) {
-        sb.append(node.value);
+        sb.append(node.getValue());
     }
 
     @Override
-    public Type visit(Id node) {
-        sb.append(node.id);
-        return null;
+    public void visit(Id node) {
+        sb.append(node.getName());
     }
 
     @Override
@@ -107,9 +99,9 @@ public class PrettyPrint implements Visitor {
         sb.append("\n");
         printIndent();
         sb.append("if(");
-        node.condition.accept(this);
+        node.getCondition().accept(this);
         sb.append(")");
-        node.child1.accept(this);
+        node.getThenBlock().accept(this);
     }
 
     @Override
@@ -117,45 +109,44 @@ public class PrettyPrint implements Visitor {
         sb.append("\n");
         printIndent();
         sb.append("if(");
-        node.condition.accept(this);
+        node.getCondition().accept(this);
         sb.append(")");
-        node.child1.accept(this);
+        node.getThenBlock().accept(this);
         sb.append("\n");
         printIndent();
         sb.append("else");
-        node.child2.accept(this);
+        node.getElseBlock().accept(this);
     }
 
     @Override
     public void visit(IntDcl node) {
         sb.append("\n");
         printIndent();
-        sb.append("int " + node.id);
+        sb.append("int " + node.getId());
     }
 
     @Override
     public void visit(IntNum node) {
-        sb.append(node.value);
+        sb.append(node.getValue());
     }
 
     @Override
-    public Type visit(Not node) {
+    public void visit(Not node) {
         sb.append("!(");
-        node.child.accept(this);
+        node.getExpression().accept(this);
         sb.append(")");
-        return null;
     }
 
     @Override
     public void visit(Print node) {
         sb.append("\n");
         printIndent();
-        sb.append("print(" + node.id + ")");
+        sb.append("print(" + node.getId() + ")");
     }
 
     @Override
     public void visit(Prog node) {
-        for(Node n : node.children){
+        for(Node n : node.getChildren()){
             n.accept(this);
         }
     }

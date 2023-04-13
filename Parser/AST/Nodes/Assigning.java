@@ -1,11 +1,13 @@
-package AST;
+package AST.Nodes;
 
+import AST.SymbolTableFilling;
 import AST.Types.Type;
+import AST.Visitor;
 
 public class Assigning extends Node {
     private String name;
-    Node child1;
-    Node child2;
+    private Node child1;
+    private Node child2;
 
     public Assigning(String name, Node child1, Node child2){
         this.name = name;
@@ -13,8 +15,8 @@ public class Assigning extends Node {
         this.child2 = child2;
     }
 
-    public Type accept(Visitor v){v.visit(this);
-        return null;
+    public void accept(Visitor v){
+        v.visit(this);
     }
 
     @Override
@@ -33,6 +35,10 @@ public class Assigning extends Node {
 
         // Return the type of the assignment
         return targetType;
+    }
+
+    public Node getDeclaration() {
+        return child1;
     }
 
     public Node getExpression() {

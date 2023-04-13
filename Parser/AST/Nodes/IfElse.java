@@ -1,11 +1,13 @@
-package AST;
+package AST.Nodes;
 
+import AST.SymbolTableFilling;
 import AST.Types.Type;
+import AST.Visitor;
 
 public class IfElse extends Node {
-    Node condition;
-    Node child1;
-    Node child2;
+    private Node condition;
+    private Node child1;
+    private Node child2;
 
     public IfElse(Node condition, Node child1, Node child2){
         this.condition = condition;
@@ -13,8 +15,8 @@ public class IfElse extends Node {
         this.child2 = child2;
     }
 
-    public Type accept(Visitor v){v.visit(this);
-        return null;
+    public void accept(Visitor v){
+        v.visit(this);
     }
 
     @Override

@@ -1,6 +1,6 @@
 package AST;
 
-import AST.Types.Type;
+import AST.Nodes.*;
 
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
@@ -65,16 +65,16 @@ public class CodeGenerator implements Visitor {
 
     @Override
     public void visit(Assigning node) {
-        node.child2.accept(this);
-        node.child1.accept(this);
-        if (!(node.child2 instanceof Computing)) {
+        node.getExpression().accept(this);
+        node.getDeclaration().accept(this);
+        if (!(node.getExpression() instanceof Computing)) {
             codeBuilder.append("TXA\n");
         }
         codeBuilder.append("PHA\n");
     }
 
     @Override
-    public Type visit(BinOperator node) {
+    public void visit(BinOperator node) {
         /*if (!(node.getLeftOperand() instanceof BinOperator)) {
             codeBuilder.append("binOperation" + binOperatorCount + ":\n");
             binOperatorCount++;
@@ -137,13 +137,12 @@ public class CodeGenerator implements Visitor {
                 // BCC = false
                 break;
         }*/
-        evaluateBinoperator(node);
-        return null;
+        evaluateBinOperator(node);
     }
 
     @Override
     public void visit(Block node) {
-        for (Node n : node.children) {
+        for (Node n : node.getChildren()) {
             codeBuilder.append("ifthen" + labelCount + ":\n");
             n.accept(this);
             labelCount++;
@@ -152,7 +151,7 @@ public class CodeGenerator implements Visitor {
 
     @Override
     public void visit(Bool node) {
-        if (node.value.equals("true")) {
+        if (node.getValue()) {
             loadXRegisterWithConst(1);
         } else {
             loadXRegisterWithConst(0);
@@ -161,19 +160,18 @@ public class CodeGenerator implements Visitor {
 
     @Override
     public void visit(BoolDcl node) {
-        symbolTable.lookup(node.id).setMemoryAddress(stackAddress);
+        symbolTable.lookup(node.getId()).setMemoryAddress(stackAddress);
         decrementStackAddress();
     }
 
     @Override
-    public Type visit(Computing node) {
+    public void visit(Computing node) {
         computingForIntNode(node);
-        return null;
     }
 
     @Override
     public void visit(FloatDcl node) {
-        symbolTable.lookup(node.id).setMemoryAddress(stackAddress);
+        symbolTable.lookup(node.getId()).setMemoryAddress(stackAddress);
         decrementStackAddress();
         decrementStackAddress();
     }
@@ -181,19 +179,21 @@ public class CodeGenerator implements Visitor {
     @Override
     public void visit(FloatNum node) {
         // .split("\\.") splits the string at the dot into an array with two entries.
-        String[] parts = node.value.split("\\.");
+        /*
+        String[] parts = node.getValue().split("\\.");
         loadXRegisterWithConst(Integer.parseInt(parts[0]));
         codeBuilder.append("TXA\n");
         pushAccumulator();
         loadXRegisterWithConst(Integer.parseInt(parts[1]));
+
+         */
     }
 
     @Override
-    public Type visit(Id node) {
+    public void visit(Id node) {
         // Man skriver $01 foran adressen fordi den metode man kalder efter er 8-bit og derfor kun 2 decimaler.
         // Når vi skriver $01 foran ender vi i stacken.
-        codeBuilder.append("LDX $01" + Integer.toHexString(symbolTable.lookup(node.id).getMemoryAddress()) + "\n");
-        return null;
+        codeBuilder.append("LDX $01" + Integer.toHexString(symbolTable.lookup(node.getName()).getMemoryAddress()) + "\n");
     }
 
     @Override
@@ -211,19 +211,19 @@ public class CodeGenerator implements Visitor {
 
     @Override
     public void visit(IntDcl node) {
-        Symbol symbol = symbolTable.lookup(node.id);
+        Symbol symbol = symbolTable.lookup(node.getId());
         symbol.setMemoryAddress(stackAddress);
         decrementStackAddress();
     }
 
     @Override
     public void visit(IntNum node) {
-        loadXRegisterWithConst(Integer.parseInt(node.value));
+        loadXRegisterWithConst(node.getValue());
     }
 
     @Override
-    public Type visit(Not node) {
-        return null;
+    public void visit(Not node) {
+
     }
 
     @Override
@@ -233,11 +233,12 @@ public class CodeGenerator implements Visitor {
 
     @Override
     public void visit(Prog node) {
-        for(Node n : node.children){
+        for(Node n : node.getChildren()){
             n.accept(this);
         }
-        System.out.println(stackAddress);
+        //System.out.println(stackAddress);
     }
+
     public void computingForIntNode(Computing node) {
         if (node.getLeftOperand() instanceof Computing) {
             node.getLeftOperand().accept(this);
@@ -286,7 +287,7 @@ public class CodeGenerator implements Visitor {
         }
     }
 
-    public void evaluateBinoperator(BinOperator node) {
+    public void evaluateBinOperator(BinOperator node) {
         node.getLeftOperand().accept(this);
         if (node.getLeftOperand() instanceof Id ||
             node.getLeftOperand() instanceof IntNum ||

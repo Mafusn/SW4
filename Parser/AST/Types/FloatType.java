@@ -1,7 +1,5 @@
 package AST.Types;
 
-import AST.BinOperator;
-
 public class FloatType extends Type{
     public static final FloatType INSTANCE = new FloatType();
 

@@ -1,28 +1,33 @@
-package AST;
+package AST.Nodes;
 
+import AST.SymbolTableFilling;
 import AST.Types.BooleanType;
 import AST.Types.Type;
+import AST.Visitor;
 
 public class BinOperator extends Node {
-    String operation;
-    Node child1;
-    Node child2;
+    private String operation;
+    private Node child1;
+    private Node child2;
+    private Type type;
 
     public BinOperator(String operation, Node child1, Node child2){
         this.operation = operation;
         this.child1 = child1;
         this.child2 = child2;
+        this.type = new BooleanType();
     }
 
-    public Type accept(Visitor v){v.visit(this);
-        return new BooleanType();
+    public void accept(Visitor v){
+        v.visit(this);
     }
 
     @Override
     public Type getType(SymbolTableFilling symbolTable) {
         Type leftType = child1.getType(symbolTable);
         Type rightType = child2.getType(symbolTable);
-        return leftType.getResultType(operation, rightType);
+        this.type = leftType.getResultType(operation, rightType);
+        return this.type;
     }
 
     public Node getLeftOperand() {

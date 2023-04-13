@@ -1,7 +1,5 @@
 package AST.Types;
 
-import AST.BinOperator;
-
 public class BooleanType extends Type{
     public static final BooleanType INSTANCE = new BooleanType();
 

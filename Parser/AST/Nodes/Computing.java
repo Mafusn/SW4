@@ -1,11 +1,14 @@
-package AST;
+package AST.Nodes;
 
+import AST.SymbolTableFilling;
 import AST.Types.Type;
+import AST.Visitor;
 
 public class Computing extends Node {
-    String operation;
-    Node child1;
-    Node child2;
+    private String operation;
+    private Node child1;
+    private Node child2;
+    private Type type;
 
     public Computing(String operation, Node child1, Node child2){
         this.child1 = child1;
@@ -13,13 +16,21 @@ public class Computing extends Node {
         this.operation = operation;
     }
 
-    public Type accept(Visitor v) {
-        return v.visit(this);
+    public void accept(Visitor v) {
+        v.visit(this);
+    }
+
+    public void setType(Type type) {
+        this.type = type;
     }
 
     @Override
     public Type getType(SymbolTableFilling symbolTable) {
-        return child1.getType(symbolTable).getResultType(operation, child2.getType(symbolTable));
+        if ((this.type == null)) {
+            return child1.getType(symbolTable).getResultType(operation, child2.getType(symbolTable));
+        } else {
+            return this.type;
+        }
     }
 
     public Node getLeftOperand() {
