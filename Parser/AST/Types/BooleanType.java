@@ -19,17 +19,20 @@ public class BooleanType extends Type{
 
     @Override
     public Type getResultType(String operator, Type other) {
-        if (operator.equals("==") || operator.equals("!=") || operator.equals("<") ||
-                operator.equals(">") || operator.equals("<=") || operator.equals(">=")) {
-            return BooleanType.INSTANCE;
-        } else if (operator.equals("&&") || operator.equals("||")) {
-            if (other instanceof BooleanType) {
+        switch (operator) {
+            case "==":
+            case "!=":
+            case "<":
+            case ">":
+            case "<=":
+            case ">=":
                 return BooleanType.INSTANCE;
-            } else {
-                return null;
-            }
-        } else {
-            return null;
+            case "&&":
+            case "||":
+                if (other instanceof BooleanType) {
+                    return BooleanType.INSTANCE;
+                }
         }
+        return null;
     }
 }

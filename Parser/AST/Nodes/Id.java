@@ -18,7 +18,10 @@ public class Id extends Node {
 
     @Override
     public Type getType(SymbolTableFilling symbolTable) {
-        return symbolTable.lookup(id).getType();
+        if (this.type == null) {
+            setType(symbolTable.lookup(id).getType());
+        }
+        return this.type;
     }
 
     public String getName() {

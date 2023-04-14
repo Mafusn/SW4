@@ -25,23 +25,13 @@ public class IntType extends Type{
     public Type getResultType(String operator, Type other) {
         if (other instanceof IntType) {
             // Arithmetic operators return an int result when both operands are ints
-            switch (operator) {
-                case "+":
-                case "-":
-                    return IntType.INSTANCE;
+            return switch (operator) {
+                case "+", "-" -> IntType.INSTANCE;
                 // Comparison operators return a boolean result
-                case "<":
-                case "<=":
-                case ">":
-                case ">=":
-                case "==":
-                case "!=":
-                    return BooleanType.INSTANCE;
-                default:
-                    return null;
-            }
-        } else {
-            return null;
+                case "<", "<=", ">", ">=", "==", "!=" -> BooleanType.INSTANCE;
+                default -> null;
+            };
         }
+        return null;
     }
 }

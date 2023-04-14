@@ -19,7 +19,9 @@ public class Not extends Node{
 
     @Override
     public Type getType(SymbolTableFilling symbolTable) {
-        setType(child.getType(symbolTable));
+        if (this.type == null) {
+            setType(child.getType(symbolTable));
+        }
         return this.type;
     }
 

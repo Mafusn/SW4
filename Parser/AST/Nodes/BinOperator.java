@@ -24,10 +24,16 @@ public class BinOperator extends Node {
 
     @Override
     public Type getType(SymbolTableFilling symbolTable) {
-        Type leftType = child1.getType(symbolTable);
-        Type rightType = child2.getType(symbolTable);
-        this.type = leftType.getResultType(operation, rightType);
+        if (this.type == null) {
+            Type leftType = child1.getType(symbolTable);
+            Type rightType = child2.getType(symbolTable);
+            setType(leftType.getResultType(operation, rightType));
+        }
         return this.type;
+    }
+
+    public void setType(Type type) {
+        this.type = type;
     }
 
     public Node getLeftOperand() {

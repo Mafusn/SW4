@@ -8,6 +8,7 @@ public class Assigning extends Node {
     private String name;
     private Node child1;
     private Node child2;
+    private Type type;
 
     public Assigning(String name, Node child1, Node child2){
         this.name = name;
@@ -21,6 +22,8 @@ public class Assigning extends Node {
 
     @Override
     public Type getType(SymbolTableFilling symbolTable) {
+        //************** when is this being used? ****************
+
         // Get the type of the expression being assigned
         Type exprType = child2.getType(symbolTable);
 
@@ -34,7 +37,12 @@ public class Assigning extends Node {
         }
 
         // Return the type of the assignment
-        return targetType;
+        setType(targetType);
+        return this.type;
+    }
+
+    public void setType(Type type) {
+        this.type = type;
     }
 
     public Node getDeclaration() {

@@ -23,23 +23,13 @@ public class FloatType extends Type{
     public Type getResultType(String operator, Type other) {
         if (other instanceof FloatType) {
             // Arithmetic operators return an int result when both operands are ints
-            switch (operator) {
-                case "+":
-                case "-":
-                    return FloatType.INSTANCE;
+            return switch (operator) {
+                case "+", "-" -> FloatType.INSTANCE;
                 // Comparison operators return a boolean result
-                case "<":
-                case "<=":
-                case ">":
-                case ">=":
-                case "==":
-                case "!=":
-                    return BooleanType.INSTANCE;
-                default:
-                    return null;
-            }
-        } else {
-            return null;
+                case "<", "<=", ">", ">=", "==", "!=" -> BooleanType.INSTANCE;
+                default -> null;
+            };
         }
+        return null;
     }
 }

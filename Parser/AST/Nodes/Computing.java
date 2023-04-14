@@ -27,10 +27,11 @@ public class Computing extends Node {
     @Override
     public Type getType(SymbolTableFilling symbolTable) {
         if ((this.type == null)) {
-            return child1.getType(symbolTable).getResultType(operation, child2.getType(symbolTable));
-        } else {
-            return this.type;
+            Type leftType = child1.getType(symbolTable);
+            Type rightType = child2.getType(symbolTable);
+            setType(leftType.getResultType(operation, rightType));
         }
+        return this.type;
     }
 
     public Node getLeftOperand() {

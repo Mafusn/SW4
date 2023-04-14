@@ -1,6 +1,10 @@
 LDX #2
 TXA
 PHA
+LDX #3
+LDX $01ff
+TXA
+PHA
 LDX $01ff
 TXA
 LDX #5
