@@ -2,17 +2,43 @@ LDX #1
 TXA
 PHA
 LDX #0
+TXA
+PHA
+LDX #0
 PLA
-CLC
 STX $0100
-CMP $0100
-BEQ ifthen0
+CLC
+AND $0100
+BEQ false0
+LDA #1
+JMP store0
+false0:
+  LDA #0
+store0:
+  PHA
+PLA
+TAX
+PLA
+STX $0100
+CLC
+ORA $0100
+BEQ false1
+LDA #1
+JMP store1
+false1:
+  LDA #0
+store1:
+  PHA
+PLA
+CMP #1
+BNE end0
 ifthen0:
 LDX #1
 TXA
-LDX #2
+LDX #6
 STX $0100
 CLC
 ADC $0100
 PHA
 end0:
+BRK

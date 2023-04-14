@@ -76,68 +76,6 @@ public class CodeGenerator implements Visitor {
 
     @Override
     public Type visit(BinOperator node) {
-        /*if (!(node.getLeftOperand() instanceof BinOperator)) {
-            codeBuilder.append("binOperation" + binOperatorCount + ":\n");
-            binOperatorCount++;
-        } else {
-            nextOperator = node.getOperator();
-        }
-        node.getLeftOperand().accept(this);
-        // Uanset hvad smider vi left operanden på stacken.
-        if (node.getLeftOperand() instanceof Computing) {
-            pushAccumulator();
-        } else if (node.getLeftOperand() instanceof Id ||
-                node.getLeftOperand() instanceof IntNum ||
-                node.getLeftOperand() instanceof FloatNum ||
-                node.getLeftOperand() instanceof Bool) {
-            codeBuilder.append("TXA\n");
-            pushAccumulator();
-        }
-        nextOperator = node.getOperator();
-        node.getRightOperand().accept(this);
-        if (node.getRightOperand() instanceof Computing) {
-            codeBuilder.append("TAX\n");
-        }
-        pullAccumulator();
-
-        switch (node.getOperator()) {
-            case "||":
-                codeBuilder.append("STX $0100\n");
-                codeBuilder.append("ORA $0100\n");
-                // BEQ = false
-                // BNE = true
-                break;
-            case "&&":
-                codeBuilder.append("STX $0100\n");
-                codeBuilder.append("AND $0100\n");
-                // BEQ = true
-                // BNE = false
-                break;
-            case "==":
-                codeBuilder.append("STX $0100\n");
-                codeBuilder.append("CMP $0100\n");
-                // BEQ = true
-                // BNE = false
-                break;
-            case "!=":
-                codeBuilder.append("STX $0100\n");
-                codeBuilder.append("CMP $0100\n");
-                // BNE = true
-                // BEQ = false
-                break;
-            case "<", "<=":
-                codeBuilder.append("STX $0100\n");
-                codeBuilder.append("CMP $0100\n");
-                // BCC = true
-                // BCS = false
-                break;
-            case ">", ">=":
-                codeBuilder.append("STX $0100\n");
-                codeBuilder.append("CMP $0100\n");
-                // BCS = true
-                // BCC = false
-                break;
-        }*/
         evaluateBinoperator(node);
         return null;
     }
@@ -145,6 +83,9 @@ public class CodeGenerator implements Visitor {
     @Override
     public void visit(Block node) {
         for (Node n : node.children) {
+            codeBuilder.append("PLA\n");
+            codeBuilder.append("CMP #1\n");
+            codeBuilder.append("BNE end" + labelCount + "\n");
             codeBuilder.append("ifthen" + labelCount + ":\n");
             n.accept(this);
             labelCount++;
@@ -238,9 +179,6 @@ public class CodeGenerator implements Visitor {
         }
         System.out.println(stackAddress);
         codeBuilder.append("BRK\n");
-        codeBuilder.append("push_true:\n");
-        codeBuilder.append("LDA #$01\n");
-        codeBuilder.append("PHA\n");
     }
     public void computingForIntNode(Computing node) {
         if (node.getLeftOperand() instanceof Computing) {
@@ -298,96 +236,68 @@ public class CodeGenerator implements Visitor {
             node.getLeftOperand() instanceof Bool)
         {
             codeBuilder.append("TXA\n");
+            pushAccumulator();
+        } else if (node.getLeftOperand() instanceof Computing) {
+            pushAccumulator();
         }
-        pushAccumulator();
-        node.getRightOperand().accept(this);
-        if (node.getLeftOperand() instanceof Computing) {
-            codeBuilder.append("TAX\n");
-        }
-        pullAccumulator();
-        codeBuilder.append("CLC\n");
-        // || and && mangler at blive fikset, der skal den enkelte operand evalueres
-        // i stedet for det pjat hernede.
-        switch (node.getOperator()) {
-            case "||":
-                codeBuilder.append("STX $0100\n");
-                codeBuilder.append("CMP $0100\n");
-                codeBuilder.append("BEQ ifthen" + labelCount + "\n");
-                break;
-            case "&&":
-                codeBuilder.append("STX $0100\n");
-                codeBuilder.append("CMP $0100\n");
-                codeBuilder.append("BNE end" + labelCount + "\n");
-                break;
-            case "==":
-                codeBuilder.append("STX $0100\n");
-                codeBuilder.append("CMP $0100\n");
-                codeBuilder.append("BEQ ifthen" + labelCount + "\n");
-                break;
-            case "!=":
-                codeBuilder.append("STX $0100\n");
-                codeBuilder.append("CMP $0100\n");
-                codeBuilder.append("BNE ifthen" + labelCount + "\n");
-                break;
-            case "<":
-                codeBuilder.append("STX $0100\n");
-                codeBuilder.append("CMP $0100\n");
-                codeBuilder.append("BEQ end" + labelCount + "\n");
-                codeBuilder.append("BCS end" + labelCount + "\n");
-                // BCC = true
-                // BCS = false
-                break;
-            case "<=":
-                codeBuilder.append("STX $0100\n");
-                codeBuilder.append("CMP $0100\n");
-                codeBuilder.append("BCS end" + labelCount + "\n");
-                // BCS = true
-                // BCC = false
-                break;
-            case ">":
-                codeBuilder.append("STX $0100\n");
-                codeBuilder.append("CMP $0100\n");
-                codeBuilder.append("BEQ end" + labelCount + "\n");
-                codeBuilder.append("BCC end" + labelCount + "\n");
-                // BCS = true
-                // BCC = false
-                break;
-            case ">=":
-                codeBuilder.append("STX $0100\n");
-                codeBuilder.append("CMP $0100\n");
-                codeBuilder.append("BCC end" + labelCount + "\n");
-                // BCS = true
-                // BCC = false
-                break;
-        }
-    }
-
-    public void binOperatortest(BinOperator node) {
-        node.getLeftOperand().accept(this);
-        if (node.getLeftOperand() instanceof Id ||
-            node.getLeftOperand() instanceof IntNum ||
-            node.getLeftOperand() instanceof FloatNum ||
-            node.getLeftOperand() instanceof Bool)
-        {
-            codeBuilder.append("TXA");
-        }
-        pushAccumulator();
 
         node.getRightOperand().accept(this);
         if (node.getRightOperand() instanceof Computing) {
-            codeBuilder.append("TAX");
+            codeBuilder.append("TAX\n");
+        } else if (node.getOperator().equals("||") || node.getOperator().equals("&&")
+                && binOperatorCount > 0
+                && !(node.getRightOperand() instanceof Bool))
+        {
+            pullAccumulator();
+            codeBuilder.append("TAX\n");
+            pullAccumulator();
+        } else {
+            pullAccumulator();
         }
-
-        pullAccumulator();
 
         codeBuilder.append("STX $0100\n");
         codeBuilder.append("CLC\n");
 
         switch (node.getOperator()) {
             case "||":
+                codeBuilder.append("ORA $0100\n");
+                codeBuilder.append("BEQ false" + binOperatorCount + "\n");
+                break;
+            case "&&":
+                codeBuilder.append("AND $0100\n");
+                codeBuilder.append("BEQ false" + binOperatorCount + "\n");
+                break;
+            case "<":
                 codeBuilder.append("CMP $0100\n");
-                codeBuilder.append("BEQ ifthen" + labelCount + "\n");
+                codeBuilder.append("BEQ false" + binOperatorCount + "\n");
+                codeBuilder.append("BCS false" + binOperatorCount + "\n");
+                break;
+            case "<=":
+                codeBuilder.append("CMP $0100\n");
+                codeBuilder.append("BCS false" + binOperatorCount + "\n");
+                // BCS = true
+                // BCC = false
+                break;
+            case ">":
+                codeBuilder.append("CMP $0100\n");
+                codeBuilder.append("BEQ false" + binOperatorCount + "\n");
+                codeBuilder.append("BCC false" + binOperatorCount + "\n");
+                // BCS = true
+                // BCC = false
+                break;
+            case ">=":
+                codeBuilder.append("CMP $0100\n");
+                codeBuilder.append("BCC false" + binOperatorCount + "\n");
+                // BCS = true
+                // BCC = false
                 break;
         }
+        codeBuilder.append("LDA #1\n");
+        codeBuilder.append("JMP store" + binOperatorCount + "\n");
+        codeBuilder.append("false" + binOperatorCount + ":\n");
+        codeBuilder.append("  LDA #0\n");
+        codeBuilder.append("store" + binOperatorCount + ":\n");
+        codeBuilder.append("  PHA\n");
+        binOperatorCount++;
     }
 }
