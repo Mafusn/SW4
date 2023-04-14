@@ -259,6 +259,14 @@ public class CodeGenerator implements Visitor {
         codeBuilder.append("CLC\n");
 
         switch (node.getOperator()) {
+            case "==":
+                codeBuilder.append("CMP $0100\n");
+                codeBuilder.append("BNE false" + binOperatorCount + "\n");
+                break;
+            case "!=":
+                codeBuilder.append("CMP $0100\n");
+                codeBuilder.append("BEQ false" + binOperatorCount + "\n");
+                break;
             case "||":
                 codeBuilder.append("ORA $0100\n");
                 codeBuilder.append("BEQ false" + binOperatorCount + "\n");

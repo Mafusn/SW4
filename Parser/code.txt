@@ -1,4 +1,4 @@
-if (true || false && false) {
+if (2 == 5 - 3) {
     int x = 6 + 1;
 }
 BYE;
