@@ -71,6 +71,7 @@ public class CodeGenerator implements Visitor {
             codeBuilder.append("TXA\n");
         }
         codeBuilder.append("PHA\n");
+        computingCount = 0;
     }
 
     @Override
@@ -206,7 +207,6 @@ public class CodeGenerator implements Visitor {
 
     @Override
     public void visit(IfElse node) {
-
     }
 
     @Override
@@ -237,6 +237,10 @@ public class CodeGenerator implements Visitor {
             n.accept(this);
         }
         System.out.println(stackAddress);
+        codeBuilder.append("BRK\n");
+        codeBuilder.append("push_true:\n");
+        codeBuilder.append("LDA #$01\n");
+        codeBuilder.append("PHA\n");
     }
     public void computingForIntNode(Computing node) {
         if (node.getLeftOperand() instanceof Computing) {
@@ -354,6 +358,35 @@ public class CodeGenerator implements Visitor {
                 codeBuilder.append("BCC end" + labelCount + "\n");
                 // BCS = true
                 // BCC = false
+                break;
+        }
+    }
+
+    public void binOperatortest(BinOperator node) {
+        node.getLeftOperand().accept(this);
+        if (node.getLeftOperand() instanceof Id ||
+            node.getLeftOperand() instanceof IntNum ||
+            node.getLeftOperand() instanceof FloatNum ||
+            node.getLeftOperand() instanceof Bool)
+        {
+            codeBuilder.append("TXA");
+        }
+        pushAccumulator();
+
+        node.getRightOperand().accept(this);
+        if (node.getRightOperand() instanceof Computing) {
+            codeBuilder.append("TAX");
+        }
+
+        pullAccumulator();
+
+        codeBuilder.append("STX $0100\n");
+        codeBuilder.append("CLC\n");
+
+        switch (node.getOperator()) {
+            case "||":
+                codeBuilder.append("CMP $0100\n");
+                codeBuilder.append("BEQ ifthen" + labelCount + "\n");
                 break;
         }
     }
