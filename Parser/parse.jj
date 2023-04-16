@@ -31,11 +31,6 @@ public class Parser {
             System.out.println("Syntax error: " + e.getMessage());
         }
     }
-}}
-}}
-}}
-}}
-}}
 }
 
 PARSER_END(Parser)
