@@ -109,7 +109,8 @@ public class CodeGenerator implements Visitor {
 
     @Override
     public Type visit(Computing node) {
-        computingForIntNode(node);
+        codeBuilder.append("CLC\n");
+        computingtest(node);
         return null;
     }
 
@@ -144,10 +145,19 @@ public class CodeGenerator implements Visitor {
         node.getThenBlock().accept(this);
         codeBuilder.append("end" + (labelCount - 1) + ":\n");
         decrementStackAddress();
+        binOperatorCount = 0;
     }
 
     @Override
     public void visit(IfElse node) {
+        node.getCondition().accept(this);
+        node.getThenBlock().accept(this);
+        codeBuilder.append("JMP end" + (labelCount - 1) + "\n");
+        codeBuilder.append("else" + (labelCount - 1) + ":\n");
+        node.getElseBlock().accept(this);
+        codeBuilder.append("end" + (labelCount - 1) + ":\n");
+        decrementStackAddress();
+        binOperatorCount = 0;
     }
 
     @Override
@@ -180,52 +190,60 @@ public class CodeGenerator implements Visitor {
         System.out.println(stackAddress);
         codeBuilder.append("BRK\n");
     }
-    public void computingForIntNode(Computing node) {
-        if (node.getLeftOperand() instanceof Computing) {
-            node.getLeftOperand().accept(this);
-            node.getRightOperand().accept(this);
-            if (computingCount == 0) {
-                codeBuilder.append("TXA\n");
-            } else {
-                if (!(node.getRightOperand() instanceof Computing)) {
-                    codeBuilder.append("STX $0100\n");
-                    codeBuilder.append("CLC\n");
-                    if (node.getOperator().equals("+")) {
-                        codeBuilder.append("ADC $0100\n");
-                    } else {
-                        codeBuilder.append("SBC $0100\n");
-                        codeBuilder.append("EOR #$FF\n");
-                    }
-                }
-            }
+
+    public void addTwoNumbers(Computing node) {
+        codeBuilder.append("STX $0100\n");
+        if (node.getOperator().equals("+")) {
+            codeBuilder.append("ADC $0100\n");
+        } else {
+            codeBuilder.append("SBC $0100\n");
+            codeBuilder.append("CLC\n");
+            codeBuilder.append("ADC #1\n");
+        }
+    }
+
+    public void computingtest(Computing node) {
+        node.getLeftOperand().accept(this);
+        if (computingCount == 0) {
+            codeBuilder.append("TXA\n");
             computingCount++;
+        }
+
+        if (node.getRightOperand() instanceof Computing) {
+            ((Computing) node.getRightOperand()).getLeftOperand().accept(this);
+            addTwoNumbers(node);
+            ((Computing) node.getRightOperand()).getRightOperand().accept(this);
+            addTwoNumbers((Computing) node.getRightOperand());
         } else {
             node.getRightOperand().accept(this);
-            if (computingCount == 0) {
-                codeBuilder.append("TXA\n");
-            } else {
-                if (!(node.getRightOperand() instanceof Computing)) {
-                    codeBuilder.append("STX $0100\n");
-                    codeBuilder.append("CLC\n");
-                    if (node.getOperator().equals("+")) {
-                        codeBuilder.append("ADC $0100\n");
-                    } else {
-                        codeBuilder.append("SBC $0100\n");
-                        codeBuilder.append("EOR #$FF\n");
-                    }
-                }
-            }
-            computingCount++;
-            node.getLeftOperand().accept(this);
-            codeBuilder.append("STX $0100\n");
-            codeBuilder.append("CLC\n");
-            if (node.getOperator().equals("+")) {
-                codeBuilder.append("ADC $0100\n");
-            } else {
-                codeBuilder.append("SBC $0100\n");
-                codeBuilder.append("EOR #$FF\n");
-            }
+            addTwoNumbers(node);
         }
+    }
+
+    public void evaluateBinoperatorTest(BinOperator node) {
+        node.getLeftOperand().accept(this);
+        if (node.getLeftOperand() instanceof Id ||
+                node.getLeftOperand() instanceof IntNum ||
+                node.getLeftOperand() instanceof FloatNum ||
+                node.getLeftOperand() instanceof Bool)
+        {
+            codeBuilder.append("TXA\n");
+        } else if (node.getLeftOperand() instanceof Computing) {
+        }
+        if (node.getRightOperand() instanceof BinOperator) {
+            ((BinOperator) node.getRightOperand()).getLeftOperand().accept(this);
+            compareTwoBooleans(node);
+            binOperatorCount++;
+            ((BinOperator) node.getRightOperand()).getRightOperand().accept(this);
+            compareTwoBooleans((BinOperator) node.getRightOperand());
+            binOperatorCount++;
+        } else {
+            node.getRightOperand().accept(this);
+            compareTwoBooleans(node);
+            binOperatorCount++;
+        }
+        computingCount = 0;
+        binOperatorCount++;
     }
 
     public void evaluateBinoperator(BinOperator node) {
@@ -244,7 +262,8 @@ public class CodeGenerator implements Visitor {
         node.getRightOperand().accept(this);
         if (node.getRightOperand() instanceof Computing) {
             codeBuilder.append("TAX\n");
-        } else if (node.getOperator().equals("||") || node.getOperator().equals("&&")
+            pullAccumulator();
+        } else if ((node.getOperator().equals("||") || node.getOperator().equals("&&"))
                 && binOperatorCount > 0
                 && !(node.getRightOperand() instanceof Bool))
         {
@@ -255,6 +274,13 @@ public class CodeGenerator implements Visitor {
             pullAccumulator();
         }
 
+        compareTwoBooleans(node);
+
+        binOperatorCount++;
+        computingCount = 0;
+    }
+
+    public void compareTwoBooleans(BinOperator node) {
         codeBuilder.append("STX $0100\n");
         codeBuilder.append("CLC\n");
 
@@ -283,21 +309,15 @@ public class CodeGenerator implements Visitor {
             case "<=":
                 codeBuilder.append("CMP $0100\n");
                 codeBuilder.append("BCS false" + binOperatorCount + "\n");
-                // BCS = true
-                // BCC = false
                 break;
             case ">":
                 codeBuilder.append("CMP $0100\n");
                 codeBuilder.append("BEQ false" + binOperatorCount + "\n");
                 codeBuilder.append("BCC false" + binOperatorCount + "\n");
-                // BCS = true
-                // BCC = false
                 break;
             case ">=":
                 codeBuilder.append("CMP $0100\n");
                 codeBuilder.append("BCC false" + binOperatorCount + "\n");
-                // BCS = true
-                // BCC = false
                 break;
         }
         codeBuilder.append("LDA #1\n");
@@ -306,6 +326,5 @@ public class CodeGenerator implements Visitor {
         codeBuilder.append("  LDA #0\n");
         codeBuilder.append("store" + binOperatorCount + ":\n");
         codeBuilder.append("  PHA\n");
-        binOperatorCount++;
     }
 }
