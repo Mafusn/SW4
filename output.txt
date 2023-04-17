@@ -1,7 +1,7 @@
 LDX #1
 PLA
 CMP #1
-BNE end0
+BNE else0
 ifthen0:
 CLC
 LDX #6
@@ -10,10 +10,6 @@ LDX #1
 STX $0100
 ADC $0100
 PHA
-PLA
-CMP #1
-BNE end1
-ifthen1:
 CLC
 LDX #2
 TXA
@@ -21,11 +17,8 @@ LDX #3
 STX $0100
 ADC $0100
 PHA
-end1:
-PLA
-CMP #1
-BNE end2
-ifthen2:
+JMP end0
+else0:
 CLC
 LDX #6
 TXA
@@ -33,4 +26,5 @@ LDX #2
 STX $0100
 ADC $0100
 PHA
+end0:
 BRK
