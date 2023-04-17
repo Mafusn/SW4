@@ -1,5 +1,6 @@
 if (true) {
     int x = 6 + 1;
+    int a = 2 + 3;
 } else {
     int y = 6 + 2;
 }

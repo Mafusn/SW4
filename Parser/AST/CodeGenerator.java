@@ -152,10 +152,8 @@ public class CodeGenerator implements Visitor {
     public void visit(IfElse node) {
         node.getCondition().accept(this);
         node.getThenBlock().accept(this);
-        codeBuilder.append("JMP end" + (labelCount - 1) + "\n");
-        codeBuilder.append("else" + (labelCount - 1) + ":\n");
-        node.getElseBlock().accept(this);
         codeBuilder.append("end" + (labelCount - 1) + ":\n");
+        node.getElseBlock().accept(this);
         decrementStackAddress();
         binOperatorCount = 0;
     }
@@ -174,6 +172,11 @@ public class CodeGenerator implements Visitor {
 
     @Override
     public Type visit(Not node) {
+        /*
+        LDA #0
+        EOR #1
+        BRK
+         */
         return null;
     }
 
