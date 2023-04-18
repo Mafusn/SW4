@@ -12,8 +12,11 @@ public class CodeGenerator implements Visitor {
     private int computingCount = 0;
     private int binOperatorCount = 0;
     private int labelCount = 0;
-    private int ifCount = 0;
-    private String nextOperator = "";
+    private static final int FIXED_POINT = 3;
+    private static final int ONE = 1 << FIXED_POINT;
+    private static int toFixedPoint(float value) {
+        return (int) (value * ONE);
+    }
 
     private void incrementStackAddress() {
         stackAddress++;
@@ -37,16 +40,12 @@ public class CodeGenerator implements Visitor {
 
     private void loadXRegisterWithVariable(String id) {
         Symbol symbol = symbolTable.lookup(id);
-        codeBuilder.append("LDX " + symbol.getMemoryAddress() + "\n");
+        codeBuilder.append("LDX $01" + symbol.getMemoryAddress() + "\n");
     }
 
     private void storeXRegisterInVariable(String id) {
         Symbol symbol = symbolTable.lookup(id);
-        codeBuilder.append("STX " + symbol.getMemoryAddress() + "\n");
-    }
-
-    public String stackAddressToString(){
-        return Integer.toHexString(stackAddress).toUpperCase();
+        codeBuilder.append("STX $01" + Integer.toHexString(symbol.getMemoryAddress()) + "\n");
     }
 
     public CodeGenerator(SymbolTableFilling symbolTable) {
@@ -66,11 +65,15 @@ public class CodeGenerator implements Visitor {
     @Override
     public void visit(Assigning node) {
         node.child2.accept(this);
-        node.child1.accept(this);
-        if (!(node.child2 instanceof Computing)) {
-            codeBuilder.append("TXA\n");
+        if (node.child1 instanceof Id) {
+            storeXRegisterInVariable(((Id) node.child1).id);
+        } else {
+            node.child1.accept(this);
+            if (!(node.child2 instanceof Computing)) {
+                codeBuilder.append("TXA\n");
+            }
+            codeBuilder.append("PHA\n");
         }
-        codeBuilder.append("PHA\n");
         computingCount = 0;
     }
 
@@ -118,12 +121,15 @@ public class CodeGenerator implements Visitor {
 
     @Override
     public void visit(FloatNum node) {
-        // .split("\\.") splits the string at the dot into an array with two entries.
+        /*// .split("\\.") splits the string at the dot into an array with two entries.
         String[] parts = node.value.split("\\.");
         loadXRegisterWithConst(Integer.parseInt(parts[0]));
         codeBuilder.append("TXA\n");
         pushAccumulator();
-        loadXRegisterWithConst(Integer.parseInt(parts[1]));
+        loadXRegisterWithConst(Integer.parseInt(parts[1]));*/
+        System.out.println(toFixedPoint(Float.parseFloat(node.value)));
+
+        codeBuilder.append("LDX #" + toFixedPoint(Float.parseFloat(node.value)) + "\n");
     }
 
     @Override
@@ -137,13 +143,16 @@ public class CodeGenerator implements Visitor {
     @Override
     public void visit(If node) {
         node.getCondition().accept(this);
-        codeBuilder.append("PLA\n");
+        if (node.getCondition() instanceof Bool) {
+            codeBuilder.append("TXA\n");
+        } else {
+            codeBuilder.append("PLA\n");
+        }
         codeBuilder.append("CMP #1\n");
         codeBuilder.append("BNE end" + labelCount + "\n");
         codeBuilder.append("ifthen" + labelCount + ":\n");
         node.getThenBlock().accept(this);
         codeBuilder.append("end" + labelCount + ":\n");
-        decrementStackAddress();
         labelCount++;
         binOperatorCount = 0;
     }
@@ -151,7 +160,11 @@ public class CodeGenerator implements Visitor {
     @Override
     public void visit(IfElse node) {
         node.getCondition().accept(this);
-        codeBuilder.append("PLA\n");
+        if (node.getCondition() instanceof Bool) {
+            codeBuilder.append("TXA\n");
+        } else {
+            codeBuilder.append("PLA\n");
+        }
         codeBuilder.append("CMP #1\n");
         codeBuilder.append("BNE else" + labelCount + "\n");
         codeBuilder.append("ifthen" + labelCount + ":\n");
@@ -160,7 +173,6 @@ public class CodeGenerator implements Visitor {
         codeBuilder.append("else" + labelCount + ":\n");
         node.getElseBlock().accept(this);
         codeBuilder.append("end" + labelCount + ":\n");
-        decrementStackAddress();
         binOperatorCount = 0;
     }
 
@@ -178,11 +190,9 @@ public class CodeGenerator implements Visitor {
 
     @Override
     public Type visit(Not node) {
-        /*
-        LDA #0
-        EOR #1
-        BRK
-         */
+        node.getExpression().accept(this);
+        codeBuilder.append("TXA\n");
+        codeBuilder.append("EOR #1\n");
         return null;
     }
 
@@ -227,32 +237,6 @@ public class CodeGenerator implements Visitor {
             node.getRightOperand().accept(this);
             addTwoNumbers(node);
         }
-    }
-
-    public void evaluateBinoperatorTest(BinOperator node) {
-        node.getLeftOperand().accept(this);
-        if (node.getLeftOperand() instanceof Id ||
-                node.getLeftOperand() instanceof IntNum ||
-                node.getLeftOperand() instanceof FloatNum ||
-                node.getLeftOperand() instanceof Bool)
-        {
-            codeBuilder.append("TXA\n");
-        } else if (node.getLeftOperand() instanceof Computing) {
-        }
-        if (node.getRightOperand() instanceof BinOperator) {
-            ((BinOperator) node.getRightOperand()).getLeftOperand().accept(this);
-            compareTwoBooleans(node);
-            binOperatorCount++;
-            ((BinOperator) node.getRightOperand()).getRightOperand().accept(this);
-            compareTwoBooleans((BinOperator) node.getRightOperand());
-            binOperatorCount++;
-        } else {
-            node.getRightOperand().accept(this);
-            compareTwoBooleans(node);
-            binOperatorCount++;
-        }
-        computingCount = 0;
-        binOperatorCount++;
     }
 
     public void evaluateBinoperator(BinOperator node) {

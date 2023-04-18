@@ -11,7 +11,7 @@ public class Parser {
             PrettyPrint prettyPrint = new PrettyPrint();
             SymbolTableFilling symbolTableFilling = new SymbolTableFilling();
             TypeChecking typeChecking = new TypeChecking(symbolTableFilling);
-            CodeGenerator codeGenerator = new CodeGenerator(symbolTableFilling.getSymbolTable());
+            CodeGenerator codeGenerator = new CodeGenerator(symbolTableFilling);
 
             prog.accept(prettyPrint);
             prog.accept(symbolTableFilling);
@@ -42,7 +42,7 @@ TOKEN : /* Numbers */
 { <INTDCL: "int">
 | <INT: ( < DIGIT > )>
 | <FLOATDCL: "float">
-| <FLOAT: ( < DIGIT > ) (".") ( < DIGIT > )>
+| <FLOAT: ( < DIGIT > ) (".") ( < DIGIT > )+ >
 | <#DIGIT: ( "0" | ["1"-"9"] ( ["0"-"9"] )* ) >
 | <PLUS: "+">
 | <MINUS: "-">
