@@ -106,7 +106,7 @@ public class PrettyPrint implements Visitor {
     public void visit(If node) {
         sb.append("\n");
         printIndent();
-        sb.append("if(");
+        sb.append("if (");
         node.condition.accept(this);
         sb.append(")");
         node.child1.accept(this);
@@ -116,14 +116,15 @@ public class PrettyPrint implements Visitor {
     public void visit(IfElse node) {
         sb.append("\n");
         printIndent();
-        sb.append("if(");
+        sb.append("if (");
         node.condition.accept(this);
-        sb.append(")");
+        sb.append(") {");
         node.child1.accept(this);
         sb.append("\n");
         printIndent();
-        sb.append("else");
+        sb.append("} else {");
         node.child2.accept(this);
+        sb.append("\n}");
     }
 
     @Override
