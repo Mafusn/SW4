@@ -1,2 +1,4 @@
-float x = 0.06;
+float x = 31.875;
+x = x - 1.0;
+int y = 5;
 BYE;

@@ -12,6 +12,9 @@ public class CodeGenerator implements Visitor {
     private int computingCount = 0;
     private int binOperatorCount = 0;
     private int labelCount = 0;
+    // Gør det muligt at bruge float i vores kode, og kan adskille dem fra hinanden for 1/8.
+    // Eksempel: 0,124 = 0, 0,125 = 1, 0,25 = 2
+    // Maks værdi er 31,875
     private static final int FIXED_POINT = 3;
     private static final int ONE = 1 << FIXED_POINT;
     private static int toFixedPoint(float value) {
@@ -116,7 +119,6 @@ public class CodeGenerator implements Visitor {
     public void visit(FloatDcl node) {
         symbolTable.lookup(node.id).setMemoryAddress(stackAddress);
         decrementStackAddress();
-        decrementStackAddress();
     }
 
     @Override
@@ -127,9 +129,7 @@ public class CodeGenerator implements Visitor {
         codeBuilder.append("TXA\n");
         pushAccumulator();
         loadXRegisterWithConst(Integer.parseInt(parts[1]));*/
-        System.out.println(toFixedPoint(Float.parseFloat(node.value)));
-
-        codeBuilder.append("LDX #" + toFixedPoint(Float.parseFloat(node.value)) + "\n");
+        loadXRegisterWithConst(toFixedPoint(Float.parseFloat(node.value)));
     }
 
     @Override
