@@ -70,7 +70,7 @@ public class CodeGenerator implements Visitor {
             if (!(node.child2 instanceof Computing)) {
                 codeBuilder.append("TXA\n");
             }
-            codeBuilder.append("PHA\n");
+            pushAccumulator();
         }
         computingCount = 0;
     }
@@ -100,7 +100,6 @@ public class CodeGenerator implements Visitor {
     @Override
     public void visit(BoolDcl node) {
         symbolTable.lookup(node.id).setMemoryAddress(stackAddress);
-        decrementStackAddress();
     }
 
     @Override
@@ -113,7 +112,6 @@ public class CodeGenerator implements Visitor {
     @Override
     public void visit(FloatDcl node) {
         symbolTable.lookup(node.id).setMemoryAddress(stackAddress);
-        decrementStackAddress();
     }
 
     @Override
@@ -173,7 +171,6 @@ public class CodeGenerator implements Visitor {
     public void visit(IntDcl node) {
         Symbol symbol = symbolTable.lookup(node.id);
         symbol.setMemoryAddress(stackAddress);
-        decrementStackAddress();
     }
 
     @Override
@@ -251,7 +248,8 @@ public class CodeGenerator implements Visitor {
             pullAccumulator();
         } else if ((node.getOperator().equals("||") || node.getOperator().equals("&&"))
                 && binOperatorCount > 0
-                && !(node.getRightOperand() instanceof Bool))
+                && !(node.getRightOperand() instanceof Bool)
+                && !(node.getRightOperand() instanceof Not))
         {
             pullAccumulator();
             codeBuilder.append("TAX\n");
@@ -311,6 +309,7 @@ public class CodeGenerator implements Visitor {
         codeBuilder.append("false" + binOperatorCount + ":\n");
         codeBuilder.append("  LDA #0\n");
         codeBuilder.append("store" + binOperatorCount + ":\n");
-        codeBuilder.append("  PHA\n");
+        codeBuilder.append("  "); // gør at der ikke kommer indent.
+        pushAccumulator();
     }
 }
