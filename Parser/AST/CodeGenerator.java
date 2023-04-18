@@ -41,11 +41,6 @@ public class CodeGenerator implements Visitor {
         codeBuilder.append("LDX #" + value + "\n");
     }
 
-    private void loadXRegisterWithVariable(String id) {
-        Symbol symbol = symbolTable.lookup(id);
-        codeBuilder.append("LDX $01" + symbol.getMemoryAddress() + "\n");
-    }
-
     private void storeXRegisterInVariable(String id) {
         Symbol symbol = symbolTable.lookup(id);
         codeBuilder.append("STX $01" + Integer.toHexString(symbol.getMemoryAddress()) + "\n");
@@ -123,12 +118,6 @@ public class CodeGenerator implements Visitor {
 
     @Override
     public void visit(FloatNum node) {
-        /*// .split("\\.") splits the string at the dot into an array with two entries.
-        String[] parts = node.value.split("\\.");
-        loadXRegisterWithConst(Integer.parseInt(parts[0]));
-        codeBuilder.append("TXA\n");
-        pushAccumulator();
-        loadXRegisterWithConst(Integer.parseInt(parts[1]));*/
         loadXRegisterWithConst(toFixedPoint(Float.parseFloat(node.value)));
     }
 
