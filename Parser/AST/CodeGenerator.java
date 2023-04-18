@@ -134,8 +134,10 @@ public class CodeGenerator implements Visitor {
         node.getCondition().accept(this);
         if (node.getCondition() instanceof Bool) {
             codeBuilder.append("TXA\n");
+        } else if (node.getCondition() instanceof Id) {
+
         } else {
-            codeBuilder.append("PLA\n");
+            pullAccumulator();
         }
         codeBuilder.append("CMP #1\n");
         codeBuilder.append("BNE end" + labelCount + "\n");
@@ -151,8 +153,10 @@ public class CodeGenerator implements Visitor {
         node.getCondition().accept(this);
         if (node.getCondition() instanceof Bool) {
             codeBuilder.append("TXA\n");
+        } else if (node.getCondition() instanceof Id) {
+
         } else {
-            codeBuilder.append("PLA\n");
+            pullAccumulator();
         }
         codeBuilder.append("CMP #1\n");
         codeBuilder.append("BNE else" + labelCount + "\n");
