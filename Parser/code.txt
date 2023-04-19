@@ -1,8 +1,8 @@
-int y = 2;
-y = 3;
-int x = 5 + y;
-boolean d = true;
-if (!x > y) {
-    int a = 2 + 2 - 3;
+int a = 2;
+boolean c = true;
+if (2 + 4 > a && (2 == a - 3) && !c) {
+    int y = 5 + 4;
+} else {
+    int x = 5 + 5;
 }
 BYE;
