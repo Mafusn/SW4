@@ -66,7 +66,7 @@ public class CodeGenerator implements Visitor {
         node.getExpression().accept(this);
         
         if (node.getDeclaration() instanceof Id) {
-            storeXRegisterInVariable(((Id) node.getDeclaration()).getId());
+            storeXRegisterInVariable(((Id) node.getDeclaration()).getName());
         } else {
             if (!(node.getExpression() instanceof Computing)) {
                 codeBuilder.append("TXA\n");
@@ -78,7 +78,7 @@ public class CodeGenerator implements Visitor {
 
     @Override
     public void visit(BinOperator node) {
-        evaluateBinoperator(node);
+        evaluateBinOperator(node);
     }
 
     @Override
@@ -100,7 +100,7 @@ public class CodeGenerator implements Visitor {
 
     @Override
     public void visit(BoolDcl node) {
-        symbolTable.lookup(node.id).setMemoryAddress(stackAddress);
+        symbolTable.lookup(node.getId()).setMemoryAddress(stackAddress);
         decrementStackAddress();
     }
 
@@ -108,11 +108,6 @@ public class CodeGenerator implements Visitor {
     public void visit(Computing node) {
         codeBuilder.append("CLC\n");
         computingtest(node);
-    }
-
-    @Override
-    public void visit(Computing node) {
-        computingForIntNode(node);
     }
 
     @Override
@@ -124,13 +119,7 @@ public class CodeGenerator implements Visitor {
 
     @Override
     public void visit(FloatNum node) {
-        loadXRegisterWithConst(toFixedPoint(Float.parseFloat(node.value)));
-        // .split("\\.") splits the string at the dot into an array with two entries.
-        String[] parts = node.getValue().split("\\.");
-        loadXRegisterWithConst(Integer.parseInt(parts[0]));
-        codeBuilder.append("TXA\n");
-        pushAccumulator();
-        loadXRegisterWithConst(Integer.parseInt(parts[1]));
+        loadXRegisterWithConst(toFixedPoint(node.getValue()));
     }
 
     @Override
@@ -227,115 +216,78 @@ public class CodeGenerator implements Visitor {
         node.getLeftOperand().accept(this);
         if (computingCount == 0) {
             codeBuilder.append("TXA\n");
+        }
         System.out.println(stackAddress);
     }
 
-    public void computingForIntNode(Computing node) {
-        if (node.getLeftOperand() instanceof Computing) {
+    public void evaluateBinOperator(BinOperator node){
             node.getLeftOperand().accept(this);
-            node.getRightOperand().accept(this);
-            if (computingCount == 0) {
+            if (node.getLeftOperand() instanceof Id ||
+                    node.getLeftOperand() instanceof IntNum ||
+                    node.getLeftOperand() instanceof FloatNum ||
+                    node.getLeftOperand() instanceof Bool) {
                 codeBuilder.append("TXA\n");
-            } else {
-                if (!(node.getRightOperand() instanceof Computing)) {
-                    codeBuilder.append("STX $0100\n");
-                    codeBuilder.append("CLC\n");
-                    if (node.getOperator().equals("+")) {
-                        codeBuilder.append("ADC $0100\n");
-                    } else {
-                        codeBuilder.append("SBC $0100\n");
-                        codeBuilder.append("EOR #$FF\n");
-                    }
-                }
+                pushAccumulator();
+            } else if (node.getLeftOperand() instanceof Computing) {
+                pushAccumulator();
             }
-            computingCount++;
-        }
-
-        if (node.getRightOperand() instanceof Computing) {
-            ((Computing) node.getRightOperand()).getLeftOperand().accept(this);
-            addTwoNumbers(node);
-            ((Computing) node.getRightOperand()).getRightOperand().accept(this);
-            addTwoNumbers((Computing) node.getRightOperand());
-        } else {
             node.getRightOperand().accept(this);
-            addTwoNumbers(node);
-        }
-    }
-
-    public void evaluateBinOperator(BinOperator node) {
-        node.getLeftOperand().accept(this);
-        if (node.getLeftOperand() instanceof Id ||
-            node.getLeftOperand() instanceof IntNum ||
-            node.getLeftOperand() instanceof FloatNum ||
-            node.getLeftOperand() instanceof Bool)
-        {
-            codeBuilder.append("TXA\n");
-            pushAccumulator();
-        } else if (node.getLeftOperand() instanceof Computing) {
-            pushAccumulator();
-        }
-
-        node.getRightOperand().accept(this);
-        if (node.getRightOperand() instanceof Computing) {
-            codeBuilder.append("TAX\n");
-            pullAccumulator();
-        } else if ((node.getOperator().equals("||") || node.getOperator().equals("&&"))
-                && binOperatorCount > 0
-                && !(node.getRightOperand() instanceof Bool)
-                && !(node.getRightOperand() instanceof Not))
-        {
-            pullAccumulator();
-            codeBuilder.append("TAX\n");
-            pullAccumulator();
-        } else {
-            pullAccumulator();
-        }
-
-        compareTwoBooleans(node);
-
-        binOperatorCount++;
-        computingCount = 0;
+            if (node.getRightOperand() instanceof Computing) {
+                codeBuilder.append("TAX\n");
+                pullAccumulator();
+            } else if ((node.getOperator().equals("||") || node.getOperator().equals("&&"))
+                    && binOperatorCount > 0
+                    && !(node.getRightOperand() instanceof Bool)
+                    && !(node.getRightOperand() instanceof Not)) {
+                pullAccumulator();
+                codeBuilder.append("TAX\n");
+                pullAccumulator();
+            } else {
+                pullAccumulator();
+            }
+            compareTwoBooleans(node);
+            binOperatorCount++;
+            computingCount = 0;
     }
 
     public void compareTwoBooleans(BinOperator node) {
         codeBuilder.append("STX $0100\n");
         codeBuilder.append("CLC\n");
-
         switch (node.getOperator()) {
-            case "==":
+            case "==" -> {
                 codeBuilder.append("CMP $0100\n");
                 codeBuilder.append("BNE false" + binOperatorCount + "\n");
-                break;
-            case "!=":
+            }
+            case "!=" -> {
                 codeBuilder.append("CMP $0100\n");
                 codeBuilder.append("BEQ false" + binOperatorCount + "\n");
-                break;
-            case "||":
+            }
+            case "||" -> {
                 codeBuilder.append("ORA $0100\n");
                 codeBuilder.append("BEQ false" + binOperatorCount + "\n");
-                break;
-            case "&&":
+            }
+            case "&&" -> {
                 codeBuilder.append("AND $0100\n");
                 codeBuilder.append("BEQ false" + binOperatorCount + "\n");
-                break;
-            case "<":
+            }
+            case "<" -> {
                 codeBuilder.append("CMP $0100\n");
                 codeBuilder.append("BEQ false" + binOperatorCount + "\n");
                 codeBuilder.append("BCS false" + binOperatorCount + "\n");
-                break;
-            case "<=":
+            }
+            case "<=" -> {
                 codeBuilder.append("CMP $0100\n");
                 codeBuilder.append("BCS false" + binOperatorCount + "\n");
-                break;
-            case ">":
+            }
+            case ">" -> {
                 codeBuilder.append("CMP $0100\n");
                 codeBuilder.append("BEQ false" + binOperatorCount + "\n");
                 codeBuilder.append("BCC false" + binOperatorCount + "\n");
-                break;
-            case ">=":
+            }
+            case ">=" -> {
                 codeBuilder.append("CMP $0100\n");
                 codeBuilder.append("BCC false" + binOperatorCount + "\n");
-                break;
+            }
         }
         codeBuilder.append("LDA #1\n");
         codeBuilder.append("JMP store" + binOperatorCount + "\n");
