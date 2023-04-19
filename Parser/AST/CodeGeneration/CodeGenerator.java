@@ -1,6 +1,9 @@
-package AST;
+package AST.CodeGeneration;
 
 import AST.Nodes.*;
+import AST.Symbol;
+import AST.SymbolTableFilling;
+import AST.Visitor;
 
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
@@ -38,12 +41,12 @@ public class CodeGenerator implements Visitor {
         incrementStackAddress();
     }
     private void loadXRegisterWithConst(int value) {
-        codeBuilder.append("LDX #" + value + "\n");
+        codeBuilder.append(InstructionSet.LDX.getInstruction() + " #" + value + "\n");
     }
 
     private void storeXRegisterInVariable(String id) {
         Symbol symbol = symbolTable.lookup(id);
-        codeBuilder.append("STX $01" + Integer.toHexString(symbol.getMemoryAddress()) + "\n");
+        codeBuilder.append(InstructionSet.STX.getInstruction() + " $01" + Integer.toHexString(symbol.getMemoryAddress()) + "\n");
     }
 
     public CodeGenerator(SymbolTableFilling symbolTable) {
@@ -69,7 +72,7 @@ public class CodeGenerator implements Visitor {
             storeXRegisterInVariable(((Id) node.getDeclaration()).getName());
         } else {
             if (!(node.getExpression() instanceof Computing)) {
-                codeBuilder.append("TXA\n");
+                codeBuilder.append(InstructionSet.TXA.getInstruction() + "\n");
             }
             pushAccumulator();
         }
@@ -106,7 +109,7 @@ public class CodeGenerator implements Visitor {
 
     @Override
     public void visit(Computing node) {
-        codeBuilder.append("CLC\n");
+        codeBuilder.append(InstructionSet.CLC.getInstruction() + "\n");
         computingtest(node);
     }
 
@@ -125,21 +128,21 @@ public class CodeGenerator implements Visitor {
     public void visit(Id node) {
         // Man skriver $01 foran adressen fordi den metode man kalder efter er 8-bit og derfor kun 2 decimaler.
         // Når vi skriver $01 foran ender vi i stacken.
-        codeBuilder.append("LDX $01" + Integer.toHexString(symbolTable.lookup(node.getName()).getMemoryAddress()) + "\n");
+        codeBuilder.append(InstructionSet.LDX.getInstruction() + " $01" + Integer.toHexString(symbolTable.lookup(node.getName()).getMemoryAddress()) + "\n");
     }
 
     @Override
     public void visit(If node) {
         node.getCondition().accept(this);
         if (node.getCondition() instanceof Bool) {
-            codeBuilder.append("TXA\n");
+            codeBuilder.append(InstructionSet.TXA.getInstruction() + "\n");
         } else if (node.getCondition() instanceof Id) {
 
         } else {
             pullAccumulator();
         }
-        codeBuilder.append("CMP #1\n");
-        codeBuilder.append("BNE end" + labelCount + "\n");
+        codeBuilder.append(InstructionSet.CMP.getInstruction() + " #1\n");
+        codeBuilder.append(InstructionSet.BNE.getInstruction() + " end" + labelCount + "\n");
         codeBuilder.append("ifthen" + labelCount + ":\n");
         node.getThenBlock().accept(this);
         codeBuilder.append("end" + labelCount + ":\n");
@@ -151,17 +154,17 @@ public class CodeGenerator implements Visitor {
     public void visit(IfElse node) {
         node.getCondition().accept(this);
         if (node.getCondition() instanceof Bool) {
-            codeBuilder.append("TXA\n");
+            codeBuilder.append(InstructionSet.TXA.getInstruction() + "\n");
         } else if (node.getCondition() instanceof Id) {
 
         } else {
             pullAccumulator();
         }
-        codeBuilder.append("CMP #1\n");
-        codeBuilder.append("BNE else" + labelCount + "\n");
+        codeBuilder.append(InstructionSet.CMP.getInstruction() + " #1\n");
+        codeBuilder.append(InstructionSet.BNE.getInstruction() + " else" + labelCount + "\n");
         codeBuilder.append("ifthen" + labelCount + ":\n");
         node.getThenBlock().accept(this);
-        codeBuilder.append("JMP end" + labelCount + "\n");
+        codeBuilder.append(InstructionSet.JMP.getInstruction() + " end" + labelCount + "\n");
         codeBuilder.append("else" + labelCount + ":\n");
         node.getElseBlock().accept(this);
         codeBuilder.append("end" + labelCount + ":\n");
@@ -182,8 +185,8 @@ public class CodeGenerator implements Visitor {
     @Override
     public void visit(Not node) {
         node.getExpression().accept(this);
-        codeBuilder.append("TXA\n");
-        codeBuilder.append("EOR #1\n");
+        codeBuilder.append(InstructionSet.TXA.getInstruction() + "\n");
+        codeBuilder.append(InstructionSet.EOR.getInstruction() + " #1\n");
     }
 
     @Override
@@ -197,24 +200,24 @@ public class CodeGenerator implements Visitor {
             n.accept(this);
         }
         System.out.println(stackAddress);
-        codeBuilder.append("BRK\n");
+        codeBuilder.append(InstructionSet.BRK.getInstruction() + "\n");
     }
 
     public void addTwoNumbers(Computing node) {
-        codeBuilder.append("STX $0100\n");
+        codeBuilder.append(InstructionSet.STX.getInstruction() + " $0100\n");
         if (node.getOperator().equals("+")) {
-            codeBuilder.append("ADC $0100\n");
+            codeBuilder.append(InstructionSet.ADC.getInstruction() + " $0100\n");
         } else {
-            codeBuilder.append("SBC $0100\n");
-            codeBuilder.append("CLC\n");
-            codeBuilder.append("ADC #1\n");
+            codeBuilder.append(InstructionSet.SBC.getInstruction() + " $0100\n");
+            codeBuilder.append(InstructionSet.CLC.getInstruction() + "\n");
+            codeBuilder.append(InstructionSet.ADC.getInstruction() + " #1\n");
         }
     }
 
     public void computingtest(Computing node) {
         node.getLeftOperand().accept(this);
         if (computingCount == 0) {
-            codeBuilder.append("TXA\n");
+            codeBuilder.append(InstructionSet.TXA.getInstruction() + "\n");
             computingCount++;
         }
 
@@ -236,14 +239,14 @@ public class CodeGenerator implements Visitor {
             node.getLeftOperand() instanceof FloatNum ||
             node.getLeftOperand() instanceof Bool)
         {
-            codeBuilder.append("TXA\n");
+            codeBuilder.append(InstructionSet.TXA.getInstruction() + "\n");
             pushAccumulator();
         } else if (node.getLeftOperand() instanceof Computing) {
             pushAccumulator();
         }
         node.getRightOperand().accept(this);
         if (node.getRightOperand() instanceof Computing) {
-            codeBuilder.append("TAX\n");
+            codeBuilder.append(InstructionSet.TXA.getInstruction() + "\n");
             pullAccumulator();
         } else if ((node.getOperator().equals("||") || node.getOperator().equals("&&"))
                 && binOperatorCount > 0
@@ -251,7 +254,7 @@ public class CodeGenerator implements Visitor {
                 && !(node.getRightOperand() instanceof Not))
         {
             pullAccumulator();
-            codeBuilder.append("TAX\n");
+            codeBuilder.append(InstructionSet.TXA.getInstruction() + "\n");
             pullAccumulator();
         } else {
             pullAccumulator();
@@ -262,48 +265,48 @@ public class CodeGenerator implements Visitor {
     }
 
     public void compareTwoBooleans(BinOperator node) {
-        codeBuilder.append("STX $0100\n");
-        codeBuilder.append("CLC\n");
+        codeBuilder.append(InstructionSet.STX.getInstruction() + " $0100\n");
+        codeBuilder.append(InstructionSet.CLC.getInstruction() + "\n");
         switch (node.getOperator()) {
             case "==" -> {
-                codeBuilder.append("CMP $0100\n");
-                codeBuilder.append("BNE false" + binOperatorCount + "\n");
+                codeBuilder.append(InstructionSet.CMP.getInstruction() + " $0100\n");
+                codeBuilder.append(InstructionSet.BNE.getInstruction() + " false" + binOperatorCount + "\n");
             }
             case "!=" -> {
-                codeBuilder.append("CMP $0100\n");
-                codeBuilder.append("BEQ false" + binOperatorCount + "\n");
+                codeBuilder.append(InstructionSet.CMP.getInstruction() + " $0100\n");
+                codeBuilder.append(InstructionSet.BEQ.getInstruction() + " false" + binOperatorCount + "\n");
             }
             case "||" -> {
-                codeBuilder.append("ORA $0100\n");
-                codeBuilder.append("BEQ false" + binOperatorCount + "\n");
+                codeBuilder.append(InstructionSet.ORA.getInstruction() + " $0100\n");
+                codeBuilder.append(InstructionSet.BEQ.getInstruction() + " false" + binOperatorCount + "\n");
             }
             case "&&" -> {
-                codeBuilder.append("AND $0100\n");
-                codeBuilder.append("BEQ false" + binOperatorCount + "\n");
+                codeBuilder.append(InstructionSet.AND.getInstruction() + " $0100\n");
+                codeBuilder.append(InstructionSet.BEQ.getInstruction() + " false" + binOperatorCount + "\n");
             }
             case "<" -> {
-                codeBuilder.append("CMP $0100\n");
-                codeBuilder.append("BEQ false" + binOperatorCount + "\n");
-                codeBuilder.append("BCS false" + binOperatorCount + "\n");
+                codeBuilder.append(InstructionSet.CMP.getInstruction() + " $0100\n");
+                codeBuilder.append(InstructionSet.BEQ.getInstruction() + " false" + binOperatorCount + "\n");
+                codeBuilder.append(InstructionSet.BCS.getInstruction() + " false" + binOperatorCount + "\n");
             }
             case "<=" -> {
-                codeBuilder.append("CMP $0100\n");
-                codeBuilder.append("BCS false" + binOperatorCount + "\n");
+                codeBuilder.append(InstructionSet.CMP.getInstruction() + " $0100\n");
+                codeBuilder.append(InstructionSet.BCS.getInstruction() + " false" + binOperatorCount + "\n");
             }
             case ">" -> {
-                codeBuilder.append("CMP $0100\n");
-                codeBuilder.append("BEQ false" + binOperatorCount + "\n");
-                codeBuilder.append("BCC false" + binOperatorCount + "\n");
+                codeBuilder.append(InstructionSet.CMP.getInstruction() + " $0100\n");
+                codeBuilder.append(InstructionSet.BEQ.getInstruction() + " false" + binOperatorCount + "\n");
+                codeBuilder.append(InstructionSet.BCC.getInstruction() + " false" + binOperatorCount + "\n");
             }
             case ">=" -> {
-                codeBuilder.append("CMP $0100\n");
-                codeBuilder.append("BCC false" + binOperatorCount + "\n");
+                codeBuilder.append(InstructionSet.CMP.getInstruction() + " $0100\n");
+                codeBuilder.append(InstructionSet.BCC.getInstruction() + " false" + binOperatorCount + "\n");
             }
         }
-        codeBuilder.append("LDA #1\n");
-        codeBuilder.append("JMP store" + binOperatorCount + "\n");
+        codeBuilder.append(InstructionSet.LDA.getInstruction() + " #1\n");
+        codeBuilder.append(InstructionSet.JMP.getInstruction() + " store" + binOperatorCount + "\n");
         codeBuilder.append("false" + binOperatorCount + ":\n");
-        codeBuilder.append("  LDA #0\n");
+        codeBuilder.append(" " + InstructionSet.LDA.getInstruction() + " #0\n");
         codeBuilder.append("store" + binOperatorCount + ":\n");
         codeBuilder.append("  "); // gør at der kommer indent.
         pushAccumulator();

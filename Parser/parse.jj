@@ -1,7 +1,7 @@
 PARSER_BEGIN(Parser)
 
 import AST.*;
-import AST.Nodes.*;
+import AST.CodeGeneration.CodeGenerator;import AST.Nodes.*;
 
 public class Parser {
     public static void main(String[] args) {
