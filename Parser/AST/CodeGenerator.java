@@ -101,7 +101,6 @@ public class CodeGenerator implements Visitor {
     @Override
     public void visit(BoolDcl node) {
         symbolTable.lookup(node.getId()).setMemoryAddress(stackAddress);
-        decrementStackAddress();
     }
 
     @Override
@@ -113,7 +112,6 @@ public class CodeGenerator implements Visitor {
     @Override
     public void visit(FloatDcl node) {
         symbolTable.lookup(node.getId()).setMemoryAddress(stackAddress);
-        decrementStackAddress();
     }
 
     @Override
