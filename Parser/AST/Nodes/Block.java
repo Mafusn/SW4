@@ -1,11 +1,13 @@
-package AST;
+package AST.Nodes;
 
+import AST.SymbolTableFilling;
 import AST.Types.Type;
+import AST.Visitor;
 
 import java.util.ArrayList;
 
 public class Block extends Node {
-    ArrayList<Node> children;
+    private ArrayList<Node> children;
 
     public Block() {
         this.children = new ArrayList<>();
@@ -15,8 +17,12 @@ public class Block extends Node {
         this.children.add(child);
     }
 
-    public Type accept(Visitor v){v.visit(this);
-        return null;
+    public void accept(Visitor v){
+        v.visit(this);
+    }
+
+    public ArrayList<Node> getChildren() {
+        return children;
     }
 
     @Override

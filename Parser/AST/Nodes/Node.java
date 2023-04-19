@@ -1,8 +1,10 @@
-package AST;
+package AST.Nodes;
 
+import AST.SymbolTableFilling;
 import AST.Types.Type;
+import AST.Visitor;
 
 public abstract class Node {
-    public abstract Type accept(Visitor v);
+    public abstract void accept(Visitor v);
     public abstract Type getType(SymbolTableFilling symbolTable);
 }
