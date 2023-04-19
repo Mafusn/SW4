@@ -1,6 +1,6 @@
 package AST;
 
-import AST.Types.Type;
+import AST.Nodes.*;
 
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
@@ -62,12 +62,13 @@ public class CodeGenerator implements Visitor {
 
     @Override
     public void visit(Assigning node) {
-        node.child2.accept(this);
-        if (node.child1 instanceof Id) {
-            storeXRegisterInVariable(((Id) node.child1).id);
+        node.getDeclaration().accept(this);
+        node.getExpression().accept(this);
+        
+        if (node.getDeclaration() instanceof Id) {
+            storeXRegisterInVariable(((Id) node.getDeclaration()).getName());
         } else {
-            node.child1.accept(this);
-            if (!(node.child2 instanceof Computing)) {
+            if (!(node.getExpression() instanceof Computing)) {
                 codeBuilder.append("TXA\n");
             }
             pushAccumulator();
@@ -76,21 +77,21 @@ public class CodeGenerator implements Visitor {
     }
 
     @Override
-    public Type visit(BinOperator node) {
-        evaluateBinoperator(node);
-        return null;
+    public void visit(BinOperator node) {
+        evaluateBinOperator(node);
     }
 
     @Override
     public void visit(Block node) {
-        for (Node n : node.children) {
+        for (Node n : node.getChildren()) {
+            codeBuilder.append("ifthen" + labelCount + ":\n");
             n.accept(this);
         }
     }
 
     @Override
     public void visit(Bool node) {
-        if (node.value.equals("true")) {
+        if (node.getValue()) {
             loadXRegisterWithConst(1);
         } else {
             loadXRegisterWithConst(0);
@@ -99,32 +100,32 @@ public class CodeGenerator implements Visitor {
 
     @Override
     public void visit(BoolDcl node) {
-        symbolTable.lookup(node.id).setMemoryAddress(stackAddress);
+        symbolTable.lookup(node.getId()).setMemoryAddress(stackAddress);
+        decrementStackAddress();
     }
 
     @Override
-    public Type visit(Computing node) {
+    public void visit(Computing node) {
         codeBuilder.append("CLC\n");
         computingtest(node);
-        return null;
     }
 
     @Override
     public void visit(FloatDcl node) {
-        symbolTable.lookup(node.id).setMemoryAddress(stackAddress);
+        symbolTable.lookup(node.getId()).setMemoryAddress(stackAddress);
+        decrementStackAddress();
     }
 
     @Override
     public void visit(FloatNum node) {
-        loadXRegisterWithConst(toFixedPoint(Float.parseFloat(node.value)));
+        loadXRegisterWithConst(toFixedPoint(node.getValue()));
     }
 
     @Override
-    public Type visit(Id node) {
+    public void visit(Id node) {
         // Man skriver $01 foran adressen fordi den metode man kalder efter er 8-bit og derfor kun 2 decimaler.
         // Når vi skriver $01 foran ender vi i stacken.
-        codeBuilder.append("LDX $01" + Integer.toHexString(symbolTable.lookup(node.id).getMemoryAddress()) + "\n");
-        return null;
+        codeBuilder.append("LDX $01" + Integer.toHexString(symbolTable.lookup(node.getName()).getMemoryAddress()) + "\n");
     }
 
     @Override
@@ -169,21 +170,20 @@ public class CodeGenerator implements Visitor {
 
     @Override
     public void visit(IntDcl node) {
-        Symbol symbol = symbolTable.lookup(node.id);
+        Symbol symbol = symbolTable.lookup(node.getId());
         symbol.setMemoryAddress(stackAddress);
     }
 
     @Override
     public void visit(IntNum node) {
-        loadXRegisterWithConst(Integer.parseInt(node.value));
+        loadXRegisterWithConst(node.getValue());
     }
 
     @Override
-    public Type visit(Not node) {
+    public void visit(Not node) {
         node.getExpression().accept(this);
         codeBuilder.append("TXA\n");
         codeBuilder.append("EOR #1\n");
-        return null;
     }
 
     @Override
@@ -193,7 +193,7 @@ public class CodeGenerator implements Visitor {
 
     @Override
     public void visit(Prog node) {
-        for(Node n : node.children){
+        for(Node n : node.getChildren()){
             n.accept(this);
         }
         System.out.println(stackAddress);
@@ -229,7 +229,7 @@ public class CodeGenerator implements Visitor {
         }
     }
 
-    public void evaluateBinoperator(BinOperator node) {
+    public void evaluateBinOperator(BinOperator node){
         node.getLeftOperand().accept(this);
         if (node.getLeftOperand() instanceof Id ||
             node.getLeftOperand() instanceof IntNum ||
@@ -241,7 +241,6 @@ public class CodeGenerator implements Visitor {
         } else if (node.getLeftOperand() instanceof Computing) {
             pushAccumulator();
         }
-
         node.getRightOperand().accept(this);
         if (node.getRightOperand() instanceof Computing) {
             codeBuilder.append("TAX\n");
@@ -257,9 +256,7 @@ public class CodeGenerator implements Visitor {
         } else {
             pullAccumulator();
         }
-
         compareTwoBooleans(node);
-
         binOperatorCount++;
         computingCount = 0;
     }
@@ -267,42 +264,41 @@ public class CodeGenerator implements Visitor {
     public void compareTwoBooleans(BinOperator node) {
         codeBuilder.append("STX $0100\n");
         codeBuilder.append("CLC\n");
-
         switch (node.getOperator()) {
-            case "==":
+            case "==" -> {
                 codeBuilder.append("CMP $0100\n");
                 codeBuilder.append("BNE false" + binOperatorCount + "\n");
-                break;
-            case "!=":
+            }
+            case "!=" -> {
                 codeBuilder.append("CMP $0100\n");
                 codeBuilder.append("BEQ false" + binOperatorCount + "\n");
-                break;
-            case "||":
+            }
+            case "||" -> {
                 codeBuilder.append("ORA $0100\n");
                 codeBuilder.append("BEQ false" + binOperatorCount + "\n");
-                break;
-            case "&&":
+            }
+            case "&&" -> {
                 codeBuilder.append("AND $0100\n");
                 codeBuilder.append("BEQ false" + binOperatorCount + "\n");
-                break;
-            case "<":
+            }
+            case "<" -> {
                 codeBuilder.append("CMP $0100\n");
                 codeBuilder.append("BEQ false" + binOperatorCount + "\n");
                 codeBuilder.append("BCS false" + binOperatorCount + "\n");
-                break;
-            case "<=":
+            }
+            case "<=" -> {
                 codeBuilder.append("CMP $0100\n");
                 codeBuilder.append("BCS false" + binOperatorCount + "\n");
-                break;
-            case ">":
+            }
+            case ">" -> {
                 codeBuilder.append("CMP $0100\n");
                 codeBuilder.append("BEQ false" + binOperatorCount + "\n");
                 codeBuilder.append("BCC false" + binOperatorCount + "\n");
-                break;
-            case ">=":
+            }
+            case ">=" -> {
                 codeBuilder.append("CMP $0100\n");
                 codeBuilder.append("BCC false" + binOperatorCount + "\n");
-                break;
+            }
         }
         codeBuilder.append("LDA #1\n");
         codeBuilder.append("JMP store" + binOperatorCount + "\n");

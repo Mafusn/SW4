@@ -1,10 +1,13 @@
-package AST;
+package AST.Nodes;
 
+import AST.Nodes.Node;
+import AST.SymbolTableFilling;
 import AST.Types.Type;
+import AST.Visitor;
 
 import java.util.ArrayList;;
 public class Prog extends Node {
-    ArrayList<Node> children;
+    private ArrayList<Node> children;
 
     public Prog() {
         this.children = new ArrayList<>();
@@ -14,12 +17,16 @@ public class Prog extends Node {
         this.children.add(child);
     }
 
-    public Type accept(Visitor v){v.visit(this);
-        return null;
+    public void accept(Visitor v){
+        v.visit(this);
     }
 
     @Override
     public Type getType(SymbolTableFilling symbolTable) {
         return null;
+    }
+
+    public ArrayList<Node> getChildren() {
+        return children;
     }
 }
