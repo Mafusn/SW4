@@ -1,6 +1,6 @@
 int a = 2;
 boolean c = true;
-if (2 + 4 > a || (2 == a - 3) && !c) {
+if (2 + 4 > a && (2 == a - 3) && !c) {
     int y = 5 + 4;
 } else {
     int x = 5 + 5;

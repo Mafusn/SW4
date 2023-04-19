@@ -305,7 +305,7 @@ public class CodeGenerator implements Visitor {
         codeBuilder.append("false" + binOperatorCount + ":\n");
         codeBuilder.append("  LDA #0\n");
         codeBuilder.append("store" + binOperatorCount + ":\n");
-        codeBuilder.append("  "); // gør at der ikke kommer indent.
+        codeBuilder.append("  "); // gør at der kommer indent.
         pushAccumulator();
     }
 }

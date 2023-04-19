@@ -66,7 +66,7 @@ TAX
 PLA
 STX $0100
 CLC
-ORA $0100
+AND $0100
 BEQ false3
 LDA #1
 JMP store3
@@ -78,6 +78,7 @@ PLA
 CMP #1
 BNE else0
 ifthen0:
+ifthen0:
 CLC
 LDX #5
 TXA
@@ -87,6 +88,7 @@ ADC $0100
 PHA
 JMP end0
 else0:
+ifthen0:
 CLC
 LDX #5
 TXA
