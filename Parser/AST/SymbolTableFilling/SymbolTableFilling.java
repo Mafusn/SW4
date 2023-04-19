@@ -1,7 +1,8 @@
-package AST;
+package AST.SymbolTableFilling;
 
 import AST.Nodes.*;
 import AST.Types.*;
+import AST.Visitor;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -28,7 +29,8 @@ public class SymbolTableFilling implements Visitor {
 
     @Override
     public void visit(BinOperator node) {
-
+        node.getLeftOperand().accept(this);
+        node.getRightOperand().accept(this);
     }
 
     @Override
@@ -81,11 +83,13 @@ public class SymbolTableFilling implements Visitor {
 
     @Override
     public void visit(If node) {
+        node.getCondition().accept(this);
         node.getThenBlock().accept(this);
     }
 
     @Override
     public void visit(IfElse node) {
+        node.getCondition().accept(this);
         node.getThenBlock().accept(this);
         node.getElseBlock().accept(this);
     }
@@ -106,7 +110,7 @@ public class SymbolTableFilling implements Visitor {
 
     @Override
     public void visit(Not node) {
-
+        node.getExpression().accept(this);
     }
 
     @Override

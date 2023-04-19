@@ -1,14 +1,17 @@
 package AST;
 
 import AST.Nodes.*;
+import AST.SymbolTableFilling.Symbol;
+import AST.SymbolTableFilling.SymbolTableFilling;
 import AST.Types.*;
 
 public class TypeChecking implements Visitor {
-    private SymbolTableFilling symbolTable;
+    private final SymbolTableFilling symbolTable;
 
     public TypeChecking(SymbolTableFilling SymbolTable) {
         this.symbolTable = SymbolTable;
     }
+
     @Override
     public void visit(Assigning node) {
         // Get the type of the expression on the right-hand side of the assignment

@@ -1,10 +1,9 @@
+
+/* gives an error (doesnt check for variables in conditions) */
 int a = 2;
-boolean b = true;
-/* gives an error (doesnt check for variables in conditions)
 if (2 + 4 > a && (2 == a - 3) && !c) {
     int y = 5 + 4;
 } else {
     int x = 5 + 5;
 }
-*/
 BYE;

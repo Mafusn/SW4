@@ -1,6 +1,6 @@
 package AST.Nodes;
 
-import AST.SymbolTableFilling;
+import AST.SymbolTableFilling.SymbolTableFilling;
 import AST.Types.IntType;
 import AST.Types.Type;
 import AST.Visitor;

@@ -1,7 +1,7 @@
 PARSER_BEGIN(Parser)
 
 import AST.*;
-import AST.CodeGeneration.CodeGenerator;import AST.Nodes.*;
+import AST.CodeGeneration.CodeGenerator;import AST.Nodes.*;import AST.SymbolTableFilling.SymbolTableFilling;
 
 public class Parser {
     public static void main(String[] args) {
@@ -32,6 +32,7 @@ public class Parser {
             System.out.println("Syntax error: " + e.getMessage());
         }
     }
+}}
 }
 
 PARSER_END(Parser)

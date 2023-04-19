@@ -1,4 +1,4 @@
-package AST;
+package AST.SymbolTableFilling;
 
 import AST.Types.Type;
 

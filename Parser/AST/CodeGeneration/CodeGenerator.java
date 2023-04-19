@@ -1,8 +1,8 @@
 package AST.CodeGeneration;
 
 import AST.Nodes.*;
-import AST.Symbol;
-import AST.SymbolTableFilling;
+import AST.SymbolTableFilling.Symbol;
+import AST.SymbolTableFilling.SymbolTableFilling;
 import AST.Visitor;
 
 import java.io.FileNotFoundException;
@@ -199,7 +199,6 @@ public class CodeGenerator implements Visitor {
         for(Node n : node.getChildren()){
             n.accept(this);
         }
-        System.out.println(stackAddress);
         codeBuilder.append(InstructionSet.BRK.getInstruction() + "\n");
     }
 
