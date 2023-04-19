@@ -114,7 +114,6 @@ public class CodeGenerator implements Visitor {
     public void visit(FloatDcl node) {
         symbolTable.lookup(node.getId()).setMemoryAddress(stackAddress);
         decrementStackAddress();
-        decrementStackAddress();
     }
 
     @Override
@@ -216,38 +215,50 @@ public class CodeGenerator implements Visitor {
         node.getLeftOperand().accept(this);
         if (computingCount == 0) {
             codeBuilder.append("TXA\n");
+            computingCount++;
         }
-        System.out.println(stackAddress);
+
+        if (node.getRightOperand() instanceof Computing) {
+            ((Computing) node.getRightOperand()).getLeftOperand().accept(this);
+            addTwoNumbers(node);
+            ((Computing) node.getRightOperand()).getRightOperand().accept(this);
+            addTwoNumbers((Computing) node.getRightOperand());
+        } else {
+            node.getRightOperand().accept(this);
+            addTwoNumbers(node);
+        }
     }
 
     public void evaluateBinOperator(BinOperator node){
-            node.getLeftOperand().accept(this);
-            if (node.getLeftOperand() instanceof Id ||
-                    node.getLeftOperand() instanceof IntNum ||
-                    node.getLeftOperand() instanceof FloatNum ||
-                    node.getLeftOperand() instanceof Bool) {
-                codeBuilder.append("TXA\n");
-                pushAccumulator();
-            } else if (node.getLeftOperand() instanceof Computing) {
-                pushAccumulator();
-            }
-            node.getRightOperand().accept(this);
-            if (node.getRightOperand() instanceof Computing) {
-                codeBuilder.append("TAX\n");
-                pullAccumulator();
-            } else if ((node.getOperator().equals("||") || node.getOperator().equals("&&"))
-                    && binOperatorCount > 0
-                    && !(node.getRightOperand() instanceof Bool)
-                    && !(node.getRightOperand() instanceof Not)) {
-                pullAccumulator();
-                codeBuilder.append("TAX\n");
-                pullAccumulator();
-            } else {
-                pullAccumulator();
-            }
-            compareTwoBooleans(node);
-            binOperatorCount++;
-            computingCount = 0;
+        node.getLeftOperand().accept(this);
+        if (node.getLeftOperand() instanceof Id ||
+            node.getLeftOperand() instanceof IntNum ||
+            node.getLeftOperand() instanceof FloatNum ||
+            node.getLeftOperand() instanceof Bool)
+        {
+            codeBuilder.append("TXA\n");
+            pushAccumulator();
+        } else if (node.getLeftOperand() instanceof Computing) {
+            pushAccumulator();
+        }
+        node.getRightOperand().accept(this);
+        if (node.getRightOperand() instanceof Computing) {
+            codeBuilder.append("TAX\n");
+            pullAccumulator();
+        } else if ((node.getOperator().equals("||") || node.getOperator().equals("&&"))
+                && binOperatorCount > 0
+                && !(node.getRightOperand() instanceof Bool)
+                && !(node.getRightOperand() instanceof Not))
+        {
+            pullAccumulator();
+            codeBuilder.append("TAX\n");
+            pullAccumulator();
+        } else {
+            pullAccumulator();
+        }
+        compareTwoBooleans(node);
+        binOperatorCount++;
+        computingCount = 0;
     }
 
     public void compareTwoBooleans(BinOperator node) {
