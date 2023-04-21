@@ -82,6 +82,7 @@ public class CodeGenerator implements Visitor {
     @Override
     public void visit(BinOperator node) {
         evaluateBinOperator(node);
+        binOperatorCount = 0;
     }
 
     @Override
