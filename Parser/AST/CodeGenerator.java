@@ -130,6 +130,7 @@ public class CodeGenerator implements Visitor {
 
     @Override
     public void visit(If node) {
+        int label = labelCount;
         node.getCondition().accept(this);
         binOperatorCount = 0;
         if (node.getCondition() instanceof Bool) {
@@ -140,15 +141,17 @@ public class CodeGenerator implements Visitor {
             pullAccumulator();
         }
         codeBuilder.append("CMP #1\n");
-        codeBuilder.append("BNE end" + labelCount + "\n");
-        codeBuilder.append("ifthen" + labelCount + ":\n");
+        codeBuilder.append("BNE end" + label + "\n");
+        codeBuilder.append("ifthen" + label + ":\n");
         node.getThenBlock().accept(this);
-        codeBuilder.append("end" + labelCount + ":\n");
+        codeBuilder.append("end" + label + ":\n");
         labelCount++;
     }
 
     @Override
     public void visit(IfElse node) {
+        int label = labelCount;
+        labelCount++;
         node.getCondition().accept(this);
         binOperatorCount = 0;
         if (node.getCondition() instanceof Bool) {
@@ -159,14 +162,13 @@ public class CodeGenerator implements Visitor {
             pullAccumulator();
         }
         codeBuilder.append("CMP #1\n");
-        codeBuilder.append("BNE else" + labelCount + "\n");
-        codeBuilder.append("ifthen" + labelCount + ":\n");
+        codeBuilder.append("BNE else" + label + "\n");
+        codeBuilder.append("ifthen" + label + ":\n");
         node.getThenBlock().accept(this);
-        codeBuilder.append("JMP end" + labelCount + "\n");
-        codeBuilder.append("else" + labelCount + ":\n");
+        codeBuilder.append("JMP end" + label + "\n");
+        codeBuilder.append("else" + label + ":\n");
         node.getElseBlock().accept(this);
-        codeBuilder.append("end" + labelCount + ":\n");
-        labelCount++;
+        codeBuilder.append("end" + label + ":\n");
     }
 
     @Override

@@ -1,6 +1,5 @@
 int a = 2;
-a = 2 + 2;
-if (a == 4 || (a > 1 + 2 + 3 + 4) && a < 2 + 4 + 5) {
+if (true) {
     a = 5;
     if (true) {
         int x = 4;
