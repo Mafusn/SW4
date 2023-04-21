@@ -62,12 +62,15 @@ public class CodeGenerator implements Visitor {
 
     @Override
     public void visit(Assigning node) {
-        node.getDeclaration().accept(this);
-        node.getExpression().accept(this);
-        
         if (node.getDeclaration() instanceof Id) {
+            node.getExpression().accept(this);
+            if (node.getExpression() instanceof Computing) {
+                codeBuilder.append("TAX\n");
+            }
             storeXRegisterInVariable(((Id) node.getDeclaration()).getName());
         } else {
+            node.getDeclaration().accept(this);
+            node.getExpression().accept(this);
             if (!(node.getExpression() instanceof Computing)) {
                 codeBuilder.append("TXA\n");
             }
