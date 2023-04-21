@@ -1,3 +1,13 @@
 int a = 2;
 a = 2 + 2;
+if (a == 4 || (a > 1 + 2 + 3 + 4) && a < 2 + 4 + 5) {
+    a = 5;
+    if (true) {
+        int x = 4;
+    } else {
+        int y = 5;
+    }
+} else {
+    a = 6;
+}
 BYE;

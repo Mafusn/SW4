@@ -82,7 +82,6 @@ public class CodeGenerator implements Visitor {
     @Override
     public void visit(BinOperator node) {
         evaluateBinOperator(node);
-        binOperatorCount = 0;
     }
 
     @Override
@@ -133,6 +132,7 @@ public class CodeGenerator implements Visitor {
     @Override
     public void visit(If node) {
         node.getCondition().accept(this);
+        binOperatorCount = 0;
         if (node.getCondition() instanceof Bool) {
             codeBuilder.append("TXA\n");
         } else if (node.getCondition() instanceof Id) {
@@ -146,12 +146,12 @@ public class CodeGenerator implements Visitor {
         node.getThenBlock().accept(this);
         codeBuilder.append("end" + labelCount + ":\n");
         labelCount++;
-        binOperatorCount = 0;
     }
 
     @Override
     public void visit(IfElse node) {
         node.getCondition().accept(this);
+        binOperatorCount = 0;
         if (node.getCondition() instanceof Bool) {
             codeBuilder.append("TXA\n");
         } else if (node.getCondition() instanceof Id) {
@@ -167,7 +167,7 @@ public class CodeGenerator implements Visitor {
         codeBuilder.append("else" + labelCount + ":\n");
         node.getElseBlock().accept(this);
         codeBuilder.append("end" + labelCount + ":\n");
-        binOperatorCount = 0;
+        labelCount++;
     }
 
     @Override
@@ -259,7 +259,6 @@ public class CodeGenerator implements Visitor {
             pullAccumulator();
         }
         compareTwoBooleans(node);
-        binOperatorCount++;
         computingCount = 0;
     }
 
@@ -307,6 +306,7 @@ public class CodeGenerator implements Visitor {
         codeBuilder.append("false" + binOperatorCount + ":\n");
         codeBuilder.append("  LDA #0\n");
         codeBuilder.append("store" + binOperatorCount + ":\n");
+        binOperatorCount++;
         codeBuilder.append("  "); // gør at der kommer indent.
         pushAccumulator();
     }
