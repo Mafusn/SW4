@@ -1,0 +1,4 @@
+boolean fooBar;
+float thisIsA_boolean2023;
+int a123456;
+BYE;

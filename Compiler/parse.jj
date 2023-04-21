@@ -1,13 +1,22 @@
-PARSER_BEGIN(Parser)
+options {
+  STATIC = false;
+}
+
+PARSER_BEGIN(Compiler)
 
 import AST.*;
-import AST.CodeGeneration.CodeGenerator;import AST.Nodes.*;import AST.SymbolTableFilling.SymbolTableFilling;
+import AST.CodeGeneration.CodeGenerator;
+import AST.Nodes.*;
+import AST.SymbolTableFilling.SymbolTableFilling;
+import java.io.*;
+import java.util.Scanner;
+import java.util.Arrays;
 
-public class Parser {
+public class Compiler {
     public static void main(String[] args) {
         try {
-            Parser parser = new Parser(new java.io.FileReader("code.txt"));
-            Node prog = parser.prog();
+            Compiler compiler = new Compiler(new java.io.FileReader("code.txt"));
+            Node prog = compiler.prog();
 
             PrettyPrint prettyPrint = new PrettyPrint();
             SymbolTableFilling symbolTableFilling = new SymbolTableFilling();
@@ -32,10 +41,9 @@ public class Parser {
             System.out.println("Syntax error: " + e.getMessage());
         }
     }
-}}
 }
 
-PARSER_END(Parser)
+PARSER_END(Compiler)
 
 SKIP:
 { " "
@@ -53,6 +61,7 @@ TOKEN : /* Numbers */
 | <#DIGIT: ( "0" | ["1"-"9"] ( ["0"-"9"] )* ) >
 | <PLUS: "+">
 | <MINUS: "-">
+| <MULTIPLY: "*">
 }
 
 TOKEN: /* LOGIC */
@@ -81,6 +90,7 @@ TOKEN : /* Operators and constructs */
 | <END_OF_LINE: ";">
 | <END_OF_FILE: "BYE">
 | <PRINT: "print">
+| <ADDRESS: "&">
 }
 
 TOKEN : /* ID */
@@ -101,11 +111,16 @@ Node prog() :
 Node dcl() :
 {
  boolean hasExpr = false;
+ boolean isPointer = false;
  Node expr = null;
  Token t;
  }
-{ < FLOATDCL > t = < ID > ( < ASSIGN > expr = expr() { hasExpr = true; } )?
+{ < FLOATDCL > ( < MULTIPLY > { isPointer = true; } )? t = < ID > ( < ASSIGN > expr = expr() { hasExpr = true; } )?
 {
+    /*if (hasExpr && isPointer) {
+       return null;
+       } else */
+       
    if (hasExpr) {
        FloatDcl floatDcl = new FloatDcl(t.image);
        return new Assigning(t.image, floatDcl, expr);
@@ -113,8 +128,11 @@ Node dcl() :
        return new FloatDcl(t.image);
    }
 }
-| < INTDCL > t = < ID > ( < ASSIGN > expr = expr() { hasExpr = true; } )?
+| < INTDCL > ( < MULTIPLY > { isPointer = true; } )? t = < ID > ( < ASSIGN > expr = expr() { hasExpr = true; } )?
 {
+     /*if (hasExpr && isPointer) {
+        return null;
+        } else */
     if (hasExpr) {
         IntDcl intDcl = new IntDcl(t.image);
         return new Assigning(t.image, intDcl, expr);
@@ -122,8 +140,11 @@ Node dcl() :
         return new IntDcl(t.image);
     }
 }
-| < BOOLDCL > t = < ID > ( < ASSIGN > expr = expr() { hasExpr = true; } )?
+| < BOOLDCL > ( < MULTIPLY > { isPointer = true; } )? t = < ID > ( < ASSIGN > expr = expr() { hasExpr = true; } )?
 {
+    /*if (hasExpr && isPointer) {
+    return null;
+    } else */
     if (hasExpr) {
         BoolDcl boolDcl = new BoolDcl(t.image);
         return new Assigning(t.image, boolDcl, expr);
@@ -135,12 +156,13 @@ Node dcl() :
 
 Node stmt() :
 {
+    boolean isPointer = false;
     Node ifStmt;
     Node dcl;
     Node expr;
     Token t;
 }
-{ t = < ID > < ASSIGN > expr = expr() < END_OF_LINE >
+{ ( < MULTIPLY > { isPointer = true; } )? t = < ID > < ASSIGN > expr = expr() < END_OF_LINE >
 {
     Id id = new Id(t.image);
     return new Assigning(t.image, id, expr);
@@ -319,6 +341,10 @@ Node val() :
     return new Id(t.image);
 }
 | (t = < TRUE > | t = < FALSE >)
+{
+    return new Bool(t.image);
+}
+| < ADDRESS > t = < ID >
 {
     return new Bool(t.image);
 }
