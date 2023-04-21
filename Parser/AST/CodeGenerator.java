@@ -87,7 +87,6 @@ public class CodeGenerator implements Visitor {
     @Override
     public void visit(Block node) {
         for (Node n : node.getChildren()) {
-            codeBuilder.append("ifthen" + labelCount + ":\n");
             n.accept(this);
         }
     }
