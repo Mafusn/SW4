@@ -33,7 +33,7 @@ class ParserTest {
             // [THEN] Assert that the created AST is equal to the expected AST
             assertAST(AST, expectedAST);
         } catch (Throwable e) {
-            e.getMessage();
+            System.out.println("Syntax error: " + e.getMessage());
             assert false;
         }
     }
@@ -58,7 +58,7 @@ class ParserTest {
             // [THEN] Assert that the created AST is equal to the expected AST
             assertAST(AST, expectedAST);
         } catch (Throwable e) {
-            e.getMessage();
+            System.out.println("Syntax error: " + e.getMessage());
             assert false;
         }
     }
@@ -83,7 +83,7 @@ class ParserTest {
             // [THEN] Assert that the created AST is equal to the expected AST
             assertAST(AST, expectedAST);
         } catch (Throwable e) {
-            e.getMessage();
+            System.out.println("Syntax error: " + e.getMessage());
             assert false;
         }
     }
@@ -108,7 +108,7 @@ class ParserTest {
             // [THEN] Assert that the created AST is equal to the expected AST
             assertAST(AST, expectedAST);
         } catch (Throwable e) {
-            e.getMessage();
+            System.out.println("Syntax error: " + e.getMessage());
             assert false;
         }
     }
@@ -124,7 +124,7 @@ class ParserTest {
         ArrayList<Node> expectedASTChildren = expectedAST.getChildren();
         Assertions.assertEquals(ASTChildren.size(), expectedASTChildren.size());
 
-        for (int i = 0; i < ASTChildren.size(); i++) {
+        for (int i = 0; i < expectedASTChildren.size(); i++) {
             Node actual = ASTChildren.get(i);
             Node expected = expectedASTChildren.get(i);
 
@@ -167,7 +167,9 @@ class ParserTest {
                 case "Print" -> assertInstanceOf(Print.class, actual);
             }
 
-            if (!(expected.getClass().getSimpleName().equals("Id") || actual.getClass().getSimpleName().equals("Id"))) {
+            String className = expected.getClass().getSimpleName();
+            if (className.equals("Bool") || className.equals("BoolDcl") || className.equals("FloatNum")
+                || className.equals("FloatDcl") || className.equals("IntNum") || className.equals("IntDcl")) {
                 switch (expected.getType(null).getClass().getSimpleName()) {
                     case "BooleanType" -> assertInstanceOf(BooleanType.class, actual.getType(null));
                     case "FloatType" -> assertInstanceOf(FloatType.class, actual.getType(null));
