@@ -115,12 +115,12 @@ Node dcl() :
  Node expr = null;
  Token t;
  }
-{ < FLOATDCL > ( < MULTIPLY > { isPointer = true; } )? t = < ID > ( < ASSIGN > expr = expr() { hasExpr = true; } )?
+{ < FLOATDCL > t = < ID > ( < ASSIGN > expr = expr() { hasExpr = true; } )?
 {
     /*if (hasExpr && isPointer) {
        return null;
        } else */
-       
+
    if (hasExpr) {
        FloatDcl floatDcl = new FloatDcl(t.image);
        return new Assigning(t.image, floatDcl, expr);
@@ -128,7 +128,7 @@ Node dcl() :
        return new FloatDcl(t.image);
    }
 }
-| < INTDCL > ( < MULTIPLY > { isPointer = true; } )? t = < ID > ( < ASSIGN > expr = expr() { hasExpr = true; } )?
+| < INTDCL > t = < ID > ( < ASSIGN > expr = expr() { hasExpr = true; } )?
 {
      /*if (hasExpr && isPointer) {
         return null;
@@ -140,10 +140,11 @@ Node dcl() :
         return new IntDcl(t.image);
     }
 }
-| < BOOLDCL > ( < MULTIPLY > { isPointer = true; } )? t = < ID > ( < ASSIGN > expr = expr() { hasExpr = true; } )?
+| < BOOLDCL > t = < ID > ( < ASSIGN > expr = expr() { hasExpr = true; } )?
 {
     /*if (hasExpr && isPointer) {
     return null;
+    ( < MULTIPLY > { isPointer = true; } )?
     } else */
     if (hasExpr) {
         BoolDcl boolDcl = new BoolDcl(t.image);
@@ -162,8 +163,11 @@ Node stmt() :
     Node expr;
     Token t;
 }
-{ ( < MULTIPLY > { isPointer = true; } )? t = < ID > < ASSIGN > expr = expr() < END_OF_LINE >
+{ t = < ID > < ASSIGN > expr = expr() < END_OF_LINE >
 {
+/*
+( < MULTIPLY > { isPointer = true; } )?
+ */
     Id id = new Id(t.image);
     return new Assigning(t.image, id, expr);
 }
@@ -344,9 +348,12 @@ Node val() :
 {
     return new Bool(t.image);
 }
+/*
 | < ADDRESS > t = < ID >
 {
     return new Bool(t.image);
 }
+
+ */
 }
 
