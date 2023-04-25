@@ -28,4 +28,17 @@ public class Prog extends Node {
     public ArrayList<Node> getChildren() {
         return children;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Prog prog = (Prog) o;
+        return children.equals(prog.children);
+    }
+
+    @Override
+    public int hashCode() {
+        return super.hashCode();
+    }
 }

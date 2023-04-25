@@ -1,5 +1,7 @@
 package AST.Types;
 
+import AST.Nodes.IntNum;
+
 public class IntType extends Type{
     public static final IntType INSTANCE = new IntType();
 
@@ -33,5 +35,13 @@ public class IntType extends Type{
             };
         }
         return null;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        IntType intType = (IntType) o;
+        return this.isEqual(intType);
     }
 }

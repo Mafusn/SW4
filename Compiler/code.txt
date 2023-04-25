@@ -1,9 +1,4 @@
-
-/* gives an error (doesnt check for variables in conditions) */
-float a = 2.0;
-if (2 + 4 > a && (2 == a - 3)) {
-    int y = 5 + 4;
-} else {
-    int x = 5 + 5;
-}
+int a = 5;
+int b = 10;
+/* c = -3; */
 BYE;

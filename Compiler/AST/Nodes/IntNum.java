@@ -26,4 +26,19 @@ public class IntNum extends Node {
     public Type getType(SymbolTableFilling symbolTable) {
         return this.type;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        IntNum intNum = (IntNum) o;
+        return value == intNum.value && type.equals(intNum.type);
+    }
+
+    @Override
+    public int hashCode() {
+        return 0;
+    }
 }
+
+

@@ -4,6 +4,8 @@ import AST.SymbolTableFilling.SymbolTableFilling;
 import AST.Types.Type;
 import AST.Visitor;
 
+import java.util.Objects;
+
 public class Assigning extends Node {
     private String name;
     private Node child1;
@@ -55,5 +57,18 @@ public class Assigning extends Node {
 
     public String getVariable() {
         return name;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Assigning assigning = (Assigning) o;
+        return name.equals(assigning.name) && child1.equals(assigning.child1) && child2.equals(assigning.child2);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, child1, child2, type);
     }
 }
