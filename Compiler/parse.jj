@@ -1,0 +1,359 @@
+options {
+  STATIC = false;
+}
+
+PARSER_BEGIN(Compiler)
+
+import AST.*;
+import AST.CodeGeneration.CodeGenerator;
+import AST.Nodes.*;
+import AST.SymbolTableFilling.SymbolTableFilling;
+import java.io.*;
+import java.util.Scanner;
+import java.util.Arrays;
+
+public class Compiler {
+    public static void main(String[] args) {
+        try {
+            Compiler compiler = new Compiler(new java.io.FileReader("code.txt"));
+            Node prog = compiler.prog();
+
+            PrettyPrint prettyPrint = new PrettyPrint();
+            SymbolTableFilling symbolTableFilling = new SymbolTableFilling();
+            TypeChecking typeChecking = new TypeChecking(symbolTableFilling);
+            CodeGenerator codeGenerator = new CodeGenerator(symbolTableFilling);
+
+            prog.accept(prettyPrint);
+            System.out.println(prettyPrint.getResult());
+            System.out.println();
+            System.out.print("Syntax is good");
+            prog.accept(symbolTableFilling);
+            System.out.println("Symbol table is good");
+            prog.accept(typeChecking);
+            System.out.println("Type check is good");
+            prog.accept(codeGenerator);
+            System.out.println("Code generator is good");
+
+            codeGenerator.generateCode();
+
+        } catch (Throwable e) {
+            // Catching Throwable is ugly but JavaCC throws Error objects!
+            System.out.println("Syntax error: " + e.getMessage());
+        }
+    }
+}
+
+PARSER_END(Compiler)
+
+SKIP:
+{ " "
+| "\t"
+| "\n"
+| "\r"
+| <COMMENT : "/*" (~["/"] | "/" ~["/"])* "*/" >
+}
+
+TOKEN : /* Numbers */
+{ <INTDCL: "int">
+| <INT: ( < DIGIT > )>
+| <FLOATDCL: "float">
+| <FLOAT: ( < DIGIT > ) (".") ( < DIGIT > )+ >
+| <#DIGIT: ( "0" | ["1"-"9"] ( ["0"-"9"] )* ) >
+| <PLUS: "+">
+| <MINUS: "-">
+| <MULTIPLY: "*">
+}
+
+TOKEN: /* LOGIC */
+{ <IF: "if">
+| <ELSE: "else">
+| <AND: "&&">
+| <OR: "||">
+| <NOT: "!">
+| <EQ: "==">
+| <NE: "!=">
+| <LT: "<">
+| <LE: "<=">
+| <GT: ">">
+| <GE: ">=">
+| <BOOLDCL: "boolean">
+| <TRUE: "true" >
+| <FALSE: "false" >
+}
+
+TOKEN : /* Operators and constructs */
+{ <ASSIGN: "=">
+| <LPAREN: "(">
+| <RPAREN: ")">
+| <LBRACE: "{">
+| <RBRACE: "}">
+| <END_OF_LINE: ";">
+| <END_OF_FILE: "BYE">
+| <PRINT: "print">
+| <ADDRESS: "&">
+}
+
+TOKEN : /* ID */
+{ <ID: (["a"-"z", "A"-"Z", "_"]) (["a"-"z", "A"-"Z", "_", "0"-"9"])*> }
+
+
+Node prog() :
+{
+ Prog prog = new Prog();
+ Node stmt = null;
+ }
+{( stmt = stmt() { prog.addChild(stmt); } )* < END_OF_FILE > < END_OF_LINE >
+{
+    return prog;
+}
+}
+
+Node dcl() :
+{
+ boolean hasExpr = false;
+ boolean isPointer = false;
+ Node expr = null;
+ Token t;
+ }
+{ < FLOATDCL > t = < ID > ( < ASSIGN > expr = expr() { hasExpr = true; } )?
+{
+    /*if (hasExpr && isPointer) {
+       return null;
+       } else */
+
+   if (hasExpr) {
+       FloatDcl floatDcl = new FloatDcl(t.image);
+       return new Assigning(t.image, floatDcl, expr);
+   } else {
+       return new FloatDcl(t.image);
+   }
+}
+| < INTDCL > t = < ID > ( < ASSIGN > expr = expr() { hasExpr = true; } )?
+{
+     /*if (hasExpr && isPointer) {
+        return null;
+        } else */
+    if (hasExpr) {
+        IntDcl intDcl = new IntDcl(t.image);
+        return new Assigning(t.image, intDcl, expr);
+    } else {
+        return new IntDcl(t.image);
+    }
+}
+| < BOOLDCL > t = < ID > ( < ASSIGN > expr = expr() { hasExpr = true; } )?
+{
+    /*if (hasExpr && isPointer) {
+    return null;
+    ( < MULTIPLY > { isPointer = true; } )?
+    } else */
+    if (hasExpr) {
+        BoolDcl boolDcl = new BoolDcl(t.image);
+        return new Assigning(t.image, boolDcl, expr);
+    } else {
+        return new BoolDcl(t.image);
+    }
+}
+}
+
+Node stmt() :
+{
+    boolean isPointer = false;
+    Node ifStmt;
+    Node dcl;
+    Node expr;
+    Token t;
+}
+{ t = < ID > < ASSIGN > expr = expr() < END_OF_LINE >
+{
+/*
+( < MULTIPLY > { isPointer = true; } )?
+ */
+    Id id = new Id(t.image);
+    return new Assigning(t.image, id, expr);
+}
+| < PRINT > < LPAREN > t = < ID > < RPAREN > < END_OF_LINE >
+{
+    return new Print(t.image);
+}
+| ifStmt = ifStmt()
+{
+return ifStmt;
+}
+| dcl = dcl() < END_OF_LINE >
+{
+    return dcl;
+}
+}
+Node ifStmt() :
+{
+ Node expr;
+ Node ifBlock;
+ Node elseBlock = null;
+ boolean withElse = false;
+}
+{
+< IF > < LPAREN > expr = expr() < RPAREN > < LBRACE > ifBlock = block() < RBRACE > ( < ELSE > < LBRACE > elseBlock = block() < RBRACE > { withElse = true; })?
+{
+    if (withElse) {
+        return new IfElse(expr, ifBlock, elseBlock);
+    } else {
+        return new If(expr, ifBlock);
+    }
+}
+}
+
+Node block() :
+{
+   Block block = new Block();
+   Node stmt = null;
+}
+{
+( stmt = stmt() { block.addChild(stmt); } )*
+{
+    return block;
+}
+}
+
+Node expr() :
+{
+    boolean hasExpr = false;
+    Node andTerm;
+    Node expr = null;
+    Token op = null;
+}
+{ andTerm = andTerm() (( op = <OR> ) expr = expr() { hasExpr = true; } )?
+{
+    if (hasExpr) {
+        return new BinOperator(op.image, andTerm, expr);
+    } else {
+        return andTerm;
+    }
+}
+}
+
+Node andTerm() :
+{
+    boolean hasAnd = false;
+    Node equalityTerm;
+    Node andTerm = null;
+    Token op = null;
+}
+{equalityTerm = equalityTerm() (( op = <AND>) andTerm = andTerm() {hasAnd = true;})?
+{
+    if (hasAnd) {
+        return new BinOperator(op.image, equalityTerm, andTerm);
+    } else {
+        return equalityTerm;
+    }
+}
+}
+
+Node equalityTerm() :
+{
+    boolean hasEq = false;
+    Node relationalTerm;
+    Node equalityTerm = null;
+    Token op = null;
+}
+{relationalTerm = relationalTerm() (( op = <EQ> | op = <NE>) equalityTerm = equalityTerm() {hasEq = true;})?
+{
+    if (hasEq) {
+        return new BinOperator(op.image, relationalTerm, equalityTerm);
+    } else {
+        return relationalTerm;
+    }
+}
+}
+Node relationalTerm() :
+{
+    boolean hasTerm = false;
+     Node additiveTerm;
+     Node relationalTerm = null;
+     Token op = null;
+ }
+{additiveTerm = additiveTerm() (( op = <LT> | op = <GT> | op = <GE> | op = <LE> )relationalTerm = relationalTerm() { hasTerm = true; })?
+{
+    if (hasTerm) {
+        return new BinOperator(op.image, additiveTerm, relationalTerm);
+    } else {
+        return additiveTerm;
+    }
+}
+}
+
+Node additiveTerm() :
+{
+    boolean hasAdditiveTerm = false;
+    Node notTerm;
+    Node additiveTerm = null;
+    Token op = null;
+ }
+{ notTerm = notTerm() ((op = <PLUS> | op = <MINUS> ) additiveTerm = additiveTerm() { hasAdditiveTerm = true; })?
+{
+    if (hasAdditiveTerm) {
+        return new Computing(op.image, notTerm, additiveTerm);
+    } else {
+        return notTerm;
+    }
+}
+}
+Node notTerm() :
+{
+    Node factor;
+    boolean hasNotTerm = false;
+}
+{
+ ( <NOT> { hasNotTerm = true; })? factor = factor()
+{
+    if (hasNotTerm) {
+        return new Not(factor);
+    } else {
+        return factor;
+    }
+}
+}
+
+Node factor() :
+{
+    Node val;
+    Node expr;
+ }
+{ <LPAREN> expr = expr() <RPAREN>
+{
+    return expr;
+}
+| val = val()
+{
+    return val;
+}
+}
+
+Node val() :
+{
+    Token t;
+ }
+{ t = < INT >
+{
+    return new IntNum(t.image);
+}
+| t = < FLOAT >
+{
+    return new FloatNum(t.image);
+}
+| t = < ID >
+{
+    return new Id(t.image);
+}
+| (t = < TRUE > | t = < FALSE >)
+{
+    return new Bool(t.image);
+}
+/*
+| < ADDRESS > t = < ID >
+{
+    return new Bool(t.image);
+}
+
+ */
+}
+
