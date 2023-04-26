@@ -198,6 +198,141 @@ class ParserTest {
         }
     }
 
+    @Test
+    void AssignFloatTest() throws FileNotFoundException {
+        // [GIVEN] That we run the parser with a file
+        Compiler compiler = readFileToParse("Test/TestCode/assignFloat.txt");
+
+        // [GIVEN] That we create the expected AST from the code from the file
+        Prog expectedAST = new Prog();
+        Id id = new Id("a");
+        Id id2 = new Id("b");
+        FloatNum floatVal = new FloatNum("3.14");
+        FloatNum floatVal2 = new FloatNum("0.025");
+        Assigning floatAssign = new Assigning("a",id, floatVal);
+        Assigning floatAssign2 = new Assigning("b",id2, floatVal2);
+        expectedAST.addChild(floatAssign);
+        expectedAST.addChild(floatAssign2);
+
+        // [WHEN] We try to parse the code from the file
+        try {
+            Prog AST = (Prog) compiler.prog();
+            // [THEN] Assert that the created AST is equal to the expected AST
+            assertTrue(AST.equals(expectedAST));
+        } catch (Throwable e) {
+            System.out.println("Syntax error: " + e.getMessage());
+            assert false;
+        }
+    }
+
+    @Test
+    void AssignBoolTest() throws FileNotFoundException {
+        // [GIVEN] That we run the parser with a file
+        Compiler compiler = readFileToParse("Test/TestCode/assignBool.txt");
+
+        // [GIVEN] That we create the expected AST from the code from the file
+        Prog expectedAST = new Prog();
+        Id id = new Id("a");
+        Id id2 = new Id("b");
+        Bool boolVal = new Bool("true");
+        Bool boolVal2 = new Bool("false");
+        Assigning boolAssign = new Assigning("a",id, boolVal);
+        Assigning boolAssign2 = new Assigning("b",id2, boolVal2);
+        expectedAST.addChild(boolAssign);
+        expectedAST.addChild(boolAssign2);
+
+        // [WHEN] We try to parse the code from the file
+        try {
+            Prog AST = (Prog) compiler.prog();
+            // [THEN] Assert that the created AST is equal to the expected AST
+            assertTrue(AST.equals(expectedAST));
+        } catch (Throwable e) {
+            System.out.println("Syntax error: " + e.getMessage());
+            assert false;
+        }
+    }
+
+    @Test
+    void AssignIntDclTest() throws FileNotFoundException {
+        // [GIVEN] That we run the parser with a file
+        Compiler compiler = readFileToParse("Test/TestCode/assignIntDcl.txt");
+
+        // [GIVEN] That we create the expected AST from the code from the file
+        Prog expectedAST = new Prog();
+        IntDcl intDcl = new IntDcl("a");
+        IntDcl intDcl2 = new IntDcl("b");
+        IntNum intVal = new IntNum("3");
+        IntNum intVal2 = new IntNum("12");
+        Assigning intAssign = new Assigning("a",intDcl, intVal);
+        Assigning intAssign2 = new Assigning("b",intDcl2, intVal2);
+        expectedAST.addChild(intAssign);
+        expectedAST.addChild(intAssign2);
+
+        // [WHEN] We try to parse the code from the file
+        try {
+            Prog AST = (Prog) compiler.prog();
+            // [THEN] Assert that the created AST is equal to the expected AST
+            assertTrue(AST.equals(expectedAST));
+        } catch (Throwable e) {
+            System.out.println("Syntax error: " + e.getMessage());
+            assert false;
+        }
+    }
+
+    @Test
+    void AssignFloatDclTest() throws FileNotFoundException {
+        // [GIVEN] That we run the parser with a file
+        Compiler compiler = readFileToParse("Test/TestCode/assignFloatDcl.txt");
+
+        // [GIVEN] That we create the expected AST from the code from the file
+        Prog expectedAST = new Prog();
+        FloatDcl floatDcl = new FloatDcl("a");
+        FloatDcl floatDcl2 = new FloatDcl("b");
+        FloatNum floatVal = new FloatNum("8.32");
+        FloatNum floatVal2 = new FloatNum("0.97");
+        Assigning floatAssign = new Assigning("a",floatDcl, floatVal);
+        Assigning floatAssign2 = new Assigning("b",floatDcl2, floatVal2);
+        expectedAST.addChild(floatAssign);
+        expectedAST.addChild(floatAssign2);
+
+        // [WHEN] We try to parse the code from the file
+        try {
+            Prog AST = (Prog) compiler.prog();
+            // [THEN] Assert that the created AST is equal to the expected AST
+            assertTrue(AST.equals(expectedAST));
+        } catch (Throwable e) {
+            System.out.println("Syntax error: " + e.getMessage());
+            assert false;
+        }
+    }
+
+    @Test
+    void AssignBoolDclTest() throws FileNotFoundException {
+        // [GIVEN] That we run the parser with a file
+        Compiler compiler = readFileToParse("Test/TestCode/assignBoolDcl.txt");
+
+        // [GIVEN] That we create the expected AST from the code from the file
+        Prog expectedAST = new Prog();
+        BoolDcl boolDcl = new BoolDcl("p");
+        BoolDcl boolDcl2 = new BoolDcl("q");
+        Bool boolVal = new Bool("true");
+        Bool boolVal2 = new Bool("false");
+        Assigning boolAssign = new Assigning("p",boolDcl, boolVal);
+        Assigning boolAssign2 = new Assigning("q",boolDcl2, boolVal2);
+        expectedAST.addChild(boolAssign);
+        expectedAST.addChild(boolAssign2);
+
+        // [WHEN] We try to parse the code from the file
+        try {
+            Prog AST = (Prog) compiler.prog();
+            // [THEN] Assert that the created AST is equal to the expected AST
+            assertTrue(AST.equals(expectedAST));
+        } catch (Throwable e) {
+            System.out.println("Syntax error: " + e.getMessage());
+            assert false;
+        }
+    }
+
     private Compiler readFileToParse(String filePath) throws FileNotFoundException {
         FileInputStream stream = new FileInputStream(filePath);
         CompilerTokenManager tm = new CompilerTokenManager(new SimpleCharStream(stream));

@@ -5,6 +5,8 @@ import AST.Types.IntType;
 import AST.Types.Type;
 import AST.Visitor;
 
+import java.util.Objects;
+
 public class IntDcl extends Node {
     private String id;
     private Type type;
@@ -25,5 +27,18 @@ public class IntDcl extends Node {
     @Override
     public Type getType(SymbolTableFilling symbolTable) {
         return this.type;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        IntDcl intDcl = (IntDcl) o;
+        return id.equals(intDcl.id) && type.equals(intDcl.type);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, type);
     }
 }

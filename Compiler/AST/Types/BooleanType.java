@@ -35,4 +35,12 @@ public class BooleanType extends Type{
         }
         return null;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        BooleanType BooleanType = (BooleanType) o;
+        return this.isEqual(BooleanType);
+    }
 }
