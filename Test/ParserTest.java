@@ -333,6 +333,179 @@ class ParserTest {
         }
     }
 
+    @Test
+    void MixAssignDclTest() throws FileNotFoundException {
+        // [GIVEN] That we run the parser with a file
+        Compiler compiler = readFileToParse("Test/TestCode/mixAssignWithDcls.txt");
+
+        // [GIVEN] That we create the expected AST from the code from the file
+        Prog expectedAST = new Prog();
+        IntDcl intDcl = new IntDcl("a");
+        BoolDcl boolDcl = new BoolDcl("b");
+        FloatDcl floatDcl = new FloatDcl("c");
+        IntNum intVal = new IntNum("1");
+        Bool boolVal = new Bool("false");
+        FloatNum floatVal = new FloatNum("6.2");
+        Assigning intAssign = new Assigning("a", intDcl, intVal);
+        Assigning boolAssign = new Assigning("b", boolDcl, boolVal);
+        Assigning floatAssign = new Assigning("c", floatDcl, floatVal);
+        expectedAST.addChild(intAssign);
+        expectedAST.addChild(boolAssign);
+        expectedAST.addChild(floatAssign);
+
+        // [WHEN] We try to parse the code from the file
+        try {
+            Prog AST = (Prog) compiler.prog();
+            // [THEN] Assert that the created AST is equal to the expected AST
+            assertTrue(AST.equals(expectedAST));
+        } catch (Throwable e) {
+            System.out.println("Syntax error: " + e.getMessage());
+            assert false;
+        }
+    }
+
+    @Test
+    void WrongAssignTest() throws FileNotFoundException {
+        // [GIVEN] That we run the parser with a file
+        Compiler compiler = readFileToParse("Test/TestCode/wrongAssign.txt");
+
+        // [WHEN] [THEN] We try to parse the code from the file, and it gives an error
+        try {
+            compiler.prog();
+            assert false;
+        } catch (Throwable e) {
+            System.out.println("Syntax error: " + e.getMessage());
+            assert true;
+        }
+    }
+
+
+    @Test
+    void IfTest() throws FileNotFoundException {
+        // [GIVEN] That we run the parser with a file
+        Compiler compiler = readFileToParse("Test/TestCode/if.txt");
+
+        // [GIVEN] That we create the expected AST from the code from the file
+        Prog expectedAST = new Prog();
+
+        IntNum intNum = new IntNum("2");
+        IntNum intNum2 = new IntNum("4");
+        BinOperator binOp = new BinOperator("<", intNum, intNum2);
+        Id id = new Id("t");
+        Bool bool = new Bool("true");
+        Assigning assigning = new Assigning("t", id, bool);
+        Block block = new Block();
+        block.addChild(assigning);
+        If ifStmt = new If (binOp, block);
+        expectedAST.addChild(ifStmt);
+
+        // [WHEN] We try to parse the code from the file
+        try {
+            Prog AST = (Prog) compiler.prog();
+            // [THEN] Assert that the created AST is equal to the expected AST
+            assertTrue(AST.equals(expectedAST));
+        } catch (Throwable e) {
+            System.out.println("Syntax error: " + e.getMessage());
+            assert false;
+        }
+    }
+
+    @Test
+    void IfElseTest() throws FileNotFoundException {
+        // [GIVEN] That we run the parser with a file
+        Compiler compiler = readFileToParse("Test/TestCode/ifElse.txt");
+
+        // [GIVEN] That we create the expected AST from the code from the file
+        Prog expectedAST = new Prog();
+
+        IntNum intNum = new IntNum("1");
+        IntNum intNum2 = new IntNum("2");
+        BinOperator binOp = new BinOperator(">", intNum, intNum2);
+        Id id = new Id("t");
+        Bool bool = new Bool("true");
+        Bool bool2 = new Bool ("false");
+        Assigning assigning = new Assigning("t", id, bool);
+        Assigning assigning2 = new Assigning("t", id, bool2);
+        Block block = new Block();
+        block.addChild(assigning);
+        Block block2 = new Block();
+        block2.addChild(assigning2);
+        IfElse ifElseStmt = new IfElse(binOp, block, block2);
+        expectedAST.addChild(ifElseStmt);
+
+        // [WHEN] We try to parse the code from the file
+        try {
+            Prog AST = (Prog) compiler.prog();
+            // [THEN] Assert that the created AST is equal to the expected AST
+            assertTrue(AST.equals(expectedAST));
+        } catch (Throwable e) {
+            System.out.println("Syntax error: " + e.getMessage());
+            assert false;
+        }
+    }
+
+    @Test
+    void WrongIfElseTest() throws FileNotFoundException {
+        // [GIVEN] That we run the parser with a file
+        Compiler compiler = readFileToParse("Test/TestCode/wrongIfElse.txt");
+
+        // [WHEN] [THEN] We try to parse the code from the file, and it gives an error
+        try {
+            compiler.prog();
+            assert false;
+        } catch (Throwable e) {
+            System.out.println("Syntax error: " + e.getMessage());
+            assert true;
+        }
+    }
+
+    @Test
+    void NestedIfElseTest() throws FileNotFoundException {
+        // [GIVEN] That we run the parser with a file
+        Compiler compiler = readFileToParse("Test/TestCode/nestedIfElse.txt");
+
+        // [GIVEN] That we create the expected AST from the code from the file
+        Prog expectedAST = new Prog();
+
+        // elseBlock
+        Id id = new Id("b");
+        FloatNum floatNum = new FloatNum("3.5");
+        Assigning assigning = new Assigning("b", id, floatNum);
+        Block elseBlock = new Block();
+        elseBlock.addChild(assigning);
+
+        Block ifBlockInner = new Block();
+
+        // condition for if-else statement
+        Bool boolVal = new Bool("true");
+        Bool boolVal2 = new Bool("false");
+        BinOperator binOp2 = new BinOperator("==", boolVal, boolVal2);
+
+        IfElse ifElseStmt = new IfElse(binOp2, ifBlockInner, elseBlock);
+
+        Block ifBlockOuter = new Block();
+        ifBlockOuter.addChild(ifElseStmt);
+
+        // condition for outer if-statement
+        IntNum intNum = new IntNum("1");
+        IntNum intNum2 = new IntNum("2");
+        BinOperator binOp = new BinOperator("<", intNum, intNum2);
+
+        If ifStmt = new If(binOp, ifBlockOuter);
+        
+        expectedAST.addChild(ifStmt);
+
+        // [WHEN] We try to parse the code from the file
+        try {
+            Prog AST = (Prog) compiler.prog();
+            // [THEN] Assert that the created AST is equal to the expected AST
+            assertTrue(AST.equals(expectedAST));
+        } catch (Throwable e) {
+            System.out.println("Syntax error: " + e.getMessage());
+            assert false;
+        }
+    }
+
     private Compiler readFileToParse(String filePath) throws FileNotFoundException {
         FileInputStream stream = new FileInputStream(filePath);
         CompilerTokenManager tm = new CompilerTokenManager(new SimpleCharStream(stream));

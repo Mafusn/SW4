@@ -5,6 +5,8 @@ import AST.Types.BooleanType;
 import AST.Types.Type;
 import AST.Visitor;
 
+import java.util.Objects;
+
 public class BinOperator extends Node {
     private String operation;
     private Node child1;
@@ -46,5 +48,18 @@ public class BinOperator extends Node {
 
     public String getOperator() {
         return operation;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        BinOperator that = (BinOperator) o;
+        return operation.equals(that.operation) && child1.equals(that.child1) && child2.equals(that.child2) && Objects.equals(type, that.type);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(operation, child1, child2, type);
     }
 }

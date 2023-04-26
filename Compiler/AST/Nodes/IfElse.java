@@ -4,6 +4,8 @@ import AST.SymbolTableFilling.SymbolTableFilling;
 import AST.Types.Type;
 import AST.Visitor;
 
+import java.util.Objects;
+
 public class IfElse extends Node {
     private Node condition;
     private Node child1;
@@ -34,5 +36,18 @@ public class IfElse extends Node {
 
     public Node getElseBlock() {
         return child2;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        IfElse ifElse = (IfElse) o;
+        return Objects.equals(condition, ifElse.condition) && Objects.equals(child1, ifElse.child1) && Objects.equals(child2, ifElse.child2);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(condition, child1, child2);
     }
 }
