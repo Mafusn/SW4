@@ -34,11 +34,6 @@ public class IntNum extends Node {
         IntNum intNum = (IntNum) o;
         return value == intNum.value && type.equals(intNum.type);
     }
-
-    @Override
-    public int hashCode() {
-        return 0;
-    }
 }
 
 

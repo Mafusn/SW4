@@ -26,4 +26,12 @@ public class FloatNum extends Node {
     public Type getType(SymbolTableFilling symbolTable) {
         return this.type;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        FloatNum floatNum = (FloatNum) o;
+        return value == floatNum.value && type.equals(floatNum.type);
+    }
 }

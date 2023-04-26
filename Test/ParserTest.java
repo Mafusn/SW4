@@ -1,13 +1,9 @@
 import AST.Nodes.*;
-import AST.Types.BooleanType;
-import AST.Types.FloatType;
-import AST.Types.IntType;
-import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -31,7 +27,7 @@ class ParserTest {
         try {
             Prog AST = (Prog) compiler.prog();
             // [THEN] Assert that the created AST is equal to the expected AST
-            assertAST(AST, expectedAST);
+            assertTrue(AST.equals(expectedAST));
         } catch (Throwable e) {
             System.out.println("Syntax error: " + e.getMessage());
             assert false;
@@ -56,7 +52,7 @@ class ParserTest {
         try {
             Prog AST = (Prog) compiler.prog();
             // [THEN] Assert that the created AST is equal to the expected AST
-            assertAST(AST, expectedAST);
+            assertTrue(AST.equals(expectedAST));
         } catch (Throwable e) {
             System.out.println("Syntax error: " + e.getMessage());
             assert false;
@@ -81,7 +77,7 @@ class ParserTest {
         try {
             Prog AST = (Prog) compiler.prog();
             // [THEN] Assert that the created AST is equal to the expected AST
-            assertAST(AST, expectedAST);
+            assertTrue(AST.equals(expectedAST));
         } catch (Throwable e) {
             System.out.println("Syntax error: " + e.getMessage());
             assert false;
@@ -106,7 +102,7 @@ class ParserTest {
         try {
             Prog AST = (Prog) compiler.prog();
             // [THEN] Assert that the created AST is equal to the expected AST
-            assertAST(AST, expectedAST);
+            assertTrue(AST.equals(expectedAST));
         } catch (Throwable e) {
             System.out.println("Syntax error: " + e.getMessage());
             assert false;
@@ -120,7 +116,7 @@ class ParserTest {
 
         // [WHEN] [THEN] We try to parse the code from the file, and it gives an error
         try {
-            Prog AST = (Prog) compiler.prog();
+            compiler.prog();
             assert false;
         } catch (Throwable e) {
             System.out.println("Syntax error: " + e.getMessage());
@@ -135,7 +131,7 @@ class ParserTest {
 
         // [WHEN] [THEN] We try to parse the code from the file, and it gives an error
         try {
-            Prog AST = (Prog) compiler.prog();
+            compiler.prog();
             assert false;
         } catch (Throwable e) {
             System.out.println("Syntax error: " + e.getMessage());
@@ -151,10 +147,10 @@ class ParserTest {
         // [GIVEN] That we create the expected AST from the code from the file
         Prog expectedAST = new Prog();
         Id id = new Id("a");
-        IntNum intVal = new IntNum("5");
-        Assigning intAssign = new Assigning("a",id, intVal);
         Id id2 = new Id("b");
+        IntNum intVal = new IntNum("5");
         IntNum intVal2 = new IntNum("10");
+        Assigning intAssign = new Assigning("a",id, intVal);
         Assigning intAssign2 = new Assigning("b",id2, intVal2);
         expectedAST.addChild(intAssign);
         expectedAST.addChild(intAssign2);
@@ -163,7 +159,7 @@ class ParserTest {
         try {
             Prog AST = (Prog) compiler.prog();
             // [THEN] Assert that the created AST is equal to the expected AST
-            assertAST(AST, expectedAST);
+            assertTrue(AST.equals(expectedAST));
         } catch (Throwable e) {
             System.out.println("Syntax error: " + e.getMessage());
             assert false;
@@ -178,19 +174,24 @@ class ParserTest {
         // [GIVEN] That we create the expected AST from the code from the file
         Prog expectedAST = new Prog();
         Id id = new Id("a");
-        IntNum intVal = new IntNum("5");
-        Assigning intAssign = new Assigning("a",id, intVal);
         Id id2 = new Id("b");
+        Id id3 = new Id("c");
+        IntNum intVal = new IntNum("5");
         IntNum intVal2 = new IntNum("10");
+        IntNum intVal3 = new IntNum("10");
+        Assigning intAssign = new Assigning("a",id, intVal);
         Assigning intAssign2 = new Assigning("b",id2, intVal2);
+        Assigning intAssign3 = new Assigning("c",id3, intVal3);
+
         expectedAST.addChild(intAssign);
         expectedAST.addChild(intAssign2);
+        expectedAST.addChild(intAssign3);
 
         // [WHEN] We try to parse the code from the file
         try {
             Prog AST = (Prog) compiler.prog();
             // [THEN] Assert that the created AST is equal to the expected AST
-            assertAST(AST, expectedAST);
+            assertTrue(AST.equals(expectedAST));
         } catch (Throwable e) {
             System.out.println("Syntax error: " + e.getMessage());
             assert false;
@@ -201,77 +202,5 @@ class ParserTest {
         FileInputStream stream = new FileInputStream(filePath);
         CompilerTokenManager tm = new CompilerTokenManager(new SimpleCharStream(stream));
         return new Compiler(tm);
-    }
-
-    private void assertAST(Prog AST, Prog expectedAST) {
-        ArrayList<Node> ASTChildren = AST.getChildren();
-        ArrayList<Node> expectedASTChildren = expectedAST.getChildren();
-        Assertions.assertEquals(ASTChildren.size(), expectedASTChildren.size());
-
-        for (int i = 0; i < expectedASTChildren.size(); i++) {
-            Node actual = ASTChildren.get(i);
-            Node expected = expectedASTChildren.get(i);
-
-            assertNodes(actual, expected);
-        }
-    }
-
-    private void assertNodes(Node actualNode, Node expectedNode) {
-        switch (expectedNode.getClass().getSimpleName()) {
-            case "IntDcl" -> {
-                assertInstanceOf(IntDcl.class, actualNode);
-                assertEquals(((IntDcl) actualNode).getId(), ((IntDcl) expectedNode).getId());
-            }
-            case "BoolDcl" -> {
-                assertInstanceOf(BoolDcl.class, actualNode);
-                assertEquals(((BoolDcl) actualNode).getId(), ((BoolDcl) expectedNode).getId());
-            }
-            case "FloatDcl" -> {
-                assertInstanceOf(FloatDcl.class, actualNode);
-                assertEquals(((FloatDcl) actualNode).getId(), ((FloatDcl) expectedNode).getId());
-            }
-            case "IntNum" -> {
-                assertInstanceOf(IntNum.class, actualNode);
-                assertEquals(((IntNum) actualNode).getValue(), ((IntNum) expectedNode).getValue());
-            }
-            case "FloatNum" -> {
-                assertInstanceOf(FloatNum.class, actualNode);
-                assertEquals(((FloatNum) actualNode).getValue(), ((FloatNum) expectedNode).getValue());
-            }
-            case "Bool" -> {
-                assertInstanceOf(Bool.class, actualNode);
-                assertEquals(((Bool) actualNode).getValue(), ((Bool) expectedNode).getValue());
-            }
-            case "Id" -> {
-                assertInstanceOf(Id.class, actualNode);
-                assertEquals(((Id) actualNode).getName(), ((Id) expectedNode).getName());
-            }
-            case "Assigning" -> {
-                assertInstanceOf(Assigning.class, actualNode);
-                Assigning assigningActual = (Assigning) actualNode;
-                Assigning assigningExpected = (Assigning) expectedNode;
-                assertEquals(assigningActual.getVariable(), assigningExpected.getVariable());
-
-                assertNodes(assigningActual.getDeclaration(), assigningExpected.getDeclaration());
-                assertNodes(assigningActual.getExpression(), assigningExpected.getExpression());
-            }
-            case "BinOperator" -> assertInstanceOf(BinOperator.class, actualNode);
-            case "Block" -> assertInstanceOf(Block.class, actualNode);
-            case "Computing" -> assertInstanceOf(Computing.class, actualNode);
-            case "If" -> assertInstanceOf(If.class, actualNode);
-            case "IfElse" -> assertInstanceOf(IfElse.class, actualNode);
-            case "Not" -> assertInstanceOf(Not.class, actualNode);
-            case "Print" -> assertInstanceOf(Print.class, actualNode);
-        }
-
-        String className = expectedNode.getClass().getSimpleName();
-        if (className.equals("Bool") || className.equals("BoolDcl") || className.equals("FloatNum")
-                || className.equals("FloatDcl") || className.equals("IntNum") || className.equals("IntDcl")) {
-            switch (expectedNode.getType(null).getClass().getSimpleName()) {
-                case "BooleanType" -> assertInstanceOf(BooleanType.class, actualNode.getType(null));
-                case "FloatType" -> assertInstanceOf(FloatType.class, actualNode.getType(null));
-                case "IntType" -> assertInstanceOf(IntType.class, actualNode.getType(null));
-            }
-        }
     }
 }

@@ -26,4 +26,12 @@ public class FloatDcl extends Node {
     public Type getType(SymbolTableFilling symbolTable) {
         return this.type;
     }
+
+    /*
+    @Override
+    public boolean equals(Object obj) {
+        return super.equals(obj);
+    }
+
+     */
 }

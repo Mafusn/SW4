@@ -36,9 +36,4 @@ public class Prog extends Node {
         Prog prog = (Prog) o;
         return children.equals(prog.children);
     }
-
-    @Override
-    public int hashCode() {
-        return super.hashCode();
-    }
 }
