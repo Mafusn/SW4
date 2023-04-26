@@ -134,6 +134,7 @@ public class CodeGenerator implements Visitor {
     @Override
     public void visit(If node) {
         int label = labelCount;
+        labelCount++;
         node.getCondition().accept(this);
         binOperatorCount = 0;
         if (node.getCondition() instanceof Bool) {
@@ -148,7 +149,6 @@ public class CodeGenerator implements Visitor {
         codeBuilder.append("ifthen" + labelCount + ":\n");
         node.getThenBlock().accept(this);
         codeBuilder.append("end" + label + ":\n");
-        labelCount++;
     }
 
     @Override
