@@ -45,7 +45,6 @@ public class Compiler implements CompilerConstants {
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
       case INTDCL:
       case FLOATDCL:
-      case MULTIPLY:
       case IF:
       case BOOLDCL:
       case PRINT:
@@ -73,16 +72,6 @@ prog.addChild(stmt);
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
     case FLOATDCL:{
       jj_consume_token(FLOATDCL);
-      switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
-      case MULTIPLY:{
-        jj_consume_token(MULTIPLY);
-isPointer = true;
-        break;
-        }
-      default:
-        jj_la1[1] = jj_gen;
-        ;
-      }
       t = jj_consume_token(ID);
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
       case ASSIGN:{
@@ -92,12 +81,13 @@ hasExpr = true;
         break;
         }
       default:
-        jj_la1[2] = jj_gen;
+        jj_la1[1] = jj_gen;
         ;
       }
 /*if (hasExpr && isPointer) {
        return null;
        } else */
+
    if (hasExpr) {
        FloatDcl floatDcl = new FloatDcl(t.image);
        {if ("" != null) return new Assigning(t.image, floatDcl, expr);}
@@ -108,16 +98,6 @@ hasExpr = true;
       }
     case INTDCL:{
       jj_consume_token(INTDCL);
-      switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
-      case MULTIPLY:{
-        jj_consume_token(MULTIPLY);
-isPointer = true;
-        break;
-        }
-      default:
-        jj_la1[3] = jj_gen;
-        ;
-      }
       t = jj_consume_token(ID);
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
       case ASSIGN:{
@@ -127,7 +107,7 @@ hasExpr = true;
         break;
         }
       default:
-        jj_la1[4] = jj_gen;
+        jj_la1[2] = jj_gen;
         ;
       }
 /*if (hasExpr && isPointer) {
@@ -143,16 +123,6 @@ hasExpr = true;
       }
     case BOOLDCL:{
       jj_consume_token(BOOLDCL);
-      switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
-      case MULTIPLY:{
-        jj_consume_token(MULTIPLY);
-isPointer = true;
-        break;
-        }
-      default:
-        jj_la1[5] = jj_gen;
-        ;
-      }
       t = jj_consume_token(ID);
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
       case ASSIGN:{
@@ -162,11 +132,12 @@ hasExpr = true;
         break;
         }
       default:
-        jj_la1[6] = jj_gen;
+        jj_la1[3] = jj_gen;
         ;
       }
 /*if (hasExpr && isPointer) {
     return null;
+    ( < MULTIPLY > { isPointer = true; } )?
     } else */
     if (hasExpr) {
         BoolDcl boolDcl = new BoolDcl(t.image);
@@ -177,7 +148,7 @@ hasExpr = true;
       break;
       }
     default:
-      jj_la1[7] = jj_gen;
+      jj_la1[4] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -190,23 +161,15 @@ hasExpr = true;
     Node expr;
     Token t;
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
-    case MULTIPLY:
     case ID:{
-      switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
-      case MULTIPLY:{
-        jj_consume_token(MULTIPLY);
-isPointer = true;
-        break;
-        }
-      default:
-        jj_la1[8] = jj_gen;
-        ;
-      }
       t = jj_consume_token(ID);
       jj_consume_token(ASSIGN);
       expr = expr();
       jj_consume_token(END_OF_LINE);
-Id id = new Id(t.image);
+/*
+( < MULTIPLY > { isPointer = true; } )?
+ */
+    Id id = new Id(t.image);
     {if ("" != null) return new Assigning(t.image, id, expr);}
       break;
       }
@@ -233,7 +196,7 @@ Id id = new Id(t.image);
       break;
       }
     default:
-      jj_la1[9] = jj_gen;
+      jj_la1[5] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -261,7 +224,7 @@ withElse = true;
       break;
       }
     default:
-      jj_la1[10] = jj_gen;
+      jj_la1[6] = jj_gen;
       ;
     }
 if (withElse) {
@@ -279,7 +242,6 @@ if (withElse) {
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
       case INTDCL:
       case FLOATDCL:
-      case MULTIPLY:
       case IF:
       case BOOLDCL:
       case PRINT:
@@ -288,7 +250,7 @@ if (withElse) {
         break;
         }
       default:
-        jj_la1[11] = jj_gen;
+        jj_la1[7] = jj_gen;
         break label_2;
       }
       stmt = stmt();
@@ -311,7 +273,7 @@ hasExpr = true;
       break;
       }
     default:
-      jj_la1[12] = jj_gen;
+      jj_la1[8] = jj_gen;
       ;
     }
 if (hasExpr) {
@@ -335,7 +297,7 @@ hasAnd = true;
       break;
       }
     default:
-      jj_la1[13] = jj_gen;
+      jj_la1[9] = jj_gen;
       ;
     }
 if (hasAnd) {
@@ -364,7 +326,7 @@ if (hasAnd) {
         break;
         }
       default:
-        jj_la1[14] = jj_gen;
+        jj_la1[10] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
       }
@@ -373,7 +335,7 @@ hasEq = true;
       break;
       }
     default:
-      jj_la1[15] = jj_gen;
+      jj_la1[11] = jj_gen;
       ;
     }
 if (hasEq) {
@@ -412,7 +374,7 @@ if (hasEq) {
         break;
         }
       default:
-        jj_la1[16] = jj_gen;
+        jj_la1[12] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
       }
@@ -421,7 +383,7 @@ hasTerm = true;
       break;
       }
     default:
-      jj_la1[17] = jj_gen;
+      jj_la1[13] = jj_gen;
       ;
     }
 if (hasTerm) {
@@ -450,7 +412,7 @@ if (hasTerm) {
         break;
         }
       default:
-        jj_la1[18] = jj_gen;
+        jj_la1[14] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
       }
@@ -459,7 +421,7 @@ hasAdditiveTerm = true;
       break;
       }
     default:
-      jj_la1[19] = jj_gen;
+      jj_la1[15] = jj_gen;
       ;
     }
 if (hasAdditiveTerm) {
@@ -479,7 +441,7 @@ hasNotTerm = true;
       break;
       }
     default:
-      jj_la1[20] = jj_gen;
+      jj_la1[16] = jj_gen;
       ;
     }
     factor = factor();
@@ -505,14 +467,13 @@ if (hasNotTerm) {
     case FLOAT:
     case TRUE:
     case FALSE:
-    case ADDRESS:
     case ID:{
       val = val();
 {if ("" != null) return val;}
       break;
       }
     default:
-      jj_la1[21] = jj_gen;
+      jj_la1[17] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -548,21 +509,15 @@ if (hasNotTerm) {
         break;
         }
       default:
-        jj_la1[22] = jj_gen;
+        jj_la1[18] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
       }
 {if ("" != null) return new Bool(t.image);}
       break;
       }
-    case ADDRESS:{
-      jj_consume_token(ADDRESS);
-      t = jj_consume_token(ID);
-{if ("" != null) return new Bool(t.image);}
-      break;
-      }
     default:
-      jj_la1[23] = jj_gen;
+      jj_la1[19] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -578,7 +533,7 @@ if (hasNotTerm) {
   public Token jj_nt;
   private int jj_ntk;
   private int jj_gen;
-  final private int[] jj_la1 = new int[24];
+  final private int[] jj_la1 = new int[20];
   static private int[] jj_la1_0;
   static private int[] jj_la1_1;
   static {
@@ -586,10 +541,10 @@ if (hasNotTerm) {
 	   jj_la1_init_1();
 	}
 	private static void jj_la1_init_0() {
-	   jj_la1_0 = new int[] {0x2006140,0x2000,0x10000000,0x2000,0x10000000,0x2000,0x10000000,0x2000140,0x2000,0x2006140,0x8000,0x2006140,0x20000,0x10000,0x180000,0x180000,0x1e00000,0x1e00000,0x1800,0x1800,0x40000,0x2c000280,0xc000000,0xc000280,};
+	   jj_la1_0 = new int[] {0x2004140,0x10000000,0x10000000,0x10000000,0x2000140,0x2004140,0x8000,0x2004140,0x20000,0x10000,0x180000,0x180000,0x1e00000,0x1e00000,0x1800,0x1800,0x40000,0x2c000280,0xc000000,0xc000280,};
 	}
 	private static void jj_la1_init_1() {
-	   jj_la1_1 = new int[] {0x28,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x28,0x0,0x28,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x30,0x0,0x30,};
+	   jj_la1_1 = new int[] {0x28,0x0,0x0,0x0,0x0,0x28,0x0,0x28,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x20,0x0,0x20,};
 	}
 
   /** Constructor with InputStream. */
@@ -603,7 +558,7 @@ if (hasNotTerm) {
 	 token = new Token();
 	 jj_ntk = -1;
 	 jj_gen = 0;
-	 for (int i = 0; i < 24; i++) jj_la1[i] = -1;
+	 for (int i = 0; i < 20; i++) jj_la1[i] = -1;
   }
 
   /** Reinitialise. */
@@ -617,7 +572,7 @@ if (hasNotTerm) {
 	 token = new Token();
 	 jj_ntk = -1;
 	 jj_gen = 0;
-	 for (int i = 0; i < 24; i++) jj_la1[i] = -1;
+	 for (int i = 0; i < 20; i++) jj_la1[i] = -1;
   }
 
   /** Constructor. */
@@ -627,7 +582,7 @@ if (hasNotTerm) {
 	 token = new Token();
 	 jj_ntk = -1;
 	 jj_gen = 0;
-	 for (int i = 0; i < 24; i++) jj_la1[i] = -1;
+	 for (int i = 0; i < 20; i++) jj_la1[i] = -1;
   }
 
   /** Reinitialise. */
@@ -645,7 +600,7 @@ if (hasNotTerm) {
 	 token = new Token();
 	 jj_ntk = -1;
 	 jj_gen = 0;
-	 for (int i = 0; i < 24; i++) jj_la1[i] = -1;
+	 for (int i = 0; i < 20; i++) jj_la1[i] = -1;
   }
 
   /** Constructor with generated Token Manager. */
@@ -654,7 +609,7 @@ if (hasNotTerm) {
 	 token = new Token();
 	 jj_ntk = -1;
 	 jj_gen = 0;
-	 for (int i = 0; i < 24; i++) jj_la1[i] = -1;
+	 for (int i = 0; i < 20; i++) jj_la1[i] = -1;
   }
 
   /** Reinitialise. */
@@ -663,7 +618,7 @@ if (hasNotTerm) {
 	 token = new Token();
 	 jj_ntk = -1;
 	 jj_gen = 0;
-	 for (int i = 0; i < 24; i++) jj_la1[i] = -1;
+	 for (int i = 0; i < 20; i++) jj_la1[i] = -1;
   }
 
   private Token jj_consume_token(int kind) throws ParseException {
@@ -719,7 +674,7 @@ if (hasNotTerm) {
 	   la1tokens[jj_kind] = true;
 	   jj_kind = -1;
 	 }
-	 for (int i = 0; i < 24; i++) {
+	 for (int i = 0; i < 20; i++) {
 	   if (jj_la1[i] == jj_gen) {
 		 for (int j = 0; j < 32; j++) {
 		   if ((jj_la1_0[i] & (1<<j)) != 0) {
