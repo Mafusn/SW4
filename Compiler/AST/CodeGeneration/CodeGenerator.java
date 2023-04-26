@@ -65,12 +65,15 @@ public class CodeGenerator implements Visitor {
 
     @Override
     public void visit(Assigning node) {
-        node.getDeclaration().accept(this);
-        node.getExpression().accept(this);
-        
         if (node.getDeclaration() instanceof Id) {
+            node.getExpression().accept(this);
+            if (node.getExpression() instanceof Computing) {
+                codeBuilder.append("TAX\n");
+            }
             storeXRegisterInVariable(((Id) node.getDeclaration()).getName());
         } else {
+            node.getDeclaration().accept(this);
+            node.getExpression().accept(this);
             if (!(node.getExpression() instanceof Computing)) {
                 codeBuilder.append(InstructionSet.TXA.getInstruction() + "\n");
             }
@@ -87,7 +90,6 @@ public class CodeGenerator implements Visitor {
     @Override
     public void visit(Block node) {
         for (Node n : node.getChildren()) {
-            codeBuilder.append("ifthen" + labelCount + ":\n");
             n.accept(this);
         }
     }
@@ -104,7 +106,6 @@ public class CodeGenerator implements Visitor {
     @Override
     public void visit(BoolDcl node) {
         symbolTable.lookup(node.getId()).setMemoryAddress(stackAddress);
-        decrementStackAddress();
     }
 
     @Override
@@ -116,7 +117,6 @@ public class CodeGenerator implements Visitor {
     @Override
     public void visit(FloatDcl node) {
         symbolTable.lookup(node.getId()).setMemoryAddress(stackAddress);
-        decrementStackAddress();
     }
 
     @Override
@@ -133,7 +133,9 @@ public class CodeGenerator implements Visitor {
 
     @Override
     public void visit(If node) {
+        int label = labelCount;
         node.getCondition().accept(this);
+        binOperatorCount = 0;
         if (node.getCondition() instanceof Bool) {
             codeBuilder.append(InstructionSet.TXA.getInstruction() + "\n");
         } else if (node.getCondition() instanceof Id) {
@@ -145,14 +147,16 @@ public class CodeGenerator implements Visitor {
         codeBuilder.append(InstructionSet.BNE.getInstruction() + " end" + labelCount + "\n");
         codeBuilder.append("ifthen" + labelCount + ":\n");
         node.getThenBlock().accept(this);
-        codeBuilder.append("end" + labelCount + ":\n");
+        codeBuilder.append("end" + label + ":\n");
         labelCount++;
-        binOperatorCount = 0;
     }
 
     @Override
     public void visit(IfElse node) {
+        int label = labelCount;
+        labelCount++;
         node.getCondition().accept(this);
+        binOperatorCount = 0;
         if (node.getCondition() instanceof Bool) {
             codeBuilder.append(InstructionSet.TXA.getInstruction() + "\n");
         } else if (node.getCondition() instanceof Id) {
@@ -167,8 +171,7 @@ public class CodeGenerator implements Visitor {
         codeBuilder.append(InstructionSet.JMP.getInstruction() + " end" + labelCount + "\n");
         codeBuilder.append("else" + labelCount + ":\n");
         node.getElseBlock().accept(this);
-        codeBuilder.append("end" + labelCount + ":\n");
-        binOperatorCount = 0;
+        codeBuilder.append("end" + label + ":\n");
     }
 
     @Override
@@ -259,7 +262,6 @@ public class CodeGenerator implements Visitor {
             pullAccumulator();
         }
         compareTwoBooleans(node);
-        binOperatorCount++;
         computingCount = 0;
     }
 
@@ -307,6 +309,7 @@ public class CodeGenerator implements Visitor {
         codeBuilder.append("false" + binOperatorCount + ":\n");
         codeBuilder.append(" " + InstructionSet.LDA.getInstruction() + " #0\n");
         codeBuilder.append("store" + binOperatorCount + ":\n");
+        binOperatorCount++;
         codeBuilder.append("  "); // gør at der kommer indent.
         pushAccumulator();
     }
