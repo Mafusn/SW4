@@ -47,4 +47,11 @@ public class BinOperator extends Node {
     public String getOperator() {
         return operation;
     }
+
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        BinOperator binOperator = (BinOperator) o;
+        return operation.equals(binOperator.operation) && child1.equals(binOperator.child1) && child2.equals(binOperator.child2);
+    }
 }

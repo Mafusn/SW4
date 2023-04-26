@@ -32,4 +32,12 @@ public class FloatType extends Type{
         }
         return null;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        FloatType floatType = (FloatType) o;
+        return this.isEqual(floatType);
+    }
 }

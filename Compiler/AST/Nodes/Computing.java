@@ -45,4 +45,11 @@ public class Computing extends Node {
     public String getOperator() {
         return operation;
     }
+
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Computing computing = (Computing) o;
+        return operation.equals(computing.operation) && child1.equals(computing.child1) && child2.equals(computing.child2);
+    }
 }

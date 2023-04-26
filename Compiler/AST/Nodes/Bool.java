@@ -26,4 +26,16 @@ public class Bool extends Node {
     public boolean getValue() {
         return value;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Bool bool = (Bool) o;
+        if ((value == true && bool.value == true) || (value == false && bool.value == false)) {
+            return type.equals(bool.type);
+        } else {
+            return false;
+        }
+    }
 }
