@@ -215,7 +215,7 @@ public class CodeGenerator implements Visitor {
         } else {
             codeBuilder.append(InstructionSet.SBC.getInstruction() + " $01" + String.format("%02d", computingCount) + "\n");
             codeBuilder.append(InstructionSet.BCS.getInstruction() + " carry" + computingCount + "\n");
-            codeBuilder.append(InstructionSet.ADC.getInstruction() + " $01" + String.format("%02d", computingCount) + "\n");
+            codeBuilder.append(InstructionSet.ADC.getInstruction() + " #1\n");
             codeBuilder.append("carry" + computingCount + ":\n");
             codeBuilder.append(InstructionSet.CLC.getInstruction() + "\n");
             codeBuilder.append(InstructionSet.ADC.getInstruction() + " #1\n");
@@ -224,6 +224,7 @@ public class CodeGenerator implements Visitor {
 
     public void EvaluateComputingNode(Computing node) {
         boolean isLeftOperandComputing = node.getLeftOperand() instanceof Computing;
+        boolean isRightOperandComputing = node.getRightOperand() instanceof Computing;
 
         if (isLeftOperandComputing) {
             operators.add(node.getOperator());
@@ -231,14 +232,22 @@ public class CodeGenerator implements Visitor {
             codeBuilder.append(InstructionSet.STA.getInstruction() + " $01" + String.format("%02d", computingCount) +"\n");
             computingCount++;
             node.getRightOperand().accept(this);
+            if (!isRightOperandComputing) {
+                codeBuilder.append(InstructionSet.STX.getInstruction() + " $01" + String.format("%02d", computingCount) + "\n");
+                computingCount++;
+            }
         } else {
             operators.add(node.getOperator());
             node.getLeftOperand().accept(this);
-            codeBuilder.append(InstructionSet.STX.getInstruction() + " $01" + String.format("%02d", computingCount) +"\n");
-            computingCount++;
+            if (!(isLeftOperandComputing)) {
+                codeBuilder.append(InstructionSet.STX.getInstruction() + " $01" + String.format("%02d", computingCount) +"\n");
+                computingCount++;
+            }
             node.getRightOperand().accept(this);
-            codeBuilder.append(InstructionSet.STX.getInstruction() + " $01" + String.format("%02d", computingCount) +"\n");
-            computingCount++;
+            if (!(isRightOperandComputing)) {
+                codeBuilder.append(InstructionSet.STX.getInstruction() + " $01" + String.format("%02d", computingCount) + "\n");
+                computingCount++;
+            }
         }
     }
     public void evaluateParentheses(Computing node) {
@@ -250,14 +259,14 @@ public class CodeGenerator implements Visitor {
 
     public void clearTheBottomOfStackForComputing() {
         codeBuilder.append(InstructionSet.LDA.getInstruction() + " $0100\n");
-        int i = computingCount + 1;
+        int i = computingCount;
         while (computingCount > 1 ){
-            if (operators.get(i - computingCount - 1).equals("+")) {
-                codeBuilder.append(InstructionSet.ADC.getInstruction() + " $01" + String.format("%02d", (i - computingCount)) + "\n");
+            if (operators.get(i - computingCount).equals("+")) {
+                codeBuilder.append(InstructionSet.ADC.getInstruction() + " $01" + String.format("%02d", (i - computingCount + 1)) + "\n");
             } else {
-                codeBuilder.append(InstructionSet.SBC.getInstruction() + " $01" + String.format("%02d", computingCount) + "\n");
+                codeBuilder.append(InstructionSet.SBC.getInstruction() + " $01" + String.format("%02d", (i - computingCount + 1)) + "\n");
                 codeBuilder.append(InstructionSet.BCS.getInstruction() + " carry" + computingCount + "\n");
-                codeBuilder.append(InstructionSet.ADC.getInstruction() + " $01" + String.format("%02d", computingCount) + "\n");
+                codeBuilder.append(InstructionSet.ADC.getInstruction() + " #1\n");
                 codeBuilder.append("carry" + computingCount + ":\n");
                 codeBuilder.append(InstructionSet.CLC.getInstruction() + "\n");
                 codeBuilder.append(InstructionSet.ADC.getInstruction() + " #1\n");
@@ -301,41 +310,41 @@ public class CodeGenerator implements Visitor {
     }
 
     public void compareTwoBooleans(BinOperator node) {
-        codeBuilder.append(InstructionSet.STX.getInstruction() + " $0100\n");
+        codeBuilder.append(InstructionSet.STX.getInstruction() + " $01" + String.format("%02d", binOperatorCount) + "\n");
         codeBuilder.append(InstructionSet.CLC.getInstruction() + "\n");
         switch (node.getOperator()) {
             case "==" -> {
-                codeBuilder.append(InstructionSet.CMP.getInstruction() + " $0100\n");
+                codeBuilder.append(InstructionSet.CMP.getInstruction() + " $01" + String.format("%02d", binOperatorCount) + "\n");
                 codeBuilder.append(InstructionSet.BNE.getInstruction() + " false" + binOperatorCount + "\n");
             }
             case "!=" -> {
-                codeBuilder.append(InstructionSet.CMP.getInstruction() + " $0100\n");
+                codeBuilder.append(InstructionSet.CMP.getInstruction() + " $01" + String.format("%02d", binOperatorCount) + "\n");
                 codeBuilder.append(InstructionSet.BEQ.getInstruction() + " false" + binOperatorCount + "\n");
             }
             case "||" -> {
-                codeBuilder.append(InstructionSet.ORA.getInstruction() + " $0100\n");
+                codeBuilder.append(InstructionSet.ORA.getInstruction() + " $01" + String.format("%02d", binOperatorCount) + "\n");
                 codeBuilder.append(InstructionSet.BEQ.getInstruction() + " false" + binOperatorCount + "\n");
             }
             case "&&" -> {
-                codeBuilder.append(InstructionSet.AND.getInstruction() + " $0100\n");
+                codeBuilder.append(InstructionSet.AND.getInstruction() + " $01" + String.format("%02d", binOperatorCount) + "\n");
                 codeBuilder.append(InstructionSet.BEQ.getInstruction() + " false" + binOperatorCount + "\n");
             }
             case "<" -> {
-                codeBuilder.append(InstructionSet.CMP.getInstruction() + " $0100\n");
+                codeBuilder.append(InstructionSet.CMP.getInstruction() + " $01" + String.format("%02d", binOperatorCount) + "\n");
                 codeBuilder.append(InstructionSet.BEQ.getInstruction() + " false" + binOperatorCount + "\n");
                 codeBuilder.append(InstructionSet.BCS.getInstruction() + " false" + binOperatorCount + "\n");
             }
             case "<=" -> {
-                codeBuilder.append(InstructionSet.CMP.getInstruction() + " $0100\n");
+                codeBuilder.append(InstructionSet.CMP.getInstruction() + " $01" + String.format("%02d", binOperatorCount) + "\n");
                 codeBuilder.append(InstructionSet.BCS.getInstruction() + " false" + binOperatorCount + "\n");
             }
             case ">" -> {
-                codeBuilder.append(InstructionSet.CMP.getInstruction() + " $0100\n");
+                codeBuilder.append(InstructionSet.CMP.getInstruction() + " $01" + String.format("%02d", binOperatorCount) + "\n");
                 codeBuilder.append(InstructionSet.BEQ.getInstruction() + " false" + binOperatorCount + "\n");
                 codeBuilder.append(InstructionSet.BCC.getInstruction() + " false" + binOperatorCount + "\n");
             }
             case ">=" -> {
-                codeBuilder.append(InstructionSet.CMP.getInstruction() + " $0100\n");
+                codeBuilder.append(InstructionSet.CMP.getInstruction() + " $01" + String.format("%02d", binOperatorCount) + "\n");
                 codeBuilder.append(InstructionSet.BCC.getInstruction() + " false" + binOperatorCount + "\n");
             }
         }
