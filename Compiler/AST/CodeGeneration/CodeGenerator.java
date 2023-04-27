@@ -7,12 +7,14 @@ import AST.Visitor;
 
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 
 public class CodeGenerator implements Visitor {
     private StringBuilder codeBuilder;
     private SymbolTableFilling symbolTable;
     private int stackAddress = 0xff;
     private int computingCount = 0;
+    private ArrayList operators = new ArrayList<Integer>();
     private int binOperatorCount = 0;
     private int labelCount = 0;
     // Gør det muligt at bruge float i vores kode, og kan adskille dem fra hinanden for 1/8.
@@ -67,13 +69,20 @@ public class CodeGenerator implements Visitor {
     public void visit(AssignmentOp node) {
         if (node.getDeclaration() instanceof Id) {
             node.getExpression().accept(this);
+
             if (node.getExpression() instanceof ArithmeticOp) {
+                clearTheBottomOfStackForComputing();
                 codeBuilder.append("TAX\n");
             }
             storeXRegisterInVariable(((Id) node.getDeclaration()).getName());
         } else {
             node.getDeclaration().accept(this);
             node.getExpression().accept(this);
+
+            if (node.getExpression() instanceof ArithmeticOp) {
+                clearTheBottomOfStackForComputing();
+            }
+            
             if (!(node.getExpression() instanceof ArithmeticOp)) {
                 codeBuilder.append(InstructionSet.TXA.getInstruction() + "\n");
             }
@@ -109,9 +118,9 @@ public class CodeGenerator implements Visitor {
     }
 
     @Override
+
     public void visit(ArithmeticOp node) {
-        codeBuilder.append(InstructionSet.CLC.getInstruction() + "\n");
-        computingtest(node);
+        EvaluateComputingNode(node);
     }
 
     @Override
@@ -201,32 +210,75 @@ public class CodeGenerator implements Visitor {
     }
 
     public void addTwoNumbers(ArithmeticOp node) {
-        codeBuilder.append(InstructionSet.STX.getInstruction() + " $0100\n");
+        codeBuilder.append(InstructionSet.STX.getInstruction() + " $01" + String.format("%02d", computingCount) + "\n");
+
         if (node.getOperator().equals("+")) {
-            codeBuilder.append(InstructionSet.ADC.getInstruction() + " $0100\n");
+            codeBuilder.append(InstructionSet.ADC.getInstruction() + " $01" + String.format("%02d", computingCount) + "\n");
         } else {
-            codeBuilder.append(InstructionSet.SBC.getInstruction() + " $0100\n");
+            codeBuilder.append(InstructionSet.SBC.getInstruction() + " $01" + String.format("%02d", computingCount) + "\n");
+            codeBuilder.append(InstructionSet.BCS.getInstruction() + " carry" + computingCount + "\n");
+            codeBuilder.append(InstructionSet.ADC.getInstruction() + " #1\n");
+            codeBuilder.append("carry" + computingCount + ":\n");
             codeBuilder.append(InstructionSet.CLC.getInstruction() + "\n");
             codeBuilder.append(InstructionSet.ADC.getInstruction() + " #1\n");
         }
     }
 
-    public void computingtest(ArithmeticOp node) {
-        node.getLeftOperand().accept(this);
-        if (computingCount == 0) {
-            codeBuilder.append(InstructionSet.TXA.getInstruction() + "\n");
-            computingCount++;
-        }
+    public void EvaluateComputingNode(ArithmeticOp node) {
+        boolean isLeftOperandComputing = node.getLeftOperand() instanceof ArithmeticOp;
+        boolean isRightOperandComputing = node.getRightOperand() instanceof ArithmeticOp;
 
-        if (node.getRightOperand() instanceof ArithmeticOp) {
-            ((ArithmeticOp) node.getRightOperand()).getLeftOperand().accept(this);
-            addTwoNumbers(node);
-            ((ArithmeticOp) node.getRightOperand()).getRightOperand().accept(this);
-            addTwoNumbers((ArithmeticOp) node.getRightOperand());
-        } else {
+        if (isLeftOperandComputing) {
+            if (!isRightOperandComputing) {
+                operators.add(node.getOperator());
+            }
+            evaluateParentheses((Computing) node.getLeftOperand());
+            codeBuilder.append(InstructionSet.STA.getInstruction() + " $01" + String.format("%02d", computingCount) +"\n");
+            computingCount++;
             node.getRightOperand().accept(this);
-            addTwoNumbers(node);
+            if (!isRightOperandComputing) {
+                codeBuilder.append(InstructionSet.STX.getInstruction() + " $01" + String.format("%02d", computingCount) + "\n");
+                computingCount++;
+            }
+        } else {
+            operators.add(node.getOperator());
+            node.getLeftOperand().accept(this);
+            if (!(isLeftOperandComputing)) {
+                codeBuilder.append(InstructionSet.STX.getInstruction() + " $01" + String.format("%02d", computingCount) +"\n");
+                computingCount++;
+            }
+            node.getRightOperand().accept(this);
+            if (!(isRightOperandComputing)) {
+                codeBuilder.append(InstructionSet.STX.getInstruction() + " $01" + String.format("%02d", computingCount) + "\n");
+                computingCount++;
+            }
         }
+    }
+    public void evaluateParentheses(ArithmeticOp node) {
+        node.getLeftOperand().accept(this);
+        codeBuilder.append(InstructionSet.TXA.getInstruction() + "\n");
+        node.getRightOperand().accept(this);
+        addTwoNumbers(node);
+    }
+
+    public void clearTheBottomOfStackForComputing() {
+        codeBuilder.append(InstructionSet.LDA.getInstruction() + " $0100\n");
+        int i = computingCount;
+        while (computingCount > 1 ){
+            if (operators.get(i - computingCount).equals("+")) {
+                codeBuilder.append(InstructionSet.ADC.getInstruction() + " $01" + String.format("%02d", (i - computingCount + 1)) + "\n");
+            } else {
+                codeBuilder.append(InstructionSet.SBC.getInstruction() + " $01" + String.format("%02d", (i - computingCount + 1)) + "\n");
+                codeBuilder.append(InstructionSet.BCS.getInstruction() + " carry" + computingCount + "\n");
+                codeBuilder.append(InstructionSet.ADC.getInstruction() + " #1\n");
+                codeBuilder.append("carry" + computingCount + ":\n");
+                codeBuilder.append(InstructionSet.CLC.getInstruction() + "\n");
+                codeBuilder.append(InstructionSet.ADC.getInstruction() + " #1\n");
+            }
+            computingCount--;
+        }
+        operators.clear();
+        computingCount = 0;
     }
 
     public void evaluateBinOperator(ComparisonOp node){
@@ -238,12 +290,15 @@ public class CodeGenerator implements Visitor {
         {
             codeBuilder.append(InstructionSet.TXA.getInstruction() + "\n");
             pushAccumulator();
-        } else if (node.getLeftOperand() instanceof ArithmeticOp) {
+        } else if (node.getLeftOperand() instanceof
+                ArithmeticOp) {
+            clearTheBottomOfStackForComputing();
             pushAccumulator();
         }
         node.getRightOperand().accept(this);
-        if (node.getRightOperand() instanceof ArithmeticOp) {
-            codeBuilder.append(InstructionSet.TXA.getInstruction() + "\n");
+        if (node.getRightOperand() instanceof Computing) {
+            clearTheBottomOfStackForComputing();
+            codeBuilder.append(InstructionSet.TAX.getInstruction() + "\n");
             pullAccumulator();
         } else if ((node.getOperator().equals("||") || node.getOperator().equals("&&"))
                 && binOperatorCount > 0
@@ -251,7 +306,7 @@ public class CodeGenerator implements Visitor {
                 && !(node.getRightOperand() instanceof NegationOp))
         {
             pullAccumulator();
-            codeBuilder.append(InstructionSet.TXA.getInstruction() + "\n");
+            codeBuilder.append(InstructionSet.TAX.getInstruction() + "\n");
             pullAccumulator();
         } else {
             pullAccumulator();
@@ -261,41 +316,41 @@ public class CodeGenerator implements Visitor {
     }
 
     public void compareTwoBooleans(ComparisonOp node) {
-        codeBuilder.append(InstructionSet.STX.getInstruction() + " $0100\n");
+        codeBuilder.append(InstructionSet.STX.getInstruction() + " $01" + String.format("%02d", binOperatorCount) + "\n");
         codeBuilder.append(InstructionSet.CLC.getInstruction() + "\n");
         switch (node.getOperator()) {
             case "==" -> {
-                codeBuilder.append(InstructionSet.CMP.getInstruction() + " $0100\n");
+                codeBuilder.append(InstructionSet.CMP.getInstruction() + " $01" + String.format("%02d", binOperatorCount) + "\n");
                 codeBuilder.append(InstructionSet.BNE.getInstruction() + " false" + binOperatorCount + "\n");
             }
             case "!=" -> {
-                codeBuilder.append(InstructionSet.CMP.getInstruction() + " $0100\n");
+                codeBuilder.append(InstructionSet.CMP.getInstruction() + " $01" + String.format("%02d", binOperatorCount) + "\n");
                 codeBuilder.append(InstructionSet.BEQ.getInstruction() + " false" + binOperatorCount + "\n");
             }
             case "||" -> {
-                codeBuilder.append(InstructionSet.ORA.getInstruction() + " $0100\n");
+                codeBuilder.append(InstructionSet.ORA.getInstruction() + " $01" + String.format("%02d", binOperatorCount) + "\n");
                 codeBuilder.append(InstructionSet.BEQ.getInstruction() + " false" + binOperatorCount + "\n");
             }
             case "&&" -> {
-                codeBuilder.append(InstructionSet.AND.getInstruction() + " $0100\n");
+                codeBuilder.append(InstructionSet.AND.getInstruction() + " $01" + String.format("%02d", binOperatorCount) + "\n");
                 codeBuilder.append(InstructionSet.BEQ.getInstruction() + " false" + binOperatorCount + "\n");
             }
             case "<" -> {
-                codeBuilder.append(InstructionSet.CMP.getInstruction() + " $0100\n");
+                codeBuilder.append(InstructionSet.CMP.getInstruction() + " $01" + String.format("%02d", binOperatorCount) + "\n");
                 codeBuilder.append(InstructionSet.BEQ.getInstruction() + " false" + binOperatorCount + "\n");
                 codeBuilder.append(InstructionSet.BCS.getInstruction() + " false" + binOperatorCount + "\n");
             }
             case "<=" -> {
-                codeBuilder.append(InstructionSet.CMP.getInstruction() + " $0100\n");
+                codeBuilder.append(InstructionSet.CMP.getInstruction() + " $01" + String.format("%02d", binOperatorCount) + "\n");
                 codeBuilder.append(InstructionSet.BCS.getInstruction() + " false" + binOperatorCount + "\n");
             }
             case ">" -> {
-                codeBuilder.append(InstructionSet.CMP.getInstruction() + " $0100\n");
+                codeBuilder.append(InstructionSet.CMP.getInstruction() + " $01" + String.format("%02d", binOperatorCount) + "\n");
                 codeBuilder.append(InstructionSet.BEQ.getInstruction() + " false" + binOperatorCount + "\n");
                 codeBuilder.append(InstructionSet.BCC.getInstruction() + " false" + binOperatorCount + "\n");
             }
             case ">=" -> {
-                codeBuilder.append(InstructionSet.CMP.getInstruction() + " $0100\n");
+                codeBuilder.append(InstructionSet.CMP.getInstruction() + " $01" + String.format("%02d", binOperatorCount) + "\n");
                 codeBuilder.append(InstructionSet.BCC.getInstruction() + " false" + binOperatorCount + "\n");
             }
         }
