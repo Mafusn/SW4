@@ -13,7 +13,7 @@ public class CodeGenerator implements Visitor {
     private StringBuilder codeBuilder;
     private SymbolTableFilling symbolTable;
     private int stackAddress = 0xff;
-    private int ArithmeticOpCount = 0;
+    private int arithmeticOpCount = 0;
     private ArrayList operators = new ArrayList<Integer>();
     private int binOperatorCount = 0;
     private int labelCount = 0;
@@ -87,7 +87,6 @@ public class CodeGenerator implements Visitor {
 
             pushAccumulator();
         }
-        ArithmeticOpCount = 0;
     }
 
     @Override
@@ -209,15 +208,15 @@ public class CodeGenerator implements Visitor {
     }
 
     public void addTwoNumbers(ArithmeticOp node) {
-        codeBuilder.append(InstructionSet.STX.getInstruction() + " $01" + String.format("%02d", ArithmeticOpCount) + "\n");
+        codeBuilder.append(InstructionSet.STX.getInstruction() + " $01" + String.format("%02d", arithmeticOpCount) + "\n");
 
         if (node.getOperator().equals("+")) {
-            codeBuilder.append(InstructionSet.ADC.getInstruction() + " $01" + String.format("%02d", ArithmeticOpCount) + "\n");
+            codeBuilder.append(InstructionSet.ADC.getInstruction() + " $01" + String.format("%02d", arithmeticOpCount) + "\n");
         } else {
-            codeBuilder.append(InstructionSet.SBC.getInstruction() + " $01" + String.format("%02d", ArithmeticOpCount) + "\n");
-            codeBuilder.append(InstructionSet.BCS.getInstruction() + " carry" + ArithmeticOpCount + "\n");
+            codeBuilder.append(InstructionSet.SBC.getInstruction() + " $01" + String.format("%02d", arithmeticOpCount) + "\n");
+            codeBuilder.append(InstructionSet.BCS.getInstruction() + " carry" + arithmeticOpCount + "\n");
             codeBuilder.append(InstructionSet.ADC.getInstruction() + " #1\n");
-            codeBuilder.append("carry" + ArithmeticOpCount + ":\n");
+            codeBuilder.append("carry" + arithmeticOpCount + ":\n");
             codeBuilder.append(InstructionSet.CLC.getInstruction() + "\n");
             codeBuilder.append(InstructionSet.ADC.getInstruction() + " #1\n");
         }
@@ -232,24 +231,24 @@ public class CodeGenerator implements Visitor {
                 operators.add(node.getOperator());
             }
             evaluateParentheses((ArithmeticOp) node.getLeftOperand());
-            codeBuilder.append(InstructionSet.STA.getInstruction() + " $01" + String.format("%02d", ArithmeticOpCount) +"\n");
-            ArithmeticOpCount++;
+            codeBuilder.append(InstructionSet.STA.getInstruction() + " $01" + String.format("%02d", arithmeticOpCount) +"\n");
+            arithmeticOpCount++;
             node.getRightOperand().accept(this);
             if (!isRightOperandArithmeticOp) {
-                codeBuilder.append(InstructionSet.STX.getInstruction() + " $01" + String.format("%02d", ArithmeticOpCount) + "\n");
-                ArithmeticOpCount++;
+                codeBuilder.append(InstructionSet.STX.getInstruction() + " $01" + String.format("%02d", arithmeticOpCount) + "\n");
+                arithmeticOpCount++;
             }
         } else {
             operators.add(node.getOperator());
             node.getLeftOperand().accept(this);
             if (!(isLeftOperandArithmeticOp)) {
-                codeBuilder.append(InstructionSet.STX.getInstruction() + " $01" + String.format("%02d", ArithmeticOpCount) +"\n");
-                ArithmeticOpCount++;
+                codeBuilder.append(InstructionSet.STX.getInstruction() + " $01" + String.format("%02d", arithmeticOpCount) +"\n");
+                arithmeticOpCount++;
             }
             node.getRightOperand().accept(this);
             if (!(isRightOperandArithmeticOp)) {
-                codeBuilder.append(InstructionSet.STX.getInstruction() + " $01" + String.format("%02d", ArithmeticOpCount) + "\n");
-                ArithmeticOpCount++;
+                codeBuilder.append(InstructionSet.STX.getInstruction() + " $01" + String.format("%02d", arithmeticOpCount) + "\n");
+                arithmeticOpCount++;
             }
         }
     }
@@ -263,22 +262,22 @@ public class CodeGenerator implements Visitor {
 
     public void clearTheBottomOfStackForArithmeticOp() {
         codeBuilder.append(InstructionSet.LDA.getInstruction() + " $0100\n");
-        int i = ArithmeticOpCount;
-        while (ArithmeticOpCount > 1 ){
-            if (operators.get(i - ArithmeticOpCount).equals("+")) {
-                codeBuilder.append(InstructionSet.ADC.getInstruction() + " $01" + String.format("%02d", (i - ArithmeticOpCount + 1)) + "\n");
+        int i = arithmeticOpCount;
+        while (arithmeticOpCount > 1 ){
+            if (operators.get(i - arithmeticOpCount).equals("+")) {
+                codeBuilder.append(InstructionSet.ADC.getInstruction() + " $01" + String.format("%02d", (i - arithmeticOpCount + 1)) + "\n");
             } else {
-                codeBuilder.append(InstructionSet.SBC.getInstruction() + " $01" + String.format("%02d", (i - ArithmeticOpCount + 1)) + "\n");
-                codeBuilder.append(InstructionSet.BCS.getInstruction() + " carry" + ArithmeticOpCount + "\n");
+                codeBuilder.append(InstructionSet.SBC.getInstruction() + " $01" + String.format("%02d", (i - arithmeticOpCount + 1)) + "\n");
+                codeBuilder.append(InstructionSet.BCS.getInstruction() + " carry" + arithmeticOpCount + "\n");
                 codeBuilder.append(InstructionSet.ADC.getInstruction() + " #1\n");
-                codeBuilder.append("carry" + ArithmeticOpCount + ":\n");
+                codeBuilder.append("carry" + arithmeticOpCount + ":\n");
                 codeBuilder.append(InstructionSet.CLC.getInstruction() + "\n");
                 codeBuilder.append(InstructionSet.ADC.getInstruction() + " #1\n");
             }
-            ArithmeticOpCount--;
+            arithmeticOpCount--;
         }
         operators.clear();
-        ArithmeticOpCount = 0;
+        arithmeticOpCount = 0;
     }
 
     public void evaluateBinOperator(ComparisonOp node){
@@ -311,7 +310,6 @@ public class CodeGenerator implements Visitor {
             pullAccumulator();
         }
         compareTwoBooleans(node);
-        ArithmeticOpCount = 0;
     }
 
     public void compareTwoBooleans(ComparisonOp node) {

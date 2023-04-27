@@ -20,7 +20,7 @@ STX $0100
 CLC
 CMP $0100
 BEQ false0
-BCC false0
+BCS false0
 LDA #1
 JMP store0
 false0:
