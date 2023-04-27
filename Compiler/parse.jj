@@ -93,25 +93,25 @@ TOKEN : /* ID */
 { <ID: (["a"-"z", "A"-"Z", "_"]) (["a"-"z", "A"-"Z", "_", "0"-"9"])*> }
 
 
-Node prog() :
+Node Prog() :
 {
  Prog prog = new Prog();
  Node stmt = null;
  }
-{( stmt = stmt() { prog.addChild(stmt); } )* < END_OF_FILE > < END_OF_LINE >
+{( stmt = Stmt() { prog.addChild(stmt); } )* < END_OF_FILE > < END_OF_LINE >
 {
     return prog;
 }
 }
 
-Node dcl() :
+Node Dcl() :
 {
  boolean hasExpr = false;
  boolean isPointer = false;
  Node expr = null;
  Token t;
  }
-{ < FLOATDCL > t = < ID > ( < ASSIGN > expr = expr() { hasExpr = true; } )?
+{ < FLOATDCL > t = < ID > ( < ASSIGN > expr = Expr() { hasExpr = true; } )?
 {
     /*if (hasExpr && isPointer) {
        return null;
@@ -124,7 +124,7 @@ Node dcl() :
        return new FloatDcl(t.image);
    }
 }
-| < INTDCL > t = < ID > ( < ASSIGN > expr = expr() { hasExpr = true; } )?
+| < INTDCL > t = < ID > ( < ASSIGN > expr = Expr() { hasExpr = true; } )?
 {
      /*if (hasExpr && isPointer) {
         return null;
@@ -136,7 +136,7 @@ Node dcl() :
         return new IntDcl(t.image);
     }
 }
-| < BOOLDCL > t = < ID > ( < ASSIGN > expr = expr() { hasExpr = true; } )?
+| < BOOLDCL > t = < ID > ( < ASSIGN > expr = Expr() { hasExpr = true; } )?
 {
     /*if (hasExpr && isPointer) {
     return null;
@@ -151,7 +151,7 @@ Node dcl() :
 }
 }
 
-Node stmt() :
+Node Stmt() :
 {
     boolean isPointer = false;
     Node ifStmt;
@@ -159,7 +159,7 @@ Node stmt() :
     Node expr;
     Token t;
 }
-{ t = < ID > < ASSIGN > expr = expr() < END_OF_LINE >
+{ t = < ID > < ASSIGN > expr = Expr() < END_OF_LINE >
 {
 /*
 ( < MULTIPLY > { isPointer = true; } )?
@@ -167,16 +167,16 @@ Node stmt() :
     Id id = new Id(t.image);
     return new AssignmentOp(t.image, id, expr);
 }
-| ifStmt = ifStmt()
+| ifStmt = IfStmt()
 {
 return ifStmt;
 }
-| dcl = dcl() < END_OF_LINE >
+| dcl = Dcl() < END_OF_LINE >
 {
     return dcl;
 }
 }
-Node ifStmt() :
+Node IfStmt() :
 {
  Node expr;
  Node ifBlock;
@@ -184,7 +184,7 @@ Node ifStmt() :
  boolean withElse = false;
 }
 {
-< IF > < LPAREN > expr = expr() < RPAREN > < LBRACE > ifBlock = block() < RBRACE > ( < ELSE > < LBRACE > elseBlock = block() < RBRACE > { withElse = true; })?
+< IF > < LPAREN > expr = Expr() < RPAREN > < LBRACE > ifBlock = Block() < RBRACE > ( < ELSE > < LBRACE > elseBlock = Block() < RBRACE > { withElse = true; })?
 {
     if (withElse) {
         return new IfElseStmt(expr, ifBlock, elseBlock);
@@ -194,37 +194,37 @@ Node ifStmt() :
 }
 }
 
-Node block() :
+Node Block() :
 {
    Block block = new Block();
    Node stmt = null;
 }
 {
-( stmt = stmt() { block.addChild(stmt); } )*
+( stmt = Stmt() { block.addChild(stmt); } )*
 {
     return block;
 }
 }
 
-Node expr() :
+Node Expr() :
 {
  Node expr;
  Node orOp = null;
 }
-{ expr = orOp()
+{ expr = OrOp()
 {
     return orOp;
 }
 }
 
-Node orOp() :
+Node OrOp() :
 {
     boolean hasExpr = false;
     Node andOp;
     Node expr = null;
     Token op = null;
 }
-{ andOp = andOp() (( op = <OR> ) expr = expr() { hasExpr = true; } )?
+{ andOp = AndOp() (( op = <OR> ) expr = Expr() { hasExpr = true; } )?
 {
     if (hasExpr) {
         return new ComparisonOp(op.image, andOp, expr);
@@ -234,14 +234,14 @@ Node orOp() :
 }
 }
 
-Node andOp() :
+Node AndOp() :
 {
     boolean hasAndOp = false;
     Node equalityOp;
     Node andOp = null;
     Token op = null;
 }
-{equalityOp = equalityOp() (( op = <AND>) andOp = andOp() {hasAndOp = true;})?
+{equalityOp = EqualityOp() (( op = <AND>) andOp = AndOp() {hasAndOp = true;})?
 {
     if (hasAndOp) {
         return new ComparisonOp(op.image, equalityOp, andOp);
@@ -251,14 +251,14 @@ Node andOp() :
 }
 }
 
-Node equalityOp() :
+Node EqualityOp() :
 {
     boolean hasEqualityOp = false;
     Node comparisonOp;
     Node equalityOp = null;
     Token op = null;
 }
-{comparisonOp = comparisonOp() (( op = <EQ> | op = <NE>) equalityOp = equalityOp() {hasEqualityOp = true;})?
+{comparisonOp = ComparisonOp() (( op = <EQ> | op = <NE>) equalityOp = EqualityOp() {hasEqualityOp = true;})?
 {
     if (hasEqualityOp) {
         return new ComparisonOp(op.image, comparisonOp, equalityOp);
@@ -267,14 +267,15 @@ Node equalityOp() :
     }
 }
 }
-Node comparisonOp() :
+
+Node ComparisonOp() :
 {
     boolean hasComparisonOp = false;
      Node arithmeticOp;
      Node comparisonOp = null;
      Token op = null;
  }
-{arithmeticOp = arithmeticOp() (( op = <LT> | op = <GT> | op = <GE> | op = <LE> )comparisonOp = comparisonOp() { hasComparisonOp = true; })?
+{arithmeticOp = ArithmeticOp() (( op = <LT> | op = <GT> | op = <GE> | op = <LE> )comparisonOp = ComparisonOp() { hasComparisonOp = true; })?
 {
     if (hasComparisonOp) {
         return new ComparisonOp(op.image, arithmeticOp, comparisonOp);
@@ -284,14 +285,14 @@ Node comparisonOp() :
 }
 }
 
-Node arithmeticOp() :
+Node ArithmeticOp() :
 {
     boolean hasArithmeticOp = false;
     Node negationOp;
     Node arithmeticOp = null;
     Token op = null;
  }
-{ negationOp = negationOp() ((op = <PLUS> | op = <MINUS> ) arithmeticOp = arithmeticOp() { hasArithmeticOp = true; })?
+{ negationOp = NegationOp() ((op = <PLUS> | op = <MINUS> ) arithmeticOp = ArithmeticOp() { hasArithmeticOp = true; })?
 {
     if (hasArithmeticOp) {
         return new ArithmeticOp(op.image, negationOp, arithmeticOp);
@@ -299,14 +300,15 @@ Node arithmeticOp() :
         return negationOp;
     }
 }
+
 }
-Node negationOp() :
+Node NegationOp() :
 {
     Node factor;
     boolean hasNegationOp = false;
 }
 {
- ( <NOT> { hasNegationOp = true; })? factor = factor()
+ ( <NOT> { hasNegationOp = true; })? factor = Factor()
 {
     if (hasNegationOp) {
         return new NegationOp(factor);
@@ -316,22 +318,22 @@ Node negationOp() :
 }
 }
 
-Node factor() :
+Node Factor() :
 {
     Node val;
     Node expr;
  }
-{ <LPAREN> expr = expr() <RPAREN>
+{ <LPAREN> expr = Expr() <RPAREN>
 {
     return expr;
 }
-| val = val()
+| val = Val()
 {
     return val;
 }
 }
 
-Node val() :
+Node Val() :
 {
     Token t;
  }
