@@ -85,7 +85,6 @@ TOKEN : /* ASSIGNMENT OPERATION AND BASIC CONTROL STRUCTURE */
 | <LBRACE: "{">
 | <RBRACE: "}">
 | <END_OF_LINE: ";">
-| <END_OF_FILE: "BYE">
 | <ADDRESS: "&">
 }
 
@@ -98,7 +97,7 @@ Node Prog() :
  Prog prog = new Prog();
  Node stmt = null;
  }
-{( stmt = Stmt() { prog.addChild(stmt); } )* < END_OF_FILE > < END_OF_LINE >
+{( stmt = Stmt() { prog.addChild(stmt); } )*
 {
     return prog;
 }

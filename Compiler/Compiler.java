@@ -55,8 +55,6 @@ public class Compiler implements CompilerConstants {
       stmt = Stmt();
 prog.addChild(stmt);
     }
-    jj_consume_token(END_OF_FILE);
-    jj_consume_token(END_OF_LINE);
 {if ("" != null) return prog;}
     throw new Error("Missing return statement in function");
 }
@@ -536,7 +534,7 @@ if (hasNegationOp) {
 	   jj_la1_0 = new int[] {0x2004140,0x10000000,0x10000000,0x10000000,0x2000140,0x2004140,0x8000,0x2004140,0x20000,0x10000,0x180000,0x180000,0x1e00000,0x1e00000,0x1800,0x1800,0x40000,0x2c000280,0xc000000,0xc000280,};
 	}
 	private static void jj_la1_init_1() {
-	   jj_la1_1 = new int[] {0x10,0x0,0x0,0x0,0x0,0x10,0x0,0x10,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x10,0x0,0x10,};
+	   jj_la1_1 = new int[] {0x8,0x0,0x0,0x0,0x0,0x8,0x0,0x8,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x8,0x0,0x8,};
 	}
 
   /** Constructor with InputStream. */
@@ -661,7 +659,7 @@ if (hasNegationOp) {
   /** Generate ParseException. */
   public ParseException generateParseException() {
 	 jj_expentries.clear();
-	 boolean[] la1tokens = new boolean[37];
+	 boolean[] la1tokens = new boolean[36];
 	 if (jj_kind >= 0) {
 	   la1tokens[jj_kind] = true;
 	   jj_kind = -1;
@@ -678,7 +676,7 @@ if (hasNegationOp) {
 		 }
 	   }
 	 }
-	 for (int i = 0; i < 37; i++) {
+	 for (int i = 0; i < 36; i++) {
 	   if (la1tokens[i]) {
 		 jj_expentry = new int[1];
 		 jj_expentry[0] = i;
