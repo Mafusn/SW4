@@ -4,9 +4,6 @@ import AST.*;
 import AST.CodeGeneration.CodeGenerator;
 import AST.Nodes.*;
 import AST.SymbolTableFilling.SymbolTableFilling;
-import java.io.*;
-import java.util.Scanner;
-import java.util.Arrays;
 
 public class Compiler implements CompilerConstants {
     public static void main(String[] args) {
@@ -90,7 +87,7 @@ hasExpr = true;
 
    if (hasExpr) {
        FloatDcl floatDcl = new FloatDcl(t.image);
-       {if ("" != null) return new Assigning(t.image, floatDcl, expr);}
+       {if ("" != null) return new AssignmentOp(t.image, floatDcl, expr);}
    } else {
        {if ("" != null) return new FloatDcl(t.image);}
    }
@@ -115,7 +112,7 @@ hasExpr = true;
         } else */
     if (hasExpr) {
         IntDcl intDcl = new IntDcl(t.image);
-        {if ("" != null) return new Assigning(t.image, intDcl, expr);}
+        {if ("" != null) return new AssignmentOp(t.image, intDcl, expr);}
     } else {
         {if ("" != null) return new IntDcl(t.image);}
     }
@@ -141,7 +138,7 @@ hasExpr = true;
     } else */
     if (hasExpr) {
         BoolDcl boolDcl = new BoolDcl(t.image);
-        {if ("" != null) return new Assigning(t.image, boolDcl, expr);}
+        {if ("" != null) return new AssignmentOp(t.image, boolDcl, expr);}
     } else {
         {if ("" != null) return new BoolDcl(t.image);}
     }
@@ -170,16 +167,7 @@ hasExpr = true;
 ( < MULTIPLY > { isPointer = true; } )?
  */
     Id id = new Id(t.image);
-    {if ("" != null) return new Assigning(t.image, id, expr);}
-      break;
-      }
-    case PRINT:{
-      jj_consume_token(PRINT);
-      jj_consume_token(LPAREN);
-      t = jj_consume_token(ID);
-      jj_consume_token(RPAREN);
-      jj_consume_token(END_OF_LINE);
-{if ("" != null) return new Print(t.image);}
+    {if ("" != null) return new AssignmentOp(t.image, id, expr);}
       break;
       }
     case IF:{
@@ -228,9 +216,9 @@ withElse = true;
       ;
     }
 if (withElse) {
-        {if ("" != null) return new IfElse(expr, ifBlock, elseBlock);}
+        {if ("" != null) return new IfElseStmt(expr, ifBlock, elseBlock);}
     } else {
-        {if ("" != null) return new If(expr, ifBlock);}
+        {if ("" != null) return new IfStmt(expr, ifBlock);}
     }
     throw new Error("Missing return statement in function");
 }
@@ -277,7 +265,7 @@ hasExpr = true;
       ;
     }
 if (hasExpr) {
-        {if ("" != null) return new BinOperator(op.image, andTerm, expr);}
+        {if ("" != null) return new ComparisonOp(op.image, andTerm, expr);}
     } else {
         {if ("" != null) return andTerm;}
     }
@@ -301,7 +289,7 @@ hasAnd = true;
       ;
     }
 if (hasAnd) {
-        {if ("" != null) return new BinOperator(op.image, equalityTerm, andTerm);}
+        {if ("" != null) return new ComparisonOp(op.image, equalityTerm, andTerm);}
     } else {
         {if ("" != null) return equalityTerm;}
     }
@@ -339,7 +327,7 @@ hasEq = true;
       ;
     }
 if (hasEq) {
-        {if ("" != null) return new BinOperator(op.image, relationalTerm, equalityTerm);}
+        {if ("" != null) return new ComparisonOp(op.image, relationalTerm, equalityTerm);}
     } else {
         {if ("" != null) return relationalTerm;}
     }
@@ -387,7 +375,7 @@ hasTerm = true;
       ;
     }
 if (hasTerm) {
-        {if ("" != null) return new BinOperator(op.image, additiveTerm, relationalTerm);}
+        {if ("" != null) return new ComparisonOp(op.image, additiveTerm, relationalTerm);}
     } else {
         {if ("" != null) return additiveTerm;}
     }
@@ -425,7 +413,7 @@ hasAdditiveTerm = true;
       ;
     }
 if (hasAdditiveTerm) {
-        {if ("" != null) return new Computing(op.image, notTerm, additiveTerm);}
+        {if ("" != null) return new ArithmeticOp(op.image, notTerm, additiveTerm);}
     } else {
         {if ("" != null) return notTerm;}
     }
@@ -446,7 +434,7 @@ hasNotTerm = true;
     }
     factor = factor();
 if (hasNotTerm) {
-        {if ("" != null) return new Not(factor);}
+        {if ("" != null) return new NegationOp(factor);}
     } else {
         {if ("" != null) return factor;}
     }

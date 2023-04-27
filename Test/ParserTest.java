@@ -1,5 +1,4 @@
 import AST.Nodes.*;
-import org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
 
 import java.io.FileInputStream;
@@ -150,8 +149,8 @@ class ParserTest {
         Id id2 = new Id("b");
         IntNum intVal = new IntNum("5");
         IntNum intVal2 = new IntNum("10");
-        Assigning intAssign = new Assigning("a",id, intVal);
-        Assigning intAssign2 = new Assigning("b",id2, intVal2);
+        AssignmentOp intAssign = new AssignmentOp("a",id, intVal);
+        AssignmentOp intAssign2 = new AssignmentOp("b",id2, intVal2);
         expectedAST.addChild(intAssign);
         expectedAST.addChild(intAssign2);
 
@@ -179,9 +178,9 @@ class ParserTest {
         IntNum intVal = new IntNum("5");
         IntNum intVal2 = new IntNum("10");
         IntNum intVal3 = new IntNum("10");
-        Assigning intAssign = new Assigning("a",id, intVal);
-        Assigning intAssign2 = new Assigning("b",id2, intVal2);
-        Assigning intAssign3 = new Assigning("c",id3, intVal3);
+        AssignmentOp intAssign = new AssignmentOp("a",id, intVal);
+        AssignmentOp intAssign2 = new AssignmentOp("b",id2, intVal2);
+        AssignmentOp intAssign3 = new AssignmentOp("c",id3, intVal3);
 
         expectedAST.addChild(intAssign);
         expectedAST.addChild(intAssign2);

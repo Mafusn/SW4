@@ -8,9 +8,6 @@ import AST.*;
 import AST.CodeGeneration.CodeGenerator;
 import AST.Nodes.*;
 import AST.SymbolTableFilling.SymbolTableFilling;
-import java.io.*;
-import java.util.Scanner;
-import java.util.Arrays;
 
 public class Compiler {
     public static void main(String[] args) {
@@ -45,7 +42,7 @@ public class Compiler {
 
 PARSER_END(Compiler)
 
-SKIP:
+SKIP: /* SKIP */
 { " "
 | "\t"
 | "\n"
@@ -53,7 +50,7 @@ SKIP:
 | <COMMENT : "/*" (~["/"] | "/" ~["/"])* "*/" >
 }
 
-TOKEN : /* Numbers */
+TOKEN : /* NUMBERS AND ARITHMETIC OPERATIONS */
 { <INTDCL: "int">
 | <INT: ( < DIGIT > )>
 | <FLOATDCL: "float">
@@ -81,7 +78,7 @@ TOKEN: /* LOGIC */
 | <FALSE: "false" >
 }
 
-TOKEN : /* Operators and constructs */
+TOKEN : /* ASSIGNMENT OPERATION AND BASIC CONTROL STRUCTURE */
 { <ASSIGN: "=">
 | <LPAREN: "(">
 | <RPAREN: ")">
@@ -89,7 +86,6 @@ TOKEN : /* Operators and constructs */
 | <RBRACE: "}">
 | <END_OF_LINE: ";">
 | <END_OF_FILE: "BYE">
-| <PRINT: "print">
 | <ADDRESS: "&">
 }
 
@@ -123,7 +119,7 @@ Node dcl() :
 
    if (hasExpr) {
        FloatDcl floatDcl = new FloatDcl(t.image);
-       return new Assigning(t.image, floatDcl, expr);
+       return new AssignmentOp(t.image, floatDcl, expr);
    } else {
        return new FloatDcl(t.image);
    }
@@ -135,7 +131,7 @@ Node dcl() :
         } else */
     if (hasExpr) {
         IntDcl intDcl = new IntDcl(t.image);
-        return new Assigning(t.image, intDcl, expr);
+        return new AssignmentOp(t.image, intDcl, expr);
     } else {
         return new IntDcl(t.image);
     }
@@ -148,7 +144,7 @@ Node dcl() :
     } else */
     if (hasExpr) {
         BoolDcl boolDcl = new BoolDcl(t.image);
-        return new Assigning(t.image, boolDcl, expr);
+        return new AssignmentOp(t.image, boolDcl, expr);
     } else {
         return new BoolDcl(t.image);
     }
@@ -169,11 +165,7 @@ Node stmt() :
 ( < MULTIPLY > { isPointer = true; } )?
  */
     Id id = new Id(t.image);
-    return new Assigning(t.image, id, expr);
-}
-| < PRINT > < LPAREN > t = < ID > < RPAREN > < END_OF_LINE >
-{
-    return new Print(t.image);
+    return new AssignmentOp(t.image, id, expr);
 }
 | ifStmt = ifStmt()
 {
@@ -195,9 +187,9 @@ Node ifStmt() :
 < IF > < LPAREN > expr = expr() < RPAREN > < LBRACE > ifBlock = block() < RBRACE > ( < ELSE > < LBRACE > elseBlock = block() < RBRACE > { withElse = true; })?
 {
     if (withElse) {
-        return new IfElse(expr, ifBlock, elseBlock);
+        return new IfElseStmt(expr, ifBlock, elseBlock);
     } else {
-        return new If(expr, ifBlock);
+        return new IfStmt(expr, ifBlock);
     }
 }
 }
@@ -216,97 +208,108 @@ Node block() :
 
 Node expr() :
 {
+ Node expr;
+ Node orOp = null;
+}
+{ expr = orOp()
+{
+    return orOp;
+}
+}
+
+Node orOp() :
+{
     boolean hasExpr = false;
-    Node andTerm;
+    Node andOp;
     Node expr = null;
     Token op = null;
 }
-{ andTerm = andTerm() (( op = <OR> ) expr = expr() { hasExpr = true; } )?
+{ andOp = andOp() (( op = <OR> ) expr = expr() { hasExpr = true; } )?
 {
     if (hasExpr) {
-        return new BinOperator(op.image, andTerm, expr);
+        return new ComparisonOp(op.image, andOp, expr);
     } else {
-        return andTerm;
+        return andOp;
     }
 }
 }
 
-Node andTerm() :
+Node andOp() :
 {
-    boolean hasAnd = false;
-    Node equalityTerm;
-    Node andTerm = null;
+    boolean hasAndOp = false;
+    Node equalityOp;
+    Node andOp = null;
     Token op = null;
 }
-{equalityTerm = equalityTerm() (( op = <AND>) andTerm = andTerm() {hasAnd = true;})?
+{equalityOp = equalityOp() (( op = <AND>) andOp = andOp() {hasAndOp = true;})?
 {
-    if (hasAnd) {
-        return new BinOperator(op.image, equalityTerm, andTerm);
+    if (hasAndOp) {
+        return new ComparisonOp(op.image, equalityOp, andOp);
     } else {
-        return equalityTerm;
+        return equalityOp;
     }
 }
 }
 
-Node equalityTerm() :
+Node equalityOp() :
 {
-    boolean hasEq = false;
-    Node relationalTerm;
-    Node equalityTerm = null;
+    boolean hasEqualityOp = false;
+    Node comparisonOp;
+    Node equalityOp = null;
     Token op = null;
 }
-{relationalTerm = relationalTerm() (( op = <EQ> | op = <NE>) equalityTerm = equalityTerm() {hasEq = true;})?
+{comparisonOp = comparisonOp() (( op = <EQ> | op = <NE>) equalityOp = equalityOp() {hasEqualityOp = true;})?
 {
-    if (hasEq) {
-        return new BinOperator(op.image, relationalTerm, equalityTerm);
+    if (hasEqualityOp) {
+        return new ComparisonOp(op.image, comparisonOp, equalityOp);
     } else {
-        return relationalTerm;
+        return comparisonOp;
     }
 }
 }
-Node relationalTerm() :
+Node comparisonOp() :
 {
-    boolean hasTerm = false;
-     Node additiveTerm;
-     Node relationalTerm = null;
+    boolean hasComparisonOp = false;
+     Node arithmeticOp;
+     Node comparisonOp = null;
      Token op = null;
  }
-{additiveTerm = additiveTerm() (( op = <LT> | op = <GT> | op = <GE> | op = <LE> )relationalTerm = relationalTerm() { hasTerm = true; })?
+{arithmeticOp = arithmeticOp() (( op = <LT> | op = <GT> | op = <GE> | op = <LE> )comparisonOp = comparisonOp() { hasComparisonOp = true; })?
 {
-    if (hasTerm) {
-        return new BinOperator(op.image, additiveTerm, relationalTerm);
+    if (hasComparisonOp) {
+        return new ComparisonOp(op.image, arithmeticOp, comparisonOp);
     } else {
-        return additiveTerm;
+        return arithmeticOp;
     }
 }
 }
 
-Node additiveTerm() :
+Node arithmeticOp() :
 {
-    boolean hasAdditiveTerm = false;
-    Node notTerm;
-    Node additiveTerm = null;
+    boolean hasArithmeticOp = false;
+    Node negationOp;
+    Node arithmeticOp = null;
     Token op = null;
  }
-{ notTerm = notTerm() ((op = <PLUS> | op = <MINUS> ) additiveTerm = additiveTerm() { hasAdditiveTerm = true; })?
+{ negationOp = negationOp() ((op = <PLUS> | op = <MINUS> ) arithmeticOp = arithmeticOp() { hasArithmeticOp = true; })?
 {
-    if (hasAdditiveTerm) {
-        return new Computing(op.image, notTerm, additiveTerm);
+    if (hasArithmeticOp) {
+        return new ArithmeticOp(op.image, negationOp, arithmeticOp);
     } else {
-        return notTerm;
+        return negationOp;
     }
 }
 }
-Node notTerm() :
+Node negationOp() :
 {
     Node factor;
-    boolean hasNotTerm = false;
+    boolean hasNegationOp = false;
 }
 {
- ( <NOT> { hasNotTerm = true; })? factor = factor()
+ ( <NOT> { hasNegationOp = true; })? factor = factor()
 {
-    if (hasNotTerm) {
-        return new Not(factor);
+    if (hasNegationOp) {
+        return new NegationOp(factor);
     } else {
         return factor;
     }
