@@ -69,7 +69,10 @@ public class CodeGenerator implements Visitor {
     public void visit(Assigning node) {
         if (node.getDeclaration() instanceof Id) {
             node.getExpression().accept(this);
-            clearTheBottomOfStackForComputing();
+            if (node.getExpression() instanceof Computing) {
+                clearTheBottomOfStackForComputing();
+            }
+
             if (node.getExpression() instanceof Computing) {
                 codeBuilder.append("TAX\n");
             }
@@ -77,7 +80,10 @@ public class CodeGenerator implements Visitor {
         } else {
             node.getDeclaration().accept(this);
             node.getExpression().accept(this);
-            clearTheBottomOfStackForComputing();
+            if (node.getExpression() instanceof Computing) {
+                clearTheBottomOfStackForComputing();
+            }
+
             if (!(node.getExpression() instanceof Computing)) {
                 codeBuilder.append(InstructionSet.TXA.getInstruction() + "\n");
             }
@@ -227,7 +233,9 @@ public class CodeGenerator implements Visitor {
         boolean isRightOperandComputing = node.getRightOperand() instanceof Computing;
 
         if (isLeftOperandComputing) {
-            operators.add(node.getOperator());
+            if (!isRightOperandComputing) {
+                operators.add(node.getOperator());
+            }
             evaluateParentheses((Computing) node.getLeftOperand());
             codeBuilder.append(InstructionSet.STA.getInstruction() + " $01" + String.format("%02d", computingCount) +"\n");
             computingCount++;
@@ -273,6 +281,7 @@ public class CodeGenerator implements Visitor {
             }
             computingCount--;
         }
+        operators.clear();
         computingCount = 0;
     }
 
@@ -285,7 +294,8 @@ public class CodeGenerator implements Visitor {
         {
             codeBuilder.append(InstructionSet.TXA.getInstruction() + "\n");
             pushAccumulator();
-        } else if (node.getLeftOperand() instanceof Computing) {
+        } else if (node.getLeftOperand() instanceof
+                Computing) {
             clearTheBottomOfStackForComputing();
             pushAccumulator();
         }
