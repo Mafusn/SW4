@@ -13,7 +13,7 @@ public class Compiler {
     public static void main(String[] args) {
         try {
             Compiler compiler = new Compiler(new java.io.FileReader("code.txt"));
-            Node prog = compiler.prog();
+            Node prog = compiler.Prog();
 
             PrettyPrint prettyPrint = new PrettyPrint();
             SymbolTableFilling symbolTableFilling = new SymbolTableFilling();
@@ -209,11 +209,10 @@ Node Block() :
 Node Expr() :
 {
  Node expr;
- Node orOp = null;
 }
 { expr = OrOp()
 {
-    return orOp;
+    return expr;
 }
 }
 

@@ -9,7 +9,7 @@ public class Compiler implements CompilerConstants {
     public static void main(String[] args) {
         try {
             Compiler compiler = new Compiler(new java.io.FileReader("code.txt"));
-            Node prog = compiler.prog();
+            Node prog = compiler.Prog();
 
             PrettyPrint prettyPrint = new PrettyPrint();
             SymbolTableFilling symbolTableFilling = new SymbolTableFilling();
@@ -35,7 +35,7 @@ public class Compiler implements CompilerConstants {
         }
     }
 
-  final public Node prog() throws ParseException {Prog prog = new Prog();
+  final public Node Prog() throws ParseException {Prog prog = new Prog();
  Node stmt = null;
     label_1:
     while (true) {
@@ -44,7 +44,6 @@ public class Compiler implements CompilerConstants {
       case FLOATDCL:
       case IF:
       case BOOLDCL:
-      case PRINT:
       case ID:{
         ;
         break;
@@ -53,7 +52,7 @@ public class Compiler implements CompilerConstants {
         jj_la1[0] = jj_gen;
         break label_1;
       }
-      stmt = stmt();
+      stmt = Stmt();
 prog.addChild(stmt);
     }
     jj_consume_token(END_OF_FILE);
@@ -62,7 +61,7 @@ prog.addChild(stmt);
     throw new Error("Missing return statement in function");
 }
 
-  final public Node dcl() throws ParseException {boolean hasExpr = false;
+  final public Node Dcl() throws ParseException {boolean hasExpr = false;
  boolean isPointer = false;
  Node expr = null;
  Token t;
@@ -73,7 +72,7 @@ prog.addChild(stmt);
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
       case ASSIGN:{
         jj_consume_token(ASSIGN);
-        expr = expr();
+        expr = Expr();
 hasExpr = true;
         break;
         }
@@ -99,7 +98,7 @@ hasExpr = true;
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
       case ASSIGN:{
         jj_consume_token(ASSIGN);
-        expr = expr();
+        expr = Expr();
 hasExpr = true;
         break;
         }
@@ -124,7 +123,7 @@ hasExpr = true;
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
       case ASSIGN:{
         jj_consume_token(ASSIGN);
-        expr = expr();
+        expr = Expr();
 hasExpr = true;
         break;
         }
@@ -152,7 +151,7 @@ hasExpr = true;
     throw new Error("Missing return statement in function");
 }
 
-  final public Node stmt() throws ParseException {boolean isPointer = false;
+  final public Node Stmt() throws ParseException {boolean isPointer = false;
     Node ifStmt;
     Node dcl;
     Node expr;
@@ -161,7 +160,7 @@ hasExpr = true;
     case ID:{
       t = jj_consume_token(ID);
       jj_consume_token(ASSIGN);
-      expr = expr();
+      expr = Expr();
       jj_consume_token(END_OF_LINE);
 /*
 ( < MULTIPLY > { isPointer = true; } )?
@@ -171,14 +170,14 @@ hasExpr = true;
       break;
       }
     case IF:{
-      ifStmt = ifStmt();
+      ifStmt = IfStmt();
 {if ("" != null) return ifStmt;}
       break;
       }
     case INTDCL:
     case FLOATDCL:
     case BOOLDCL:{
-      dcl = dcl();
+      dcl = Dcl();
       jj_consume_token(END_OF_LINE);
 {if ("" != null) return dcl;}
       break;
@@ -191,22 +190,22 @@ hasExpr = true;
     throw new Error("Missing return statement in function");
 }
 
-  final public Node ifStmt() throws ParseException {Node expr;
+  final public Node IfStmt() throws ParseException {Node expr;
  Node ifBlock;
  Node elseBlock = null;
  boolean withElse = false;
     jj_consume_token(IF);
     jj_consume_token(LPAREN);
-    expr = expr();
+    expr = Expr();
     jj_consume_token(RPAREN);
     jj_consume_token(LBRACE);
-    ifBlock = block();
+    ifBlock = Block();
     jj_consume_token(RBRACE);
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
     case ELSE:{
       jj_consume_token(ELSE);
       jj_consume_token(LBRACE);
-      elseBlock = block();
+      elseBlock = Block();
       jj_consume_token(RBRACE);
 withElse = true;
       break;
@@ -223,7 +222,7 @@ if (withElse) {
     throw new Error("Missing return statement in function");
 }
 
-  final public Node block() throws ParseException {Block block = new Block();
+  final public Node Block() throws ParseException {Block block = new Block();
    Node stmt = null;
     label_2:
     while (true) {
@@ -232,7 +231,6 @@ if (withElse) {
       case FLOATDCL:
       case IF:
       case BOOLDCL:
-      case PRINT:
       case ID:{
         ;
         break;
@@ -241,22 +239,28 @@ if (withElse) {
         jj_la1[7] = jj_gen;
         break label_2;
       }
-      stmt = stmt();
+      stmt = Stmt();
 block.addChild(stmt);
     }
 {if ("" != null) return block;}
     throw new Error("Missing return statement in function");
 }
 
-  final public Node expr() throws ParseException {boolean hasExpr = false;
-    Node andTerm;
+  final public Node Expr() throws ParseException {Node expr;
+    expr = OrOp();
+{if ("" != null) return expr;}
+    throw new Error("Missing return statement in function");
+}
+
+  final public Node OrOp() throws ParseException {boolean hasExpr = false;
+    Node andOp;
     Node expr = null;
     Token op = null;
-    andTerm = andTerm();
+    andOp = AndOp();
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
     case OR:{
       op = jj_consume_token(OR);
-      expr = expr();
+      expr = Expr();
 hasExpr = true;
       break;
       }
@@ -265,42 +269,42 @@ hasExpr = true;
       ;
     }
 if (hasExpr) {
-        {if ("" != null) return new ComparisonOp(op.image, andTerm, expr);}
+        {if ("" != null) return new ComparisonOp(op.image, andOp, expr);}
     } else {
-        {if ("" != null) return andTerm;}
+        {if ("" != null) return andOp;}
     }
     throw new Error("Missing return statement in function");
 }
 
-  final public Node andTerm() throws ParseException {boolean hasAnd = false;
-    Node equalityTerm;
-    Node andTerm = null;
+  final public Node AndOp() throws ParseException {boolean hasAndOp = false;
+    Node equalityOp;
+    Node andOp = null;
     Token op = null;
-    equalityTerm = equalityTerm();
+    equalityOp = EqualityOp();
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
     case AND:{
       op = jj_consume_token(AND);
-      andTerm = andTerm();
-hasAnd = true;
+      andOp = AndOp();
+hasAndOp = true;
       break;
       }
     default:
       jj_la1[9] = jj_gen;
       ;
     }
-if (hasAnd) {
-        {if ("" != null) return new ComparisonOp(op.image, equalityTerm, andTerm);}
+if (hasAndOp) {
+        {if ("" != null) return new ComparisonOp(op.image, equalityOp, andOp);}
     } else {
-        {if ("" != null) return equalityTerm;}
+        {if ("" != null) return equalityOp;}
     }
     throw new Error("Missing return statement in function");
 }
 
-  final public Node equalityTerm() throws ParseException {boolean hasEq = false;
-    Node relationalTerm;
-    Node equalityTerm = null;
+  final public Node EqualityOp() throws ParseException {boolean hasEqualityOp = false;
+    Node comparisonOp;
+    Node equalityOp = null;
     Token op = null;
-    relationalTerm = relationalTerm();
+    comparisonOp = ComparisonOp();
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
     case EQ:
     case NE:{
@@ -318,27 +322,27 @@ if (hasAnd) {
         jj_consume_token(-1);
         throw new ParseException();
       }
-      equalityTerm = equalityTerm();
-hasEq = true;
+      equalityOp = EqualityOp();
+hasEqualityOp = true;
       break;
       }
     default:
       jj_la1[11] = jj_gen;
       ;
     }
-if (hasEq) {
-        {if ("" != null) return new ComparisonOp(op.image, relationalTerm, equalityTerm);}
+if (hasEqualityOp) {
+        {if ("" != null) return new ComparisonOp(op.image, comparisonOp, equalityOp);}
     } else {
-        {if ("" != null) return relationalTerm;}
+        {if ("" != null) return comparisonOp;}
     }
     throw new Error("Missing return statement in function");
 }
 
-  final public Node relationalTerm() throws ParseException {boolean hasTerm = false;
-     Node additiveTerm;
-     Node relationalTerm = null;
+  final public Node ComparisonOp() throws ParseException {boolean hasComparisonOp = false;
+     Node arithmeticOp;
+     Node comparisonOp = null;
      Token op = null;
-    additiveTerm = additiveTerm();
+    arithmeticOp = ArithmeticOp();
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
     case LT:
     case LE:
@@ -366,27 +370,27 @@ if (hasEq) {
         jj_consume_token(-1);
         throw new ParseException();
       }
-      relationalTerm = relationalTerm();
-hasTerm = true;
+      comparisonOp = ComparisonOp();
+hasComparisonOp = true;
       break;
       }
     default:
       jj_la1[13] = jj_gen;
       ;
     }
-if (hasTerm) {
-        {if ("" != null) return new ComparisonOp(op.image, additiveTerm, relationalTerm);}
+if (hasComparisonOp) {
+        {if ("" != null) return new ComparisonOp(op.image, arithmeticOp, comparisonOp);}
     } else {
-        {if ("" != null) return additiveTerm;}
+        {if ("" != null) return arithmeticOp;}
     }
     throw new Error("Missing return statement in function");
 }
 
-  final public Node additiveTerm() throws ParseException {boolean hasAdditiveTerm = false;
-    Node notTerm;
-    Node additiveTerm = null;
+  final public Node ArithmeticOp() throws ParseException {boolean hasArithmeticOp = false;
+    Node negationOp;
+    Node arithmeticOp = null;
     Token op = null;
-    notTerm = notTerm();
+    negationOp = NegationOp();
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
     case PLUS:
     case MINUS:{
@@ -404,36 +408,36 @@ if (hasTerm) {
         jj_consume_token(-1);
         throw new ParseException();
       }
-      additiveTerm = additiveTerm();
-hasAdditiveTerm = true;
+      arithmeticOp = ArithmeticOp();
+hasArithmeticOp = true;
       break;
       }
     default:
       jj_la1[15] = jj_gen;
       ;
     }
-if (hasAdditiveTerm) {
-        {if ("" != null) return new ArithmeticOp(op.image, notTerm, additiveTerm);}
+if (hasArithmeticOp) {
+        {if ("" != null) return new ArithmeticOp(op.image, negationOp, arithmeticOp);}
     } else {
-        {if ("" != null) return notTerm;}
+        {if ("" != null) return negationOp;}
     }
     throw new Error("Missing return statement in function");
 }
 
-  final public Node notTerm() throws ParseException {Node factor;
-    boolean hasNotTerm = false;
+  final public Node NegationOp() throws ParseException {Node factor;
+    boolean hasNegationOp = false;
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
     case NOT:{
       jj_consume_token(NOT);
-hasNotTerm = true;
+hasNegationOp = true;
       break;
       }
     default:
       jj_la1[16] = jj_gen;
       ;
     }
-    factor = factor();
-if (hasNotTerm) {
+    factor = Factor();
+if (hasNegationOp) {
         {if ("" != null) return new NegationOp(factor);}
     } else {
         {if ("" != null) return factor;}
@@ -441,12 +445,12 @@ if (hasNotTerm) {
     throw new Error("Missing return statement in function");
 }
 
-  final public Node factor() throws ParseException {Node val;
+  final public Node Factor() throws ParseException {Node val;
     Node expr;
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
     case LPAREN:{
       jj_consume_token(LPAREN);
-      expr = expr();
+      expr = Expr();
       jj_consume_token(RPAREN);
 {if ("" != null) return expr;}
       break;
@@ -456,7 +460,7 @@ if (hasNotTerm) {
     case TRUE:
     case FALSE:
     case ID:{
-      val = val();
+      val = Val();
 {if ("" != null) return val;}
       break;
       }
@@ -468,7 +472,7 @@ if (hasNotTerm) {
     throw new Error("Missing return statement in function");
 }
 
-  final public Node val() throws ParseException {Token t;
+  final public Node Val() throws ParseException {Token t;
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
     case INT:{
       t = jj_consume_token(INT);
@@ -532,7 +536,7 @@ if (hasNotTerm) {
 	   jj_la1_0 = new int[] {0x2004140,0x10000000,0x10000000,0x10000000,0x2000140,0x2004140,0x8000,0x2004140,0x20000,0x10000,0x180000,0x180000,0x1e00000,0x1e00000,0x1800,0x1800,0x40000,0x2c000280,0xc000000,0xc000280,};
 	}
 	private static void jj_la1_init_1() {
-	   jj_la1_1 = new int[] {0x28,0x0,0x0,0x0,0x0,0x28,0x0,0x28,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x20,0x0,0x20,};
+	   jj_la1_1 = new int[] {0x10,0x0,0x0,0x0,0x0,0x10,0x0,0x10,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x10,0x0,0x10,};
 	}
 
   /** Constructor with InputStream. */
@@ -657,7 +661,7 @@ if (hasNotTerm) {
   /** Generate ParseException. */
   public ParseException generateParseException() {
 	 jj_expentries.clear();
-	 boolean[] la1tokens = new boolean[38];
+	 boolean[] la1tokens = new boolean[37];
 	 if (jj_kind >= 0) {
 	   la1tokens[jj_kind] = true;
 	   jj_kind = -1;
@@ -674,7 +678,7 @@ if (hasNotTerm) {
 		 }
 	   }
 	 }
-	 for (int i = 0; i < 38; i++) {
+	 for (int i = 0; i < 37; i++) {
 	   if (la1tokens[i]) {
 		 jj_expentry = new int[1];
 		 jj_expentry[0] = i;
