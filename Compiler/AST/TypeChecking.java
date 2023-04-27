@@ -13,7 +13,7 @@ public class TypeChecking implements Visitor {
     }
 
     @Override
-    public void visit(Assigning node) {
+    public void visit(AssignmentOp node) {
         // Get the type of the expression on the right-hand side of the assignment
         Type rhsType = node.getExpression().getType(symbolTable);
 
@@ -28,7 +28,7 @@ public class TypeChecking implements Visitor {
     }
 
     @Override
-    public void visit(BinOperator node) {
+    public void visit(ComparisonOp node) {
         Type leftType = node.getLeftOperand().getType(this.symbolTable);
         Type rightType = node.getRightOperand().getType(this.symbolTable);
 
@@ -57,7 +57,7 @@ public class TypeChecking implements Visitor {
     }
 
     @Override
-    public void visit(Computing node) {
+    public void visit(ArithmeticOp node) {
         Type leftType = node.getLeftOperand().getType(this.symbolTable);
         Type rightType = node.getRightOperand().getType(this.symbolTable);
 
@@ -95,7 +95,7 @@ public class TypeChecking implements Visitor {
     }
 
     @Override
-    public void visit(If node) {
+    public void visit(IfStmt node) {
         Type conditionType = node.getCondition().getType(this.symbolTable);
 
         if (!(conditionType instanceof BooleanType)) {
@@ -106,7 +106,7 @@ public class TypeChecking implements Visitor {
     }
 
     @Override
-    public void visit(IfElse node) {
+    public void visit(IfElseStmt node) {
         Type conditionType = node.getCondition().getType(this.symbolTable);
 
         if (!(conditionType instanceof BooleanType)) {
@@ -128,17 +128,12 @@ public class TypeChecking implements Visitor {
     }
 
     @Override
-    public void visit(Not node) {
+    public void visit(NegationOp node) {
         Type exprType = node.getExpression().getType(symbolTable);
         if (!(exprType instanceof BooleanType)) {
             error("Type mismatch in Not operator");
         }
         node.setType(exprType);
-    }
-
-    @Override
-    public void visit(Print node) {
-        // System.out.println("Print er ikke blevet implementeret endnu");
     }
 
     @Override
