@@ -1,8 +1,8 @@
-int a = 2;
-
-if (2 + (3 + 2) + 2 < 1 + 2 + (4 + 5) - 9) {
-    int b = 2;
+float a = 2.0;
+int y;
+int x;
+if (6.0 > a && (2.0 == a)) {
+    y = 5 + 4;
 } else {
-    int c = 3;
+    x = 5 + 5;
 }
-BYE;

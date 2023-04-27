@@ -22,13 +22,13 @@ public class SymbolTableFilling implements Visitor {
     private int scopeLevel = 0;
 
     @Override
-    public void visit(Assigning node) {
+    public void visit(AssignmentOp node) {
         node.getDeclaration().accept(this);
         node.getExpression().accept(this);
     }
 
     @Override
-    public void visit(BinOperator node) {
+    public void visit(ComparisonOp node) {
         node.getLeftOperand().accept(this);
         node.getRightOperand().accept(this);
     }
@@ -55,7 +55,7 @@ public class SymbolTableFilling implements Visitor {
     }
 
     @Override
-    public void visit(Computing node) {
+    public void visit(ArithmeticOp node) {
         node.getLeftOperand().accept(this);
         node.getRightOperand().accept(this);
     }
@@ -82,13 +82,13 @@ public class SymbolTableFilling implements Visitor {
     }
 
     @Override
-    public void visit(If node) {
+    public void visit(IfStmt node) {
         node.getCondition().accept(this);
         node.getThenBlock().accept(this);
     }
 
     @Override
-    public void visit(IfElse node) {
+    public void visit(IfElseStmt node) {
         node.getCondition().accept(this);
         node.getThenBlock().accept(this);
         node.getElseBlock().accept(this);
@@ -109,13 +109,8 @@ public class SymbolTableFilling implements Visitor {
     }
 
     @Override
-    public void visit(Not node) {
+    public void visit(NegationOp node) {
         node.getExpression().accept(this);
-    }
-
-    @Override
-    public void visit(Print node) {
-
     }
 
     @Override

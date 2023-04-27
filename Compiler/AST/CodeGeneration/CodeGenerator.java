@@ -66,25 +66,24 @@ public class CodeGenerator implements Visitor {
     }
 
     @Override
-    public void visit(Assigning node) {
+    public void visit(AssignmentOp node) {
         if (node.getDeclaration() instanceof Id) {
             node.getExpression().accept(this);
-            if (node.getExpression() instanceof Computing) {
-                clearTheBottomOfStackForComputing();
-            }
 
-            if (node.getExpression() instanceof Computing) {
+            if (node.getExpression() instanceof ArithmeticOp) {
+                clearTheBottomOfStackForComputing();
                 codeBuilder.append("TAX\n");
             }
             storeXRegisterInVariable(((Id) node.getDeclaration()).getName());
         } else {
             node.getDeclaration().accept(this);
             node.getExpression().accept(this);
-            if (node.getExpression() instanceof Computing) {
+
+            if (node.getExpression() instanceof ArithmeticOp) {
                 clearTheBottomOfStackForComputing();
             }
-
-            if (!(node.getExpression() instanceof Computing)) {
+            
+            if (!(node.getExpression() instanceof ArithmeticOp)) {
                 codeBuilder.append(InstructionSet.TXA.getInstruction() + "\n");
             }
             pushAccumulator();
@@ -93,7 +92,7 @@ public class CodeGenerator implements Visitor {
     }
 
     @Override
-    public void visit(BinOperator node) {
+    public void visit(ComparisonOp node) {
         evaluateBinOperator(node);
     }
 
@@ -119,7 +118,8 @@ public class CodeGenerator implements Visitor {
     }
 
     @Override
-    public void visit(Computing node) {
+
+    public void visit(ArithmeticOp node) {
         EvaluateComputingNode(node);
     }
 
@@ -141,7 +141,7 @@ public class CodeGenerator implements Visitor {
     }
 
     @Override
-    public void visit(If node) {
+    public void visit(IfStmt node) {
         int label = labelCount;
         labelCount++;
         node.getCondition().accept(this);
@@ -161,7 +161,7 @@ public class CodeGenerator implements Visitor {
     }
 
     @Override
-    public void visit(IfElse node) {
+    public void visit(IfElseStmt node) {
         int label = labelCount;
         labelCount++;
         node.getCondition().accept(this);
@@ -195,15 +195,10 @@ public class CodeGenerator implements Visitor {
     }
 
     @Override
-    public void visit(Not node) {
+    public void visit(NegationOp node) {
         node.getExpression().accept(this);
         codeBuilder.append(InstructionSet.TXA.getInstruction() + "\n");
         codeBuilder.append(InstructionSet.EOR.getInstruction() + " #1\n");
-    }
-
-    @Override
-    public void visit(Print node) {
-
     }
 
     @Override
@@ -214,8 +209,9 @@ public class CodeGenerator implements Visitor {
         codeBuilder.append(InstructionSet.BRK.getInstruction() + "\n");
     }
 
-    public void addTwoNumbers(Computing node) {
+    public void addTwoNumbers(ArithmeticOp node) {
         codeBuilder.append(InstructionSet.STX.getInstruction() + " $01" + String.format("%02d", computingCount) + "\n");
+
         if (node.getOperator().equals("+")) {
             codeBuilder.append(InstructionSet.ADC.getInstruction() + " $01" + String.format("%02d", computingCount) + "\n");
         } else {
@@ -228,9 +224,9 @@ public class CodeGenerator implements Visitor {
         }
     }
 
-    public void EvaluateComputingNode(Computing node) {
-        boolean isLeftOperandComputing = node.getLeftOperand() instanceof Computing;
-        boolean isRightOperandComputing = node.getRightOperand() instanceof Computing;
+    public void EvaluateComputingNode(ArithmeticOp node) {
+        boolean isLeftOperandComputing = node.getLeftOperand() instanceof ArithmeticOp;
+        boolean isRightOperandComputing = node.getRightOperand() instanceof ArithmeticOp;
 
         if (isLeftOperandComputing) {
             if (!isRightOperandComputing) {
@@ -258,7 +254,7 @@ public class CodeGenerator implements Visitor {
             }
         }
     }
-    public void evaluateParentheses(Computing node) {
+    public void evaluateParentheses(ArithmeticOp node) {
         node.getLeftOperand().accept(this);
         codeBuilder.append(InstructionSet.TXA.getInstruction() + "\n");
         node.getRightOperand().accept(this);
@@ -285,7 +281,7 @@ public class CodeGenerator implements Visitor {
         computingCount = 0;
     }
 
-    public void evaluateBinOperator(BinOperator node){
+    public void evaluateBinOperator(ComparisonOp node){
         node.getLeftOperand().accept(this);
         if (node.getLeftOperand() instanceof Id ||
             node.getLeftOperand() instanceof IntNum ||
@@ -295,7 +291,7 @@ public class CodeGenerator implements Visitor {
             codeBuilder.append(InstructionSet.TXA.getInstruction() + "\n");
             pushAccumulator();
         } else if (node.getLeftOperand() instanceof
-                Computing) {
+                ArithmeticOp) {
             clearTheBottomOfStackForComputing();
             pushAccumulator();
         }
@@ -307,7 +303,7 @@ public class CodeGenerator implements Visitor {
         } else if ((node.getOperator().equals("||") || node.getOperator().equals("&&"))
                 && binOperatorCount > 0
                 && !(node.getRightOperand() instanceof Bool)
-                && !(node.getRightOperand() instanceof Not))
+                && !(node.getRightOperand() instanceof NegationOp))
         {
             pullAccumulator();
             codeBuilder.append(InstructionSet.TAX.getInstruction() + "\n");
@@ -319,7 +315,7 @@ public class CodeGenerator implements Visitor {
         computingCount = 0;
     }
 
-    public void compareTwoBooleans(BinOperator node) {
+    public void compareTwoBooleans(ComparisonOp node) {
         codeBuilder.append(InstructionSet.STX.getInstruction() + " $01" + String.format("%02d", binOperatorCount) + "\n");
         codeBuilder.append(InstructionSet.CLC.getInstruction() + "\n");
         switch (node.getOperator()) {
