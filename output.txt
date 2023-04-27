@@ -1,0 +1,46 @@
+LDX #5
+LDA $0100
+TXA
+PHA
+LDX #2
+STX $0100
+LDX #3
+STX $0101
+LDA $0100
+ADC $0101
+PHA
+LDX #1
+STX $0100
+LDX #2
+STX $0101
+LDA $0100
+ADC $0101
+TAX
+PLA
+STX $0100
+CLC
+CMP $0100
+BEQ false0
+BCC false0
+LDA #1
+JMP store0
+false0:
+ LDA #0
+store0:
+  PHA
+PLA
+CMP #1
+BNE else1
+ifthen1:
+LDX #2
+LDA $0100
+TXA
+PHA
+JMP end1
+else1:
+LDX #3
+LDA $0100
+TXA
+PHA
+end0:
+BRK

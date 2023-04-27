@@ -1,12 +1,8 @@
-a = 5 + (5 + 10) - 4 + 5 - (3 - 4);
-b = 10 - 5;
-c = 0 + 10005;
-/* gives an error (doesnt check for variables in conditions)
-float a = 2.0;
-if (2 + 4 > a && (2 == a - 3)) {
-    int y = 5 + 4;
+int a = 5;
+
+if (2 + 3 > 1 + 2) {
+    int b = 2;
 } else {
-    int x = 5 + 5;
+    int c = 3;
 }
-*/
 BYE;

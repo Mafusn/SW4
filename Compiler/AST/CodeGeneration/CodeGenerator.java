@@ -7,12 +7,14 @@ import AST.Visitor;
 
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 
 public class CodeGenerator implements Visitor {
     private StringBuilder codeBuilder;
     private SymbolTableFilling symbolTable;
     private int stackAddress = 0xff;
     private int computingCount = 0;
+    private ArrayList operators = new ArrayList<Integer>();
     private int binOperatorCount = 0;
     private int labelCount = 0;
     // Gør det muligt at bruge float i vores kode, og kan adskille dem fra hinanden for 1/8.
@@ -67,6 +69,7 @@ public class CodeGenerator implements Visitor {
     public void visit(Assigning node) {
         if (node.getDeclaration() instanceof Id) {
             node.getExpression().accept(this);
+            clearTheBottomOfStackForComputing();
             if (node.getExpression() instanceof Computing) {
                 codeBuilder.append("TAX\n");
             }
@@ -74,6 +77,7 @@ public class CodeGenerator implements Visitor {
         } else {
             node.getDeclaration().accept(this);
             node.getExpression().accept(this);
+            clearTheBottomOfStackForComputing();
             if (!(node.getExpression() instanceof Computing)) {
                 codeBuilder.append(InstructionSet.TXA.getInstruction() + "\n");
             }
@@ -110,8 +114,7 @@ public class CodeGenerator implements Visitor {
 
     @Override
     public void visit(Computing node) {
-        codeBuilder.append(InstructionSet.CLC.getInstruction() + "\n");
-        computingtest(node);
+        EvaluateComputingNode(node);
     }
 
     @Override
@@ -206,32 +209,62 @@ public class CodeGenerator implements Visitor {
     }
 
     public void addTwoNumbers(Computing node) {
-        codeBuilder.append(InstructionSet.STX.getInstruction() + " $0100\n");
+        codeBuilder.append(InstructionSet.STX.getInstruction() + " $01" + String.format("%02d", computingCount) + "\n");
         if (node.getOperator().equals("+")) {
-            codeBuilder.append(InstructionSet.ADC.getInstruction() + " $0100\n");
+            codeBuilder.append(InstructionSet.ADC.getInstruction() + " $01" + String.format("%02d", computingCount) + "\n");
         } else {
-            codeBuilder.append(InstructionSet.SBC.getInstruction() + " $0100\n");
+            codeBuilder.append(InstructionSet.SBC.getInstruction() + " $01" + String.format("%02d", computingCount) + "\n");
+            codeBuilder.append(InstructionSet.BCS.getInstruction() + " carry" + computingCount + "\n");
+            codeBuilder.append(InstructionSet.ADC.getInstruction() + " $01" + String.format("%02d", computingCount) + "\n");
+            codeBuilder.append("carry" + computingCount + ":\n");
             codeBuilder.append(InstructionSet.CLC.getInstruction() + "\n");
             codeBuilder.append(InstructionSet.ADC.getInstruction() + " #1\n");
         }
     }
 
-    public void computingtest(Computing node) {
-        node.getLeftOperand().accept(this);
-        if (computingCount == 0) {
-            codeBuilder.append(InstructionSet.TXA.getInstruction() + "\n");
+    public void EvaluateComputingNode(Computing node) {
+        boolean isLeftOperandComputing = node.getLeftOperand() instanceof Computing;
+
+        if (isLeftOperandComputing) {
+            operators.add(node.getOperator());
+            evaluateParentheses((Computing) node.getLeftOperand());
+            codeBuilder.append(InstructionSet.STA.getInstruction() + " $01" + String.format("%02d", computingCount) +"\n");
+            computingCount++;
+            node.getRightOperand().accept(this);
+        } else {
+            operators.add(node.getOperator());
+            node.getLeftOperand().accept(this);
+            codeBuilder.append(InstructionSet.STX.getInstruction() + " $01" + String.format("%02d", computingCount) +"\n");
+            computingCount++;
+            node.getRightOperand().accept(this);
+            codeBuilder.append(InstructionSet.STX.getInstruction() + " $01" + String.format("%02d", computingCount) +"\n");
             computingCount++;
         }
+    }
+    public void evaluateParentheses(Computing node) {
+        node.getLeftOperand().accept(this);
+        codeBuilder.append(InstructionSet.TXA.getInstruction() + "\n");
+        node.getRightOperand().accept(this);
+        addTwoNumbers(node);
+    }
 
-        if (node.getRightOperand() instanceof Computing) {
-            ((Computing) node.getRightOperand()).getLeftOperand().accept(this);
-            addTwoNumbers(node);
-            ((Computing) node.getRightOperand()).getRightOperand().accept(this);
-            addTwoNumbers((Computing) node.getRightOperand());
-        } else {
-            node.getRightOperand().accept(this);
-            addTwoNumbers(node);
+    public void clearTheBottomOfStackForComputing() {
+        codeBuilder.append(InstructionSet.LDA.getInstruction() + " $0100\n");
+        int i = computingCount + 1;
+        while (computingCount > 1 ){
+            if (operators.get(i - computingCount - 1).equals("+")) {
+                codeBuilder.append(InstructionSet.ADC.getInstruction() + " $01" + String.format("%02d", (i - computingCount)) + "\n");
+            } else {
+                codeBuilder.append(InstructionSet.SBC.getInstruction() + " $01" + String.format("%02d", computingCount) + "\n");
+                codeBuilder.append(InstructionSet.BCS.getInstruction() + " carry" + computingCount + "\n");
+                codeBuilder.append(InstructionSet.ADC.getInstruction() + " $01" + String.format("%02d", computingCount) + "\n");
+                codeBuilder.append("carry" + computingCount + ":\n");
+                codeBuilder.append(InstructionSet.CLC.getInstruction() + "\n");
+                codeBuilder.append(InstructionSet.ADC.getInstruction() + " #1\n");
+            }
+            computingCount--;
         }
+        computingCount = 0;
     }
 
     public void evaluateBinOperator(BinOperator node){
@@ -244,11 +277,13 @@ public class CodeGenerator implements Visitor {
             codeBuilder.append(InstructionSet.TXA.getInstruction() + "\n");
             pushAccumulator();
         } else if (node.getLeftOperand() instanceof Computing) {
+            clearTheBottomOfStackForComputing();
             pushAccumulator();
         }
         node.getRightOperand().accept(this);
         if (node.getRightOperand() instanceof Computing) {
-            codeBuilder.append(InstructionSet.TXA.getInstruction() + "\n");
+            clearTheBottomOfStackForComputing();
+            codeBuilder.append(InstructionSet.TAX.getInstruction() + "\n");
             pullAccumulator();
         } else if ((node.getOperator().equals("||") || node.getOperator().equals("&&"))
                 && binOperatorCount > 0
@@ -256,7 +291,7 @@ public class CodeGenerator implements Visitor {
                 && !(node.getRightOperand() instanceof Not))
         {
             pullAccumulator();
-            codeBuilder.append(InstructionSet.TXA.getInstruction() + "\n");
+            codeBuilder.append(InstructionSet.TAX.getInstruction() + "\n");
             pullAccumulator();
         } else {
             pullAccumulator();
