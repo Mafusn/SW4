@@ -18,4 +18,5 @@ public interface Visitor {
     void visit(IntNum node);
     void visit(NegationOp node);
     void visit(Prog node);
+    void visit(WhileLoop node);
 }

@@ -121,6 +121,12 @@ public class SymbolTableFilling implements Visitor {
         System.out.println();
     }
 
+    @Override
+    public void visit(WhileLoop node) {
+        node.getCondition().accept(this);
+        node.getBlock().accept(this);
+    }
+
     private void error(String message) {
         throw new Error(message);
     }

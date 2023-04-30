@@ -39,7 +39,7 @@ public class CodeGenerator implements Visitor {
     }
 
     private void pullAccumulator() {
-        codeBuilder.append("PLA\n");
+        codeBuilder.append(InstructionSet.PLA.getInstruction() + "\n");
         incrementStackAddress();
     }
     private void loadXRegisterWithConst(int value) {
@@ -72,7 +72,7 @@ public class CodeGenerator implements Visitor {
 
             if (node.getExpression() instanceof ArithmeticOp) {
                 clearTheBottomOfStackForArithmeticOp();
-                codeBuilder.append("TAX\n");
+                codeBuilder.append(InstructionSet.TAX.getInstruction() + "\n");
             }
             storeXRegisterInVariable(((Id) node.getDeclaration()).getName());
         } else {
@@ -205,6 +205,11 @@ public class CodeGenerator implements Visitor {
             n.accept(this);
         }
         codeBuilder.append(InstructionSet.BRK.getInstruction() + "\n");
+    }
+
+    @Override
+    public void visit(WhileLoop node) {
+
     }
 
     public void addTwoNumbers(ArithmeticOp node) {
