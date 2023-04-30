@@ -32,4 +32,12 @@ public class Not extends Node{
     public Node getExpression() {
         return child;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Not not = (Not) o;
+        return child.equals(not.child);
+    }
 }

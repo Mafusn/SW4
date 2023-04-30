@@ -9,9 +9,34 @@ import java.util.Objects;
 public class Id extends Node {
     private String id;
     private Type type;
+    private boolean isAdressRef;
+    private boolean isPointer;
+    private String adress;
 
-    public Id(String id){
+    public Id(String id, boolean isAdressRef, boolean isPointer){
         this.id = id;
+        this.isAdressRef = isAdressRef;
+        this.isPointer = isPointer;
+    }
+
+    public boolean isAdressRef() {
+        return isAdressRef;
+    }
+
+    public String getAdress() {
+        return adress;
+    }
+
+    public void setAdress(String adress) {
+        this.adress = adress;
+    }
+
+    public void setAdressRef(boolean adressRef) {
+        isAdressRef = adressRef;
+    }
+
+    public void setPointer(boolean pointer) {
+        isPointer = pointer;
     }
 
     public void accept(Visitor v){
@@ -38,12 +63,7 @@ public class Id extends Node {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Id id1 = (Id) o;
-        return id.equals(id1.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id);
+        Id idNode = (Id) o;
+        return isAdressRef == idNode.isAdressRef && isPointer == idNode.isPointer && id.equals(idNode.id);
     }
 }

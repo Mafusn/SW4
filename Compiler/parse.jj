@@ -15,7 +15,7 @@ import java.util.Arrays;
 public class Compiler {
     public static void main(String[] args) {
         try {
-            Compiler compiler = new Compiler(new java.io.FileReader("code.txt"));
+            Compiler compiler = new Compiler(new java.io.FileReader("Compiler/code.txt"));
             Node prog = compiler.prog();
 
             PrettyPrint prettyPrint = new PrettyPrint();
@@ -157,23 +157,25 @@ Node dcl() :
 
 Node stmt() :
 {
+    boolean isAddress = false;
     boolean isPointer = false;
     Node ifStmt;
     Node dcl;
-    Node expr;
+    Node expr = null;
     Token t;
+    Token tAddress = null;
 }
-{ t = < ID > < ASSIGN > expr = expr() < END_OF_LINE >
+{ ( < MULTIPLY > { isPointer = true; } )? t = < ID > < ASSIGN > ( ( < ADDRESS > tAddress = < ID > { isAddress = true; } ) | expr = expr() ) < END_OF_LINE >
 {
-/*
-( < MULTIPLY > { isPointer = true; } )?
- */
-    Id id = new Id(t.image);
+    Id id = new Id(t.image, false, false);
+    if (isAddress) {
+        Id pointerId = new Id(tAddress.image, true, false);
+        return new Assigning(t.image, id, pointerId);
+    }
+    if (isPointer) {
+        id.setPointer(true);
+    }
     return new Assigning(t.image, id, expr);
-}
-| < PRINT > < LPAREN > t = < ID > < RPAREN > < END_OF_LINE >
-{
-    return new Print(t.image);
 }
 | ifStmt = ifStmt()
 {
@@ -342,18 +344,11 @@ Node val() :
 }
 | t = < ID >
 {
-    return new Id(t.image);
+    return new Id(t.image, false);
 }
 | (t = < TRUE > | t = < FALSE >)
 {
     return new Bool(t.image);
 }
-/*
-| < ADDRESS > t = < ID >
-{
-    return new Bool(t.image);
-}
-
- */
 }
 

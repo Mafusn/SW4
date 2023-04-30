@@ -1,0 +1,4 @@
+boolean*ptr;
+boolean* pointer;
+boolean *samePointer123;
+BYE;
