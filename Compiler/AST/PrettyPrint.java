@@ -143,4 +143,14 @@ public class PrettyPrint implements Visitor {
             n.accept(this);
         }
     }
+
+    @Override
+    public void visit(WhileLoop node) {
+        sb.append("\n");
+        printIndent();
+        sb.append("while (");
+        node.getCondition().accept(this);
+        sb.append(")");
+        node.getBlock().accept(this);
+    }
 }

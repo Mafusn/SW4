@@ -17,6 +17,7 @@ public class CodeGenerator implements Visitor {
     private ArrayList operators = new ArrayList<Integer>();
     private int binOperatorCount = 0;
     private int labelCount = 0;
+    private int whileLoopCount = 0;
     // Gør det muligt at bruge float i vores kode, og kan adskille dem fra hinanden for 1/8.
     // Eksempel: 0,124 = 0, 0,125 = 1, 0,25 = 2
     // Maks værdi er 31,875
@@ -39,7 +40,7 @@ public class CodeGenerator implements Visitor {
     }
 
     private void pullAccumulator() {
-        codeBuilder.append("PLA\n");
+        codeBuilder.append(InstructionSet.PLA.getInstruction() + "\n");
         incrementStackAddress();
     }
     private void loadXRegisterWithConst(int value) {
@@ -72,7 +73,7 @@ public class CodeGenerator implements Visitor {
 
             if (node.getExpression() instanceof ArithmeticOp) {
                 clearTheBottomOfStackForArithmeticOp();
-                codeBuilder.append("TAX\n");
+                codeBuilder.append(InstructionSet.TAX.getInstruction() + "\n");
             }
             storeXRegisterInVariable(((Id) node.getDeclaration()).getName());
         } else {
@@ -205,6 +206,26 @@ public class CodeGenerator implements Visitor {
             n.accept(this);
         }
         codeBuilder.append(InstructionSet.BRK.getInstruction() + "\n");
+    }
+
+    @Override
+    public void visit(WhileLoop node) {
+        codeBuilder.append("while" + whileLoopCount + ":\n");
+        node.getCondition().accept(this);
+        if (node.getCondition() instanceof Bool) {
+            codeBuilder.append(InstructionSet.TXA.getInstruction() + "\n");
+        } else if (node.getCondition() instanceof Id) {
+
+        } else {
+            pullAccumulator();
+        }
+        codeBuilder.append(InstructionSet.CMP.getInstruction() + " #1\n");
+        codeBuilder.append(InstructionSet.BNE.getInstruction() + " end" + labelCount + "\n");
+        node.getBlock().accept(this);
+        codeBuilder.append(InstructionSet.JMP.getInstruction() + " while" + whileLoopCount + "\n");
+        whileLoopCount++;
+        codeBuilder.append("end" + labelCount + ":\n");
+        labelCount++;
     }
 
     public void addTwoNumbers(ArithmeticOp node) {

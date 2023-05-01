@@ -44,6 +44,7 @@ public class Compiler implements CompilerConstants {
       case FLOATDCL:
       case IF:
       case BOOLDCL:
+      case WHILE:
       case ID:{
         ;
         break;
@@ -55,12 +56,54 @@ public class Compiler implements CompilerConstants {
       stmt = Stmt();
 prog.addChild(stmt);
     }
+    jj_consume_token(END_OF_FILE);
+    jj_consume_token(END_OF_LINE);
 {if ("" != null) return prog;}
     throw new Error("Missing return statement in function");
 }
 
+  final public Node Stmt() throws ParseException {Node ifStmt;
+    Node dcl;
+    Node expr;
+    Node whileLoop;
+    Token t;
+    switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
+    case ID:{
+      t = jj_consume_token(ID);
+      jj_consume_token(ASSIGN);
+      expr = Expr();
+      jj_consume_token(END_OF_LINE);
+Id id = new Id(t.image);
+    {if ("" != null) return new AssignmentOp(t.image, id, expr);}
+      break;
+      }
+    case INTDCL:
+    case FLOATDCL:
+    case BOOLDCL:{
+      dcl = Dcl();
+      jj_consume_token(END_OF_LINE);
+{if ("" != null) return dcl;}
+      break;
+      }
+    case IF:{
+      ifStmt = IfStmt();
+{if ("" != null) return ifStmt;}
+      break;
+      }
+    case WHILE:{
+      whileLoop = WhileLoop();
+{if ("" != null) return whileLoop;}
+      break;
+      }
+    default:
+      jj_la1[1] = jj_gen;
+      jj_consume_token(-1);
+      throw new ParseException();
+    }
+    throw new Error("Missing return statement in function");
+}
+
   final public Node Dcl() throws ParseException {boolean hasExpr = false;
- boolean isPointer = false;
  Node expr = null;
  Token t;
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
@@ -75,14 +118,10 @@ hasExpr = true;
         break;
         }
       default:
-        jj_la1[1] = jj_gen;
+        jj_la1[2] = jj_gen;
         ;
       }
-/*if (hasExpr && isPointer) {
-       return null;
-       } else */
-
-   if (hasExpr) {
+if (hasExpr) {
        FloatDcl floatDcl = new FloatDcl(t.image);
        {if ("" != null) return new AssignmentOp(t.image, floatDcl, expr);}
    } else {
@@ -101,13 +140,10 @@ hasExpr = true;
         break;
         }
       default:
-        jj_la1[2] = jj_gen;
+        jj_la1[3] = jj_gen;
         ;
       }
-/*if (hasExpr && isPointer) {
-        return null;
-        } else */
-    if (hasExpr) {
+if (hasExpr) {
         IntDcl intDcl = new IntDcl(t.image);
         {if ("" != null) return new AssignmentOp(t.image, intDcl, expr);}
     } else {
@@ -126,58 +162,15 @@ hasExpr = true;
         break;
         }
       default:
-        jj_la1[3] = jj_gen;
+        jj_la1[4] = jj_gen;
         ;
       }
-/*if (hasExpr && isPointer) {
-    return null;
-    ( < MULTIPLY > { isPointer = true; } )?
-    } else */
-    if (hasExpr) {
+if (hasExpr) {
         BoolDcl boolDcl = new BoolDcl(t.image);
         {if ("" != null) return new AssignmentOp(t.image, boolDcl, expr);}
     } else {
         {if ("" != null) return new BoolDcl(t.image);}
     }
-      break;
-      }
-    default:
-      jj_la1[4] = jj_gen;
-      jj_consume_token(-1);
-      throw new ParseException();
-    }
-    throw new Error("Missing return statement in function");
-}
-
-  final public Node Stmt() throws ParseException {boolean isPointer = false;
-    Node ifStmt;
-    Node dcl;
-    Node expr;
-    Token t;
-    switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
-    case ID:{
-      t = jj_consume_token(ID);
-      jj_consume_token(ASSIGN);
-      expr = Expr();
-      jj_consume_token(END_OF_LINE);
-/*
-( < MULTIPLY > { isPointer = true; } )?
- */
-    Id id = new Id(t.image);
-    {if ("" != null) return new AssignmentOp(t.image, id, expr);}
-      break;
-      }
-    case IF:{
-      ifStmt = IfStmt();
-{if ("" != null) return ifStmt;}
-      break;
-      }
-    case INTDCL:
-    case FLOATDCL:
-    case BOOLDCL:{
-      dcl = Dcl();
-      jj_consume_token(END_OF_LINE);
-{if ("" != null) return dcl;}
       break;
       }
     default:
@@ -220,6 +213,19 @@ if (withElse) {
     throw new Error("Missing return statement in function");
 }
 
+  final public Node WhileLoop() throws ParseException {Node expr;
+    Node block;
+    jj_consume_token(WHILE);
+    jj_consume_token(LPAREN);
+    expr = Expr();
+    jj_consume_token(RPAREN);
+    jj_consume_token(LBRACE);
+    block = Block();
+    jj_consume_token(RBRACE);
+{if ("" != null) return new WhileLoop(expr, block);}
+    throw new Error("Missing return statement in function");
+}
+
   final public Node Block() throws ParseException {Block block = new Block();
    Node stmt = null;
     label_2:
@@ -229,6 +235,7 @@ if (withElse) {
       case FLOATDCL:
       case IF:
       case BOOLDCL:
+      case WHILE:
       case ID:{
         ;
         break;
@@ -531,10 +538,10 @@ if (hasNegationOp) {
 	   jj_la1_init_1();
 	}
 	private static void jj_la1_init_0() {
-	   jj_la1_0 = new int[] {0x2004140,0x10000000,0x10000000,0x10000000,0x2000140,0x2004140,0x8000,0x2004140,0x20000,0x10000,0x180000,0x180000,0x1e00000,0x1e00000,0x1800,0x1800,0x40000,0x2c000280,0xc000000,0xc000280,};
+	   jj_la1_0 = new int[] {0x2004140,0x2004140,0x10000000,0x10000000,0x10000000,0x2000140,0x8000,0x2004140,0x20000,0x10000,0x180000,0x180000,0x1e00000,0x1e00000,0x1800,0x1800,0x40000,0x2c000280,0xc000000,0xc000280,};
 	}
 	private static void jj_la1_init_1() {
-	   jj_la1_1 = new int[] {0x8,0x0,0x0,0x0,0x0,0x8,0x0,0x8,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x8,0x0,0x8,};
+	   jj_la1_1 = new int[] {0x30,0x30,0x0,0x0,0x0,0x0,0x0,0x30,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x20,0x0,0x20,};
 	}
 
   /** Constructor with InputStream. */
@@ -659,7 +666,7 @@ if (hasNegationOp) {
   /** Generate ParseException. */
   public ParseException generateParseException() {
 	 jj_expentries.clear();
-	 boolean[] la1tokens = new boolean[36];
+	 boolean[] la1tokens = new boolean[38];
 	 if (jj_kind >= 0) {
 	   la1tokens[jj_kind] = true;
 	   jj_kind = -1;
@@ -676,7 +683,7 @@ if (hasNegationOp) {
 		 }
 	   }
 	 }
-	 for (int i = 0; i < 36; i++) {
+	 for (int i = 0; i < 38; i++) {
 	   if (la1tokens[i]) {
 		 jj_expentry = new int[1];
 		 jj_expentry[0] = i;

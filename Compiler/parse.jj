@@ -12,7 +12,7 @@ import AST.SymbolTableFilling.SymbolTableFilling;
 public class Compiler {
     public static void main(String[] args) {
         try {
-            Compiler compiler = new Compiler(new java.io.FileReader("code.txt"));
+            Compiler compiler = new Compiler(new java.io.FileReader("Compiler/code.txt"));
             Node prog = compiler.Prog();
 
             PrettyPrint prettyPrint = new PrettyPrint();
@@ -86,6 +86,8 @@ TOKEN : /* ASSIGNMENT OPERATION AND BASIC CONTROL STRUCTURE */
 | <RBRACE: "}">
 | <END_OF_LINE: ";">
 | <ADDRESS: "&">
+| <END_OF_FILE: "END">
+| <WHILE: "while">
 }
 
 TOKEN : /* ID */
@@ -97,25 +99,47 @@ Node Prog() :
  Prog prog = new Prog();
  Node stmt = null;
  }
-{( stmt = Stmt() { prog.addChild(stmt); } )*
+{( stmt = Stmt() { prog.addChild(stmt); } )* < END_OF_FILE > < END_OF_LINE >
 {
     return prog;
+}
+}
+
+Node Stmt() :
+{
+    Node ifStmt;
+    Node dcl;
+    Node expr;
+    Node whileLoop;
+    Token t;
+}
+{ t = < ID > < ASSIGN > expr = Expr() < END_OF_LINE >
+{
+    Id id = new Id(t.image);
+    return new AssignmentOp(t.image, id, expr);
+}
+| dcl = Dcl() < END_OF_LINE >
+{
+    return dcl;
+}
+| ifStmt = IfStmt()
+{
+    return ifStmt;
+}
+| whileLoop = WhileLoop()
+{
+    return whileLoop;
 }
 }
 
 Node Dcl() :
 {
  boolean hasExpr = false;
- boolean isPointer = false;
  Node expr = null;
  Token t;
  }
 { < FLOATDCL > t = < ID > ( < ASSIGN > expr = Expr() { hasExpr = true; } )?
 {
-    /*if (hasExpr && isPointer) {
-       return null;
-       } else */
-
    if (hasExpr) {
        FloatDcl floatDcl = new FloatDcl(t.image);
        return new AssignmentOp(t.image, floatDcl, expr);
@@ -125,9 +149,6 @@ Node Dcl() :
 }
 | < INTDCL > t = < ID > ( < ASSIGN > expr = Expr() { hasExpr = true; } )?
 {
-     /*if (hasExpr && isPointer) {
-        return null;
-        } else */
     if (hasExpr) {
         IntDcl intDcl = new IntDcl(t.image);
         return new AssignmentOp(t.image, intDcl, expr);
@@ -137,10 +158,6 @@ Node Dcl() :
 }
 | < BOOLDCL > t = < ID > ( < ASSIGN > expr = Expr() { hasExpr = true; } )?
 {
-    /*if (hasExpr && isPointer) {
-    return null;
-    ( < MULTIPLY > { isPointer = true; } )?
-    } else */
     if (hasExpr) {
         BoolDcl boolDcl = new BoolDcl(t.image);
         return new AssignmentOp(t.image, boolDcl, expr);
@@ -150,31 +167,6 @@ Node Dcl() :
 }
 }
 
-Node Stmt() :
-{
-    boolean isPointer = false;
-    Node ifStmt;
-    Node dcl;
-    Node expr;
-    Token t;
-}
-{ t = < ID > < ASSIGN > expr = Expr() < END_OF_LINE >
-{
-/*
-( < MULTIPLY > { isPointer = true; } )?
- */
-    Id id = new Id(t.image);
-    return new AssignmentOp(t.image, id, expr);
-}
-| ifStmt = IfStmt()
-{
-return ifStmt;
-}
-| dcl = Dcl() < END_OF_LINE >
-{
-    return dcl;
-}
-}
 Node IfStmt() :
 {
  Node expr;
@@ -190,6 +182,17 @@ Node IfStmt() :
     } else {
         return new IfStmt(expr, ifBlock);
     }
+}
+}
+
+Node WhileLoop() :
+{
+    Node expr;
+    Node block;
+}
+{ < WHILE > < LPAREN > expr = Expr() < RPAREN > < LBRACE > block = Block() < RBRACE >
+{
+    return new WhileLoop(expr, block);
 }
 }
 
