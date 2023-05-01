@@ -14,8 +14,7 @@ public class Compiler implements CompilerConstants {
             Node prog = compiler.Prog();
 
             PrettyPrint prettyPrint = new PrettyPrint();
-            ArrayList<SymbolTableFilling> symbolTables = new ArrayList<>();
-            SymbolTableFilling symbolTableFilling = new SymbolTableFilling(symbolTables);
+            SymbolTableFilling symbolTableFilling = new SymbolTableFilling();
             TypeChecking typeChecking = new TypeChecking(symbolTableFilling);
             CodeGenerator codeGenerator = new CodeGenerator(symbolTableFilling);
 

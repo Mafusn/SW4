@@ -14,10 +14,6 @@ public class SymbolTableFilling implements Visitor {
     private Map<String,Symbol> symbolTable = new HashMap<>();
     private ArrayList<SymbolTableFilling> symbolTables;
 
-    public SymbolTableFilling(ArrayList<SymbolTableFilling> symbolTables) {
-        this.symbolTables = symbolTables;
-    }
-
     public Map<String, Symbol> getSymbolTable() {
         return symbolTable;
     }
@@ -25,7 +21,6 @@ public class SymbolTableFilling implements Visitor {
     public Symbol lookup(String id) {
         return symbolTable.get(id);
     }
-
 
     @Override
     public void visit(AssignmentOp node) {
