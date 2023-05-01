@@ -4,12 +4,19 @@ import AST.Nodes.*;
 import AST.Types.*;
 import AST.Visitor;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
 public class SymbolTableFilling implements Visitor {
 
+    private int scopeLevel = 0;
     private Map<String,Symbol> symbolTable = new HashMap<>();
+    private ArrayList<SymbolTableFilling> symbolTables;
+
+    public SymbolTableFilling(ArrayList<SymbolTableFilling> symbolTables) {
+        this.symbolTables = symbolTables;
+    }
 
     public Map<String, Symbol> getSymbolTable() {
         return symbolTable;
@@ -19,7 +26,6 @@ public class SymbolTableFilling implements Visitor {
         return symbolTable.get(id);
     }
 
-    private int scopeLevel = 0;
 
     @Override
     public void visit(AssignmentOp node) {
