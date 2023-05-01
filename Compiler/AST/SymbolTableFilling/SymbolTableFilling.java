@@ -12,7 +12,6 @@ public class SymbolTableFilling implements Visitor {
 
     private int scopeLevel = 0;
     private Map<String,Symbol> symbolTable = new HashMap<>();
-    private ArrayList<SymbolTableFilling> symbolTables;
 
     public Map<String, Symbol> getSymbolTable() {
         return symbolTable;
