@@ -10,8 +10,9 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 
 public class CodeGenerator implements Visitor {
+    private int scopeLevel = 0;
     private StringBuilder codeBuilder;
-    private SymbolTableFilling symbolTable;
+    private final ArrayList<SymbolTableFilling> symbolTables;
     private int stackAddress = 0xff;
     private int arithmeticOpCount = 0;
     private ArrayList operators = new ArrayList<Integer>();
@@ -48,13 +49,13 @@ public class CodeGenerator implements Visitor {
     }
 
     private void storeXRegisterInVariable(String id) {
-        Symbol symbol = symbolTable.lookup(id);
+        Symbol symbol = symbolTables.get(scopeLevel).lookup(id);
         codeBuilder.append(InstructionSet.STX.getInstruction() + " $01" + Integer.toHexString(symbol.getMemoryAddress()) + "\n");
     }
 
-    public CodeGenerator(SymbolTableFilling symbolTable) {
+    public CodeGenerator(ArrayList<SymbolTableFilling> symbolTables) {
         codeBuilder = new StringBuilder();
-        this.symbolTable = symbolTable;
+        this.symbolTables = symbolTables;
     }
 
     public void generateCode() {
@@ -97,6 +98,7 @@ public class CodeGenerator implements Visitor {
 
     @Override
     public void visit(Block node) {
+        scopeLevel++;
         for (Node n : node.getChildren()) {
             n.accept(this);
         }
@@ -113,7 +115,7 @@ public class CodeGenerator implements Visitor {
 
     @Override
     public void visit(BoolDcl node) {
-        symbolTable.lookup(node.getId()).setMemoryAddress(stackAddress);
+        symbolTables.get(scopeLevel).lookup(node.getId()).setMemoryAddress(stackAddress);
     }
 
     @Override
@@ -124,7 +126,7 @@ public class CodeGenerator implements Visitor {
 
     @Override
     public void visit(FloatDcl node) {
-        symbolTable.lookup(node.getId()).setMemoryAddress(stackAddress);
+        symbolTables.get(scopeLevel).lookup(node.getId()).setMemoryAddress(stackAddress);
     }
 
     @Override
@@ -136,7 +138,7 @@ public class CodeGenerator implements Visitor {
     public void visit(Id node) {
         // Man skriver $01 foran adressen fordi den metode man kalder efter er 8-bit og derfor kun 2 decimaler.
         // Når vi skriver $01 foran ender vi i stacken.
-        codeBuilder.append(InstructionSet.LDX.getInstruction() + " $01" + Integer.toHexString(symbolTable.lookup(node.getName()).getMemoryAddress()) + "\n");
+        codeBuilder.append(InstructionSet.LDX.getInstruction() + " $01" + Integer.toHexString(symbolTables.get(scopeLevel).lookup(node.getName()).getMemoryAddress()) + "\n");
     }
 
     @Override
@@ -184,7 +186,7 @@ public class CodeGenerator implements Visitor {
 
     @Override
     public void visit(IntDcl node) {
-        Symbol symbol = symbolTable.lookup(node.getId());
+        Symbol symbol = symbolTables.get(scopeLevel).lookup(node.getId());
         symbol.setMemoryAddress(stackAddress);
     }
 

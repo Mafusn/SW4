@@ -1,8 +1,10 @@
 int a = 2;
-
-while (2 < 3) {
-    a = a + 1;
-    int b = 2;
-    int c = 5;
+if (a == 2) {
+    int a = 4;
+    a = 5;
 }
+if (a == 2) {
+    int c = 3;
+}
+
 END;

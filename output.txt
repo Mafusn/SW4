@@ -1,17 +1,15 @@
 LDX #2
 TXA
 PHA
-while0:
-LDX #2
+LDX $01ff
 TXA
 PHA
-LDX #3
+LDX #2
 PLA
 STX $0100
 CLC
 CMP $0100
-BEQ false0
-BCS false0
+BNE false0
 LDA #1
 JMP store0
 false0:
@@ -20,21 +18,35 @@ store0:
   PHA
 PLA
 CMP #1
-BNE end0
-LDX $01ff
-STX $0100
-LDX #1
-STX $0101
-LDA $0100
-ADC $0101
-TAX
-STX $01ff
-LDX #2
+BNE end1
+ifthen1:
+LDX #4
 TXA
 PHA
 LDX #5
+STX $01fe
+end0:
+LDX $01fe
 TXA
 PHA
-JMP while0
-end0:
+LDX #2
+PLA
+STX $0100
+CLC
+CMP $0100
+BNE false0
+LDA #1
+JMP store0
+false0:
+ LDA #0
+store0:
+  PHA
+PLA
+CMP #1
+BNE end2
+ifthen2:
+LDX #3
+TXA
+PHA
+end1:
 BRK
