@@ -98,10 +98,12 @@ public class CodeGenerator implements Visitor {
 
     @Override
     public void visit(Block node) {
+        int stackAddressPlaceHolder = stackAddress;
         scopeLevel++;
         for (Node n : node.getChildren()) {
             n.accept(this);
         }
+        stackAddress = stackAddressPlaceHolder;
     }
 
     @Override
@@ -136,9 +138,11 @@ public class CodeGenerator implements Visitor {
 
     @Override
     public void visit(Id node) {
+        // Vi trækker 1 fra scopeLevel fordi at if'ens condition ikke har adang til de variabler som er inde i dets eget scope.
+        int scopePlaceHolder = (scopeLevel == 0 ? 0 : scopeLevel - 1);
         // Man skriver $01 foran adressen fordi den metode man kalder efter er 8-bit og derfor kun 2 decimaler.
         // Når vi skriver $01 foran ender vi i stacken.
-        codeBuilder.append(InstructionSet.LDX.getInstruction() + " $01" + Integer.toHexString(symbolTables.get(scopeLevel).lookup(node.getName()).getMemoryAddress()) + "\n");
+        codeBuilder.append(InstructionSet.LDX.getInstruction() + " $01" + Integer.toHexString(symbolTables.get(scopePlaceHolder).lookup(node.getName()).getMemoryAddress()) + "\n");
     }
 
     @Override

@@ -23,10 +23,13 @@ ifthen1:
 LDX #4
 TXA
 PHA
+LDX #4
+TXA
+PHA
 LDX #5
-STX $01fe
+STX $01fd
 end0:
-LDX $01fe
+LDX $01ff
 TXA
 PHA
 LDX #2
@@ -49,4 +52,9 @@ LDX #3
 TXA
 PHA
 end1:
+LDX #3
+TXA
+PHA
+LDX #4
+STX $01fe
 BRK

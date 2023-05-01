@@ -98,7 +98,8 @@ public class SymbolTableFilling implements Visitor {
 
     @Override
     public void visit(Id node) {
-        if (symbolTable.get(node.getName()) == null) {
+        Symbol symbol = lookup(node.getName());
+        if (symbol == null) {
             error("variable " + node.getName() + " is not declared");
         }
     }
