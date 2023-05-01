@@ -58,7 +58,6 @@ public class CodeGenerator implements Visitor {
     }
 
     private void storeXRegisterInVariable(String id) {
-        System.out.println("scopeLevel: " + getScopeLevel());
         Symbol symbol = symbolTables.get(getScopeLevel()).lookup(id);
         codeBuilder.append(InstructionSet.STX.getInstruction() + " $01" + Integer.toHexString(symbol.getMemoryAddress()) + "\n");
     }
@@ -114,7 +113,6 @@ public class CodeGenerator implements Visitor {
         for (Node n : node.getChildren()) {
             n.accept(this);
         }
-        System.out.println("StackAddressPlaceHolder: " + stackAddressPlaceHolder + " " + "stackAddress: " + stackAddress);
         for (int i = stackAddressPlaceHolder - stackAddress; i > 0; i--) {
             codeBuilder.append(InstructionSet.PLA.getInstruction() + "\n");
         }
