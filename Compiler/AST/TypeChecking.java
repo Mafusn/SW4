@@ -145,7 +145,13 @@ public class TypeChecking implements Visitor {
 
     @Override
     public void visit(WhileLoop node) {
+        Type conditionType = node.getCondition().getType(this.symbolTable);
 
+        if (!(conditionType instanceof BooleanType)) {
+            error("While-loop statement is not of type boolean");
+        }
+
+        node.getBlock().accept(this);
     }
 
     private void error(String message) {
