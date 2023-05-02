@@ -8,7 +8,7 @@ import AST.SymbolTableFilling.SymbolTableFilling;
 public class Compiler implements CompilerConstants {
     public static void main(String[] args) {
         try {
-            Compiler compiler = new Compiler(new java.io.FileReader("code.txt"));
+            Compiler compiler = new Compiler(new java.io.FileReader("Compiler/code.txt"));
             Node prog = compiler.Prog();
 
             PrettyPrint prettyPrint = new PrettyPrint();

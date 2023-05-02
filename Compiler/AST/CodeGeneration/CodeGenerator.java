@@ -68,25 +68,45 @@ public class CodeGenerator implements Visitor {
 
     @Override
     public void visit(AssignmentOp node) {
-        if (node.getDeclaration() instanceof Id) {
+        if (!(node.getCompAssOp().equals("notCompAssOp"))) {
+            codeBuilder.append(InstructionSet.LDA.getInstruction() + " $01" + Integer.toHexString(symbolTable.lookup(node.getVariable()).getMemoryAddress()) + "\n");
+            codeBuilder.append(InstructionSet.STA.getInstruction() + " 01" + String.format("%02d", arithmeticOpCount) + "\n");
+            switch (node.getCompAssOp()) {
+                case "+=" -> operators.add("+");
+                case "-=" -> operators.add("-");
+                default -> {
+                    RuntimeException e = new RuntimeException("invalid operator");
+                    System.out.println(node.getVariable() + ": has an " + e);
+                }
+            }
+            arithmeticOpCount++;
             node.getExpression().accept(this);
-
             if (node.getExpression() instanceof ArithmeticOp) {
                 clearTheBottomOfStackForArithmeticOp();
                 codeBuilder.append(InstructionSet.TAX.getInstruction() + "\n");
             }
             storeXRegisterInVariable(((Id) node.getDeclaration()).getName());
         } else {
-            node.getDeclaration().accept(this);
-            node.getExpression().accept(this);
+            if (node.getDeclaration() instanceof Id) {
+                node.getExpression().accept(this);
 
-            if (node.getExpression() instanceof ArithmeticOp) {
-                clearTheBottomOfStackForArithmeticOp();
+                if (node.getExpression() instanceof ArithmeticOp) {
+                    clearTheBottomOfStackForArithmeticOp();
+                    codeBuilder.append(InstructionSet.TAX.getInstruction() + "\n");
+                }
+                storeXRegisterInVariable(((Id) node.getDeclaration()).getName());
             } else {
-                codeBuilder.append(InstructionSet.TXA.getInstruction() + "\n");
-            }
+                node.getDeclaration().accept(this);
+                node.getExpression().accept(this);
 
-            pushAccumulator();
+                if (node.getExpression() instanceof ArithmeticOp) {
+                    clearTheBottomOfStackForArithmeticOp();
+                } else {
+                    codeBuilder.append(InstructionSet.TXA.getInstruction() + "\n");
+                }
+
+                pushAccumulator();
+            }
         }
     }
 
@@ -235,9 +255,9 @@ public class CodeGenerator implements Visitor {
             codeBuilder.append(InstructionSet.ADC.getInstruction() + " $01" + String.format("%02d", arithmeticOpCount) + "\n");
         } else {
             codeBuilder.append(InstructionSet.SBC.getInstruction() + " $01" + String.format("%02d", arithmeticOpCount) + "\n");
-            codeBuilder.append(InstructionSet.BCS.getInstruction() + " carry" + arithmeticOpCount + "\n");
+            codeBuilder.append(InstructionSet.BCS.getInstruction() + " carry" + labelCount + "\n");
             codeBuilder.append(InstructionSet.ADC.getInstruction() + " #1\n");
-            codeBuilder.append("carry" + arithmeticOpCount + ":\n");
+            codeBuilder.append("carry" + labelCount + ":\n");
             codeBuilder.append(InstructionSet.CLC.getInstruction() + "\n");
             codeBuilder.append(InstructionSet.ADC.getInstruction() + " #1\n");
         }
@@ -283,15 +303,16 @@ public class CodeGenerator implements Visitor {
 
     public void clearTheBottomOfStackForArithmeticOp() {
         codeBuilder.append(InstructionSet.LDA.getInstruction() + " $0100\n");
+        System.out.println(operators);
         int i = arithmeticOpCount;
         while (arithmeticOpCount > 1 ){
             if (operators.get(i - arithmeticOpCount).equals("+")) {
                 codeBuilder.append(InstructionSet.ADC.getInstruction() + " $01" + String.format("%02d", (i - arithmeticOpCount + 1)) + "\n");
             } else {
                 codeBuilder.append(InstructionSet.SBC.getInstruction() + " $01" + String.format("%02d", (i - arithmeticOpCount + 1)) + "\n");
-                codeBuilder.append(InstructionSet.BCS.getInstruction() + " carry" + arithmeticOpCount + "\n");
+                codeBuilder.append(InstructionSet.BCS.getInstruction() + " carry" + labelCount + "\n");
                 codeBuilder.append(InstructionSet.ADC.getInstruction() + " #1\n");
-                codeBuilder.append("carry" + arithmeticOpCount + ":\n");
+                codeBuilder.append("carry" + labelCount + ":\n");
                 codeBuilder.append(InstructionSet.CLC.getInstruction() + "\n");
                 codeBuilder.append(InstructionSet.ADC.getInstruction() + " #1\n");
             }
@@ -299,6 +320,7 @@ public class CodeGenerator implements Visitor {
         }
         operators.clear();
         arithmeticOpCount = 0;
+        labelCount++;
     }
 
     public void evaluateBinOperator(ComparisonOp node){

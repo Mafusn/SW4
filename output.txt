@@ -1,40 +1,22 @@
 LDX #2
 TXA
 PHA
-while0:
+LDA $01ff
+STA 0100
 LDX #2
-TXA
-PHA
-LDX #3
-PLA
-STX $0100
-CLC
-CMP $0100
-BEQ false0
-BCS false0
-LDA #1
-JMP store0
-false0:
- LDA #0
-store0:
-  PHA
-PLA
-CMP #1
-BNE end0
-LDX $01ff
-STX $0100
-LDX #1
 STX $0101
+LDX #3
+STX $0102
 LDA $0100
-ADC $0101
+SBC $0103
+BCS carry0
+ADC #1
+JMP carryend0
+carry0:
+CLC
+ADC #1
+carryend0:
+ADC $0102
 TAX
 STX $01ff
-LDX #2
-TXA
-PHA
-LDX #5
-TXA
-PHA
-JMP while0
-end0:
 BRK
