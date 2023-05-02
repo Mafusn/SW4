@@ -8,6 +8,7 @@ import AST.*;
 import AST.CodeGeneration.CodeGenerator;
 import AST.Nodes.*;
 import AST.SymbolTableFilling.SymbolTableFilling;
+import java.util.ArrayList;
 
 public class Compiler {
     public static void main(String[] args) {
@@ -16,14 +17,15 @@ public class Compiler {
             Node prog = compiler.Prog();
 
             PrettyPrint prettyPrint = new PrettyPrint();
-            SymbolTableFilling symbolTableFilling = new SymbolTableFilling();
-            TypeChecking typeChecking = new TypeChecking(symbolTableFilling);
-            CodeGenerator codeGenerator = new CodeGenerator(symbolTableFilling);
+            ArrayList<SymbolTableFilling> symbolTableFillings; // = new ArrayList<>();
+            SymbolTableFilling symbolTableFilling = new SymbolTableFilling(symbolTableFillings , 0);
+            TypeChecking typeChecking = new TypeChecking(symbolTableFillings);
+            CodeGenerator codeGenerator = new CodeGenerator(symbolTableFillings);
 
             prog.accept(prettyPrint);
             System.out.println(prettyPrint.getResult());
             System.out.println();
-            System.out.print("Syntax is good");
+            System.out.print("Syntax is good\n");
             prog.accept(symbolTableFilling);
             System.out.println("Symbol table is good");
             prog.accept(typeChecking);

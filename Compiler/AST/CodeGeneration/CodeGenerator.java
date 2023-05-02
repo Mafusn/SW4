@@ -10,14 +10,16 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 
 public class CodeGenerator implements Visitor {
+    private int scopeLevel = 0;
     private StringBuilder codeBuilder;
-    private SymbolTableFilling symbolTable;
+    private final ArrayList<SymbolTableFilling> symbolTables;
     private int stackAddress = 0xff;
     private int arithmeticOpCount = 0;
     private ArrayList operators = new ArrayList<Integer>();
     private int binOperatorCount = 0;
     private int labelCount = 0;
     private int whileLoopCount = 0;
+    private int blockCount = 0;
     // Gør det muligt at bruge float i vores kode, og kan adskille dem fra hinanden for 1/8.
     // Eksempel: 0,124 = 0, 0,125 = 1, 0,25 = 2
     // Maks værdi er 31,875
@@ -43,18 +45,26 @@ public class CodeGenerator implements Visitor {
         codeBuilder.append(InstructionSet.PLA.getInstruction() + "\n");
         incrementStackAddress();
     }
+
+    private int getScopeLevel() {
+        // Hvis blockCount er 0, så har vi kun adgang til variablerne i global scope.
+        if (blockCount == 0) {
+            return 0;
+        }
+        return scopeLevel;
+    }
     private void loadXRegisterWithConst(int value) {
         codeBuilder.append(InstructionSet.LDX.getInstruction() + " #" + value + "\n");
     }
 
     private void storeXRegisterInVariable(String id) {
-        Symbol symbol = symbolTable.lookup(id);
+        Symbol symbol = symbolTables.get(getScopeLevel()).lookup(id);
         codeBuilder.append(InstructionSet.STX.getInstruction() + " $01" + Integer.toHexString(symbol.getMemoryAddress()) + "\n");
     }
 
-    public CodeGenerator(SymbolTableFilling symbolTable) {
+    public CodeGenerator(ArrayList<SymbolTableFilling> symbolTables) {
         codeBuilder = new StringBuilder();
-        this.symbolTable = symbolTable;
+        this.symbolTables = symbolTables;
     }
 
     public void generateCode() {
@@ -117,9 +127,17 @@ public class CodeGenerator implements Visitor {
 
     @Override
     public void visit(Block node) {
+        blockCount++;
+        int stackAddressPlaceHolder = stackAddress;
+        scopeLevel++;
         for (Node n : node.getChildren()) {
             n.accept(this);
         }
+        for (int i = stackAddressPlaceHolder - stackAddress; i > 0; i--) {
+            codeBuilder.append(InstructionSet.PLA.getInstruction() + "\n");
+        }
+        stackAddress = stackAddressPlaceHolder;
+        blockCount--;
     }
 
     @Override
@@ -133,7 +151,7 @@ public class CodeGenerator implements Visitor {
 
     @Override
     public void visit(BoolDcl node) {
-        symbolTable.lookup(node.getId()).setMemoryAddress(stackAddress);
+        symbolTables.get(getScopeLevel()).lookup(node.getId()).setMemoryAddress(stackAddress);
     }
 
     @Override
@@ -144,7 +162,7 @@ public class CodeGenerator implements Visitor {
 
     @Override
     public void visit(FloatDcl node) {
-        symbolTable.lookup(node.getId()).setMemoryAddress(stackAddress);
+        symbolTables.get(getScopeLevel()).lookup(node.getId()).setMemoryAddress(stackAddress);
     }
 
     @Override
@@ -156,7 +174,7 @@ public class CodeGenerator implements Visitor {
     public void visit(Id node) {
         // Man skriver $01 foran adressen fordi den metode man kalder efter er 8-bit og derfor kun 2 decimaler.
         // Når vi skriver $01 foran ender vi i stacken.
-        codeBuilder.append(InstructionSet.LDX.getInstruction() + " $01" + Integer.toHexString(symbolTable.lookup(node.getName()).getMemoryAddress()) + "\n");
+        codeBuilder.append(InstructionSet.LDX.getInstruction() + " $01" + Integer.toHexString(symbolTables.get(getScopeLevel()).lookup(node.getName()).getMemoryAddress()) + "\n");
     }
 
     @Override
@@ -173,8 +191,8 @@ public class CodeGenerator implements Visitor {
             pullAccumulator();
         }
         codeBuilder.append(InstructionSet.CMP.getInstruction() + " #1\n");
-        codeBuilder.append(InstructionSet.BNE.getInstruction() + " end" + labelCount + "\n");
-        codeBuilder.append("ifthen" + labelCount + ":\n");
+        codeBuilder.append(InstructionSet.BNE.getInstruction() + " end" + label + "\n");
+        codeBuilder.append("ifthen" + label + ":\n");
         node.getThenBlock().accept(this);
         codeBuilder.append("end" + label + ":\n");
     }
@@ -193,18 +211,18 @@ public class CodeGenerator implements Visitor {
             pullAccumulator();
         }
         codeBuilder.append(InstructionSet.CMP.getInstruction() + " #1\n");
-        codeBuilder.append(InstructionSet.BNE.getInstruction() + " else" + labelCount + "\n");
-        codeBuilder.append("ifthen" + labelCount + ":\n");
+        codeBuilder.append(InstructionSet.BNE.getInstruction() + " else" + label + "\n");
+        codeBuilder.append("ifthen" + label + ":\n");
         node.getThenBlock().accept(this);
-        codeBuilder.append(InstructionSet.JMP.getInstruction() + " end" + labelCount + "\n");
-        codeBuilder.append("else" + labelCount + ":\n");
+        codeBuilder.append(InstructionSet.JMP.getInstruction() + " end" + label + "\n");
+        codeBuilder.append("else" + label + ":\n");
         node.getElseBlock().accept(this);
         codeBuilder.append("end" + label + ":\n");
     }
 
     @Override
     public void visit(IntDcl node) {
-        Symbol symbol = symbolTable.lookup(node.getId());
+        Symbol symbol = symbolTables.get(getScopeLevel()).lookup(node.getId());
         symbol.setMemoryAddress(stackAddress);
     }
 
@@ -364,44 +382,44 @@ public class CodeGenerator implements Visitor {
         switch (node.getOperator()) {
             case "==" -> {
                 codeBuilder.append(InstructionSet.CMP.getInstruction() + " $01" + String.format("%02d", binOperatorCount) + "\n");
-                codeBuilder.append(InstructionSet.BNE.getInstruction() + " false" + binOperatorCount + "\n");
+                codeBuilder.append(InstructionSet.BNE.getInstruction() + " false" + labelCount + "\n");
             }
             case "!=" -> {
                 codeBuilder.append(InstructionSet.CMP.getInstruction() + " $01" + String.format("%02d", binOperatorCount) + "\n");
-                codeBuilder.append(InstructionSet.BEQ.getInstruction() + " false" + binOperatorCount + "\n");
+                codeBuilder.append(InstructionSet.BEQ.getInstruction() + " false" + labelCount + "\n");
             }
             case "||" -> {
                 codeBuilder.append(InstructionSet.ORA.getInstruction() + " $01" + String.format("%02d", binOperatorCount) + "\n");
-                codeBuilder.append(InstructionSet.BEQ.getInstruction() + " false" + binOperatorCount + "\n");
+                codeBuilder.append(InstructionSet.BEQ.getInstruction() + " false" + labelCount + "\n");
             }
             case "&&" -> {
                 codeBuilder.append(InstructionSet.AND.getInstruction() + " $01" + String.format("%02d", binOperatorCount) + "\n");
-                codeBuilder.append(InstructionSet.BEQ.getInstruction() + " false" + binOperatorCount + "\n");
+                codeBuilder.append(InstructionSet.BEQ.getInstruction() + " false" + labelCount + "\n");
             }
             case "<" -> {
                 codeBuilder.append(InstructionSet.CMP.getInstruction() + " $01" + String.format("%02d", binOperatorCount) + "\n");
-                codeBuilder.append(InstructionSet.BEQ.getInstruction() + " false" + binOperatorCount + "\n");
-                codeBuilder.append(InstructionSet.BCS.getInstruction() + " false" + binOperatorCount + "\n");
+                codeBuilder.append(InstructionSet.BEQ.getInstruction() + " false" + labelCount + "\n");
+                codeBuilder.append(InstructionSet.BCS.getInstruction() + " false" + labelCount + "\n");
             }
             case "<=" -> {
                 codeBuilder.append(InstructionSet.CMP.getInstruction() + " $01" + String.format("%02d", binOperatorCount) + "\n");
-                codeBuilder.append(InstructionSet.BCS.getInstruction() + " false" + binOperatorCount + "\n");
+                codeBuilder.append(InstructionSet.BCS.getInstruction() + " false" + labelCount + "\n");
             }
             case ">" -> {
                 codeBuilder.append(InstructionSet.CMP.getInstruction() + " $01" + String.format("%02d", binOperatorCount) + "\n");
-                codeBuilder.append(InstructionSet.BEQ.getInstruction() + " false" + binOperatorCount + "\n");
-                codeBuilder.append(InstructionSet.BCC.getInstruction() + " false" + binOperatorCount + "\n");
+                codeBuilder.append(InstructionSet.BEQ.getInstruction() + " false" + labelCount + "\n");
+                codeBuilder.append(InstructionSet.BCC.getInstruction() + " false" + labelCount + "\n");
             }
             case ">=" -> {
                 codeBuilder.append(InstructionSet.CMP.getInstruction() + " $01" + String.format("%02d", binOperatorCount) + "\n");
-                codeBuilder.append(InstructionSet.BCC.getInstruction() + " false" + binOperatorCount + "\n");
+                codeBuilder.append(InstructionSet.BCC.getInstruction() + " false" + labelCount + "\n");
             }
         }
         codeBuilder.append(InstructionSet.LDA.getInstruction() + " #1\n");
-        codeBuilder.append(InstructionSet.JMP.getInstruction() + " store" + binOperatorCount + "\n");
-        codeBuilder.append("false" + binOperatorCount + ":\n");
+        codeBuilder.append(InstructionSet.JMP.getInstruction() + " store" + labelCount + "\n");
+        codeBuilder.append("false" + labelCount + ":\n");
         codeBuilder.append(" " + InstructionSet.LDA.getInstruction() + " #0\n");
-        codeBuilder.append("store" + binOperatorCount + ":\n");
+        codeBuilder.append("store" + labelCount + ":\n");
         binOperatorCount++;
         codeBuilder.append("  "); // gør at der kommer indent.
         pushAccumulator();
