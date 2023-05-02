@@ -8,6 +8,7 @@ import AST.*;
 import AST.CodeGeneration.CodeGenerator;
 import AST.Nodes.*;
 import AST.SymbolTableFilling.SymbolTableFilling;
+import java.util.ArrayList;
 
 public class Compiler {
     public static void main(String[] args) {
@@ -16,7 +17,7 @@ public class Compiler {
             Node prog = compiler.Prog();
 
             PrettyPrint prettyPrint = new PrettyPrint();
-            ArrayList<SymbolTableFilling> symbolTableFillings = new ArrayList<>();
+            ArrayList<SymbolTableFilling> symbolTableFillings; // = new ArrayList<>();
             SymbolTableFilling symbolTableFilling = new SymbolTableFilling(symbolTableFillings , 0);
             TypeChecking typeChecking = new TypeChecking(symbolTableFillings);
             CodeGenerator codeGenerator = new CodeGenerator(symbolTableFillings);
