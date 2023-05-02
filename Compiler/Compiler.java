@@ -8,7 +8,7 @@ import java.util.ArrayList;
 public class Compiler implements CompilerConstants {
     public static void main(String[] args) {
         try {
-            Compiler compiler = new Compiler(new java.io.FileReader("code.txt"));
+            Compiler compiler = new Compiler(new java.io.FileReader("Compiler/code.txt"));
             Node prog = compiler.Prog();
 
             PrettyPrint prettyPrint = new PrettyPrint();
@@ -70,28 +70,25 @@ public class Compiler implements CompilerConstants {
     Node whileLoop;
     Token t;
     Token compAssOp = null;
-    switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
-    case ID:{
+    switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+    case ID:
       t = jj_consume_token(ID);
-      switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
+      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case PLUS:
-      case MINUS:{
-        switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
-        case PLUS:{
+      case MINUS:
+        switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+        case PLUS:
           compAssOp = jj_consume_token(PLUS);
           break;
-          }
-        case MINUS:{
+        case MINUS:
           compAssOp = jj_consume_token(MINUS);
           break;
-          }
         default:
           jj_la1[1] = jj_gen;
           jj_consume_token(-1);
           throw new ParseException();
         }
         break;
-        }
       default:
         jj_la1[2] = jj_gen;
         ;
@@ -99,12 +96,12 @@ public class Compiler implements CompilerConstants {
       jj_consume_token(ASSIGN);
       expr = Expr();
       jj_consume_token(END_OF_LINE);
-Id id = new Id(t.image);
+    Id id = new Id(t.image);
 
     if (compAssOp != null) {
-        {if ("" != null) return new AssignmentOp(t.image, id, expr, compAssOp.image);}
+        {if (true) return new AssignmentOp(t.image, id, expr, compAssOp.image);}
     } else {
-        {if ("" != null) return new AssignmentOp(t.image, id, expr);}
+        {if (true) return new AssignmentOp(t.image, id, expr);}
     }
       break;
     case INTDCL:
@@ -544,15 +541,15 @@ Id id = new Id(t.image);
   static private int[] jj_la1_0;
   static private int[] jj_la1_1;
   static {
-	   jj_la1_init_0();
-	   jj_la1_init_1();
-	}
-	private static void jj_la1_init_0() {
-	   jj_la1_0 = new int[] {0x2004140,0x1800,0x1800,0x2004140,0x10000000,0x10000000,0x10000000,0x2000140,0x8000,0x2004140,0x20000,0x10000,0x180000,0x180000,0x1e00000,0x1e00000,0x1800,0x1800,0x40000,0x2c000280,0xc000000,0xc000280,};
-	}
-	private static void jj_la1_init_1() {
-	   jj_la1_1 = new int[] {0x30,0x0,0x0,0x30,0x0,0x0,0x0,0x0,0x0,0x30,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x20,0x0,0x20,};
-	}
+      jj_la1_init_0();
+      jj_la1_init_1();
+   }
+   private static void jj_la1_init_0() {
+      jj_la1_0 = new int[] {0x2004140,0x1800,0x1800,0x2004140,0x10000000,0x10000000,0x10000000,0x2000140,0x8000,0x2004140,0x20000,0x10000,0x180000,0x180000,0x1e00000,0x1e00000,0x1800,0x1800,0x40000,0x2c000280,0xc000000,0xc000280,};
+   }
+   private static void jj_la1_init_1() {
+      jj_la1_1 = new int[] {0x30,0x0,0x0,0x30,0x0,0x0,0x0,0x0,0x0,0x30,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x20,0x0,0x20,};
+   }
 
   /** Constructor with InputStream. */
   public Compiler(java.io.InputStream stream) {
@@ -560,12 +557,12 @@ Id id = new Id(t.image);
   }
   /** Constructor with InputStream and supplied encoding */
   public Compiler(java.io.InputStream stream, String encoding) {
-	 try { jj_input_stream = new SimpleCharStream(stream, encoding, 1, 1); } catch(java.io.UnsupportedEncodingException e) { throw new RuntimeException(e); }
-	 token_source = new CompilerTokenManager(jj_input_stream);
-	 token = new Token();
-	 jj_ntk = -1;
-	 jj_gen = 0;
-	 for (int i = 0; i < 22; i++) jj_la1[i] = -1;
+    try { jj_input_stream = new SimpleCharStream(stream, encoding, 1, 1); } catch(java.io.UnsupportedEncodingException e) { throw new RuntimeException(e); }
+    token_source = new CompilerTokenManager(jj_input_stream);
+    token = new Token();
+    jj_ntk = -1;
+    jj_gen = 0;
+    for (int i = 0; i < 22; i++) jj_la1[i] = -1;
   }
 
   /** Reinitialise. */
@@ -574,58 +571,50 @@ Id id = new Id(t.image);
   }
   /** Reinitialise. */
   public void ReInit(java.io.InputStream stream, String encoding) {
-	 try { jj_input_stream.ReInit(stream, encoding, 1, 1); } catch(java.io.UnsupportedEncodingException e) { throw new RuntimeException(e); }
-	 token_source.ReInit(jj_input_stream);
-	 token = new Token();
-	 jj_ntk = -1;
-	 jj_gen = 0;
-	 for (int i = 0; i < 22; i++) jj_la1[i] = -1;
+    try { jj_input_stream.ReInit(stream, encoding, 1, 1); } catch(java.io.UnsupportedEncodingException e) { throw new RuntimeException(e); }
+    token_source.ReInit(jj_input_stream);
+    token = new Token();
+    jj_ntk = -1;
+    jj_gen = 0;
+    for (int i = 0; i < 22; i++) jj_la1[i] = -1;
   }
 
   /** Constructor. */
   public Compiler(java.io.Reader stream) {
-	 jj_input_stream = new SimpleCharStream(stream, 1, 1);
-	 token_source = new CompilerTokenManager(jj_input_stream);
-	 token = new Token();
-	 jj_ntk = -1;
-	 jj_gen = 0;
-	 for (int i = 0; i < 22; i++) jj_la1[i] = -1;
+    jj_input_stream = new SimpleCharStream(stream, 1, 1);
+    token_source = new CompilerTokenManager(jj_input_stream);
+    token = new Token();
+    jj_ntk = -1;
+    jj_gen = 0;
+    for (int i = 0; i < 22; i++) jj_la1[i] = -1;
   }
 
   /** Reinitialise. */
   public void ReInit(java.io.Reader stream) {
-	if (jj_input_stream == null) {
-	   jj_input_stream = new SimpleCharStream(stream, 1, 1);
-	} else {
-	   jj_input_stream.ReInit(stream, 1, 1);
-	}
-	if (token_source == null) {
- token_source = new CompilerTokenManager(jj_input_stream);
-	}
-
-	 token_source.ReInit(jj_input_stream);
-	 token = new Token();
-	 jj_ntk = -1;
-	 jj_gen = 0;
-	 for (int i = 0; i < 22; i++) jj_la1[i] = -1;
+    jj_input_stream.ReInit(stream, 1, 1);
+    token_source.ReInit(jj_input_stream);
+    token = new Token();
+    jj_ntk = -1;
+    jj_gen = 0;
+    for (int i = 0; i < 22; i++) jj_la1[i] = -1;
   }
 
   /** Constructor with generated Token Manager. */
   public Compiler(CompilerTokenManager tm) {
-	 token_source = tm;
-	 token = new Token();
-	 jj_ntk = -1;
-	 jj_gen = 0;
-	 for (int i = 0; i < 22; i++) jj_la1[i] = -1;
+    token_source = tm;
+    token = new Token();
+    jj_ntk = -1;
+    jj_gen = 0;
+    for (int i = 0; i < 22; i++) jj_la1[i] = -1;
   }
 
   /** Reinitialise. */
   public void ReInit(CompilerTokenManager tm) {
-	 token_source = tm;
-	 token = new Token();
-	 jj_ntk = -1;
-	 jj_gen = 0;
-	 for (int i = 0; i < 22; i++) jj_la1[i] = -1;
+    token_source = tm;
+    token = new Token();
+    jj_ntk = -1;
+    jj_gen = 0;
+    for (int i = 0; i < 22; i++) jj_la1[i] = -1;
   }
 
   private Token jj_consume_token(int kind) throws ParseException {
@@ -675,43 +664,36 @@ Id id = new Id(t.image);
 
   /** Generate ParseException. */
   public ParseException generateParseException() {
-	 jj_expentries.clear();
-	 boolean[] la1tokens = new boolean[38];
-	 if (jj_kind >= 0) {
-	   la1tokens[jj_kind] = true;
-	   jj_kind = -1;
-	 }
-	 for (int i = 0; i < 22; i++) {
-	   if (jj_la1[i] == jj_gen) {
-		 for (int j = 0; j < 32; j++) {
-		   if ((jj_la1_0[i] & (1<<j)) != 0) {
-			 la1tokens[j] = true;
-		   }
-		   if ((jj_la1_1[i] & (1<<j)) != 0) {
-			 la1tokens[32+j] = true;
-		   }
-		 }
-	   }
-	 }
-	 for (int i = 0; i < 38; i++) {
-	   if (la1tokens[i]) {
-		 jj_expentry = new int[1];
-		 jj_expentry[0] = i;
-		 jj_expentries.add(jj_expentry);
-	   }
-	 }
-	 int[][] exptokseq = new int[jj_expentries.size()][];
-	 for (int i = 0; i < jj_expentries.size(); i++) {
-	   exptokseq[i] = jj_expentries.get(i);
-	 }
-	 return new ParseException(token, exptokseq, tokenImage);
-  }
-
-  private boolean trace_enabled;
-
-/** Trace enabled. */
-  final public boolean trace_enabled() {
-	 return trace_enabled;
+    jj_expentries.clear();
+    boolean[] la1tokens = new boolean[38];
+    if (jj_kind >= 0) {
+      la1tokens[jj_kind] = true;
+      jj_kind = -1;
+    }
+    for (int i = 0; i < 22; i++) {
+      if (jj_la1[i] == jj_gen) {
+        for (int j = 0; j < 32; j++) {
+          if ((jj_la1_0[i] & (1<<j)) != 0) {
+            la1tokens[j] = true;
+          }
+          if ((jj_la1_1[i] & (1<<j)) != 0) {
+            la1tokens[32+j] = true;
+          }
+        }
+      }
+    }
+    for (int i = 0; i < 38; i++) {
+      if (la1tokens[i]) {
+        jj_expentry = new int[1];
+        jj_expentry[0] = i;
+        jj_expentries.add(jj_expentry);
+      }
+    }
+    int[][] exptokseq = new int[jj_expentries.size()][];
+    for (int i = 0; i < jj_expentries.size(); i++) {
+      exptokseq[i] = (int[])jj_expentries.get(i);
+    }
+    return new ParseException(token, exptokseq, tokenImage);
   }
 
   /** Enable tracing. */

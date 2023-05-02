@@ -1,11 +1,23 @@
 LDX #2
 TXA
 PHA
-LDX #4
-TXA
-PHA
-LDX $01ff
-TXA
-PHA
+LDA $01ff
+STA $0100
 LDX #2
+STX $0101
+LDX #3
+STX $0102
+LDA $0100
+ADC $0101
+SBC $0102
+BCS carry0
+ADC #1
+CLC
+JMP carryend0
+carry0:
+CLC
+ADC #1
+carryend0:
+TAX
+STX $01ff
 BRK

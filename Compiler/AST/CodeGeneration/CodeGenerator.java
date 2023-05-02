@@ -79,7 +79,7 @@ public class CodeGenerator implements Visitor {
     @Override
     public void visit(AssignmentOp node) {
         if (!(node.getCompAssOp().equals("notCompAssOp"))) {
-            codeBuilder.append(InstructionSet.LDA.getInstruction() + " $01" + Integer.toHexString(symbolTable.lookup(node.getVariable()).getMemoryAddress()) + "\n");
+            codeBuilder.append(InstructionSet.LDA.getInstruction() + " $01" + Integer.toHexString(symbolTables.get(getScopeLevel()).lookup(node.getVariable()).getMemoryAddress()) + "\n");
             codeBuilder.append(InstructionSet.STA.getInstruction() + " $01" + String.format("%02d", arithmeticOpCount) + "\n");
             switch (node.getCompAssOp()) {
                 case "+=" -> operators.add("+");
@@ -321,7 +321,6 @@ public class CodeGenerator implements Visitor {
 
     public void clearTheBottomOfStackForArithmeticOp() {
         codeBuilder.append(InstructionSet.LDA.getInstruction() + " $0100\n");
-        System.out.println(operators);
         int i = arithmeticOpCount;
         while (arithmeticOpCount > 1 ){
             if (operators.get(i - arithmeticOpCount).equals("+")) {
