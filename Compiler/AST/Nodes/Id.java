@@ -23,6 +23,10 @@ public class Id extends Node {
         return isAdressRef;
     }
 
+    public boolean isPointer() {
+        return isPointer;
+    }
+
     public String getAdress() {
         return adress;
     }

@@ -126,6 +126,11 @@ public class SymbolTableFilling implements Visitor {
         System.out.println();
     }
 
+    @Override
+    public void visit(PointerDcl node) {
+
+    }
+
     private void error(String message) {
         throw new Error(message);
     }

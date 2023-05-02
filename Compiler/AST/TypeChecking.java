@@ -148,6 +148,11 @@ public class TypeChecking implements Visitor {
         }
     }
 
+    @Override
+    public void visit(PointerDcl node) {
+
+    }
+
     private void error(String message) {
         throw new Error(message);
     }

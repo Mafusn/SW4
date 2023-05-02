@@ -205,6 +205,11 @@ public class CodeGenerator implements Visitor {
         codeBuilder.append(InstructionSet.BRK.getInstruction() + "\n");
     }
 
+    @Override
+    public void visit(PointerDcl node) {
+
+    }
+
     public void addTwoNumbers(Computing node) {
         codeBuilder.append(InstructionSet.STX.getInstruction() + " $0100\n");
         if (node.getOperator().equals("+")) {

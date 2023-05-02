@@ -27,53 +27,55 @@ public interface CompilerConstants {
   /** RegularExpression Id. */
   int MULTIPLY = 13;
   /** RegularExpression Id. */
-  int IF = 14;
+  int POINTERDCL = 14;
   /** RegularExpression Id. */
-  int ELSE = 15;
+  int IF = 15;
   /** RegularExpression Id. */
-  int AND = 16;
+  int ELSE = 16;
   /** RegularExpression Id. */
-  int OR = 17;
+  int AND = 17;
   /** RegularExpression Id. */
-  int NOT = 18;
+  int OR = 18;
   /** RegularExpression Id. */
-  int EQ = 19;
+  int NOT = 19;
   /** RegularExpression Id. */
-  int NE = 20;
+  int EQ = 20;
   /** RegularExpression Id. */
-  int LT = 21;
+  int NE = 21;
   /** RegularExpression Id. */
-  int LE = 22;
+  int LT = 22;
   /** RegularExpression Id. */
-  int GT = 23;
+  int LE = 23;
   /** RegularExpression Id. */
-  int GE = 24;
+  int GT = 24;
   /** RegularExpression Id. */
-  int BOOLDCL = 25;
+  int GE = 25;
   /** RegularExpression Id. */
-  int TRUE = 26;
+  int BOOLDCL = 26;
   /** RegularExpression Id. */
-  int FALSE = 27;
+  int TRUE = 27;
   /** RegularExpression Id. */
-  int ASSIGN = 28;
+  int FALSE = 28;
   /** RegularExpression Id. */
-  int LPAREN = 29;
+  int ASSIGN = 29;
   /** RegularExpression Id. */
-  int RPAREN = 30;
+  int LPAREN = 30;
   /** RegularExpression Id. */
-  int LBRACE = 31;
+  int RPAREN = 31;
   /** RegularExpression Id. */
-  int RBRACE = 32;
+  int LBRACE = 32;
   /** RegularExpression Id. */
-  int END_OF_LINE = 33;
+  int RBRACE = 33;
   /** RegularExpression Id. */
-  int END_OF_FILE = 34;
+  int END_OF_LINE = 34;
   /** RegularExpression Id. */
-  int PRINT = 35;
+  int END_OF_FILE = 35;
   /** RegularExpression Id. */
-  int ADDRESS = 36;
+  int PRINT = 36;
   /** RegularExpression Id. */
-  int ID = 37;
+  int ADDRESS = 37;
+  /** RegularExpression Id. */
+  int ID = 38;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -94,6 +96,7 @@ public interface CompilerConstants {
     "\"+\"",
     "\"-\"",
     "\"*\"",
+    "\"pointer\"",
     "\"if\"",
     "\"else\"",
     "\"&&\"",

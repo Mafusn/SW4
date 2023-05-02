@@ -19,4 +19,5 @@ public interface Visitor {
     void visit(Not node);
     void visit(Print node);
     void visit(Prog node);
+    void visit(PointerDcl node);
 }

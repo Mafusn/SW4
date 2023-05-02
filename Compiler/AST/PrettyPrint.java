@@ -27,7 +27,7 @@ public class PrettyPrint implements Visitor {
     @Override
     public void visit(Assigning node) {
         switch (node.getDeclaration().getClass().getSimpleName()) {
-            case "FloatDcl", "IntDcl", "BoolDcl" -> {
+            case "FloatDcl", "IntDcl", "BoolDcl", "PointerDcl" -> {
                 node.getDeclaration().accept(this);
                 sb.append(" = ");
                 node.getExpression().accept(this);
@@ -91,6 +91,12 @@ public class PrettyPrint implements Visitor {
 
     @Override
     public void visit(Id node) {
+        if (node.isAdressRef()) {
+            sb.append("&");
+        }
+        if (node.isPointer()) {
+            sb.append("*");
+        }
         sb.append(node.getName());
     }
 
@@ -149,5 +155,12 @@ public class PrettyPrint implements Visitor {
         for(Node n : node.getChildren()){
             n.accept(this);
         }
+    }
+
+    @Override
+    public void visit(PointerDcl node) {
+        sb.append("\n");
+        printIndent();
+        sb.append("pointer " + "*" + node.getId());
     }
 }

@@ -1,4 +1,4 @@
-ptr = &a;
-ptr2 = &example;
-ptr3 = &test;
+pointer *ptr = &a;
+*ptr2 = &example;
+*ptr3 = 20;
 BYE;

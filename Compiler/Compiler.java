@@ -4,9 +4,6 @@ import AST.*;
 import AST.CodeGeneration.CodeGenerator;
 import AST.Nodes.*;
 import AST.SymbolTableFilling.SymbolTableFilling;
-import java.io.*;
-import java.util.Scanner;
-import java.util.Arrays;
 
 public class Compiler implements CompilerConstants {
     public static void main(String[] args) {
@@ -46,6 +43,7 @@ public class Compiler implements CompilerConstants {
       case INTDCL:
       case FLOATDCL:
       case MULTIPLY:
+      case POINTERDCL:
       case IF:
       case BOOLDCL:
       case ID:{
@@ -66,8 +64,10 @@ prog.addChild(stmt);
 }
 
   final public Node dcl() throws ParseException {boolean hasExpr = false;
+ boolean hasAddress = false;
  boolean isPointer = false;
  Node expr = null;
+ Token tAddress = null;
  Token t;
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
     case FLOATDCL:{
@@ -84,11 +84,7 @@ hasExpr = true;
         jj_la1[1] = jj_gen;
         ;
       }
-/*if (hasExpr && isPointer) {
-       return null;
-       } else */
-
-   if (hasExpr) {
+if (hasExpr) {
        FloatDcl floatDcl = new FloatDcl(t.image);
        {if ("" != null) return new Assigning(t.image, floatDcl, expr);}
    } else {
@@ -110,10 +106,7 @@ hasExpr = true;
         jj_la1[2] = jj_gen;
         ;
       }
-/*if (hasExpr && isPointer) {
-        return null;
-        } else */
-    if (hasExpr) {
+if (hasExpr) {
         IntDcl intDcl = new IntDcl(t.image);
         {if ("" != null) return new Assigning(t.image, intDcl, expr);}
     } else {
@@ -135,11 +128,7 @@ hasExpr = true;
         jj_la1[3] = jj_gen;
         ;
       }
-/*if (hasExpr && isPointer) {
-    return null;
-    ( < MULTIPLY > { isPointer = true; } )?
-    } else */
-    if (hasExpr) {
+if (hasExpr) {
         BoolDcl boolDcl = new BoolDcl(t.image);
         {if ("" != null) return new Assigning(t.image, boolDcl, expr);}
     } else {
@@ -147,8 +136,33 @@ hasExpr = true;
     }
       break;
       }
+    case POINTERDCL:{
+      jj_consume_token(POINTERDCL);
+      jj_consume_token(MULTIPLY);
+      t = jj_consume_token(ID);
+      switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
+      case ASSIGN:{
+        jj_consume_token(ASSIGN);
+        jj_consume_token(ADDRESS);
+hasAddress = true;
+        tAddress = jj_consume_token(ID);
+        break;
+        }
+      default:
+        jj_la1[4] = jj_gen;
+        ;
+      }
+if (hasAddress) {
+        PointerDcl pointerDcl = new PointerDcl(t.image);
+        Id id = new Id(tAddress.image, true, false);
+        {if ("" != null) return new Assigning(t.image, pointerDcl, id);}
+    } else {
+        {if ("" != null) return new PointerDcl(t.image);}
+    }
+      break;
+      }
     default:
-      jj_la1[4] = jj_gen;
+      jj_la1[5] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -156,6 +170,7 @@ hasExpr = true;
 }
 
   final public Node stmt() throws ParseException {boolean isAddress = false;
+    boolean isPointer = false;
     Node ifStmt;
     Node dcl;
     Node expr = null;
@@ -167,10 +182,11 @@ hasExpr = true;
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
       case MULTIPLY:{
         jj_consume_token(MULTIPLY);
+isPointer = true;
         break;
         }
       default:
-        jj_la1[5] = jj_gen;
+        jj_la1[6] = jj_gen;
         ;
       }
       t = jj_consume_token(ID);
@@ -193,16 +209,18 @@ isAddress = true;
         break;
         }
       default:
-        jj_la1[6] = jj_gen;
+        jj_la1[7] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
       }
       jj_consume_token(END_OF_LINE);
-Id id = new Id(t.image, false);
+Id id = new Id(t.image, false, false);
+    if (isPointer) {
+        id.setPointer(true);
+    }
     if (isAddress) {
-        Id pointerId = new Id(tAddress.image, true);
-        id.setAdressRef(true);
-        {if ("" != null) return new Assigning(t.image, id, pointerId);}
+        Id addressId = new Id(tAddress.image, true, false);
+        {if ("" != null) return new Assigning(t.image, id, addressId);}
     }
     {if ("" != null) return new Assigning(t.image, id, expr);}
       break;
@@ -214,6 +232,7 @@ Id id = new Id(t.image, false);
       }
     case INTDCL:
     case FLOATDCL:
+    case POINTERDCL:
     case BOOLDCL:{
       dcl = dcl();
       jj_consume_token(END_OF_LINE);
@@ -221,7 +240,7 @@ Id id = new Id(t.image, false);
       break;
       }
     default:
-      jj_la1[7] = jj_gen;
+      jj_la1[8] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -249,7 +268,7 @@ withElse = true;
       break;
       }
     default:
-      jj_la1[8] = jj_gen;
+      jj_la1[9] = jj_gen;
       ;
     }
 if (withElse) {
@@ -268,6 +287,7 @@ if (withElse) {
       case INTDCL:
       case FLOATDCL:
       case MULTIPLY:
+      case POINTERDCL:
       case IF:
       case BOOLDCL:
       case ID:{
@@ -275,7 +295,7 @@ if (withElse) {
         break;
         }
       default:
-        jj_la1[9] = jj_gen;
+        jj_la1[10] = jj_gen;
         break label_2;
       }
       stmt = stmt();
@@ -298,7 +318,7 @@ hasExpr = true;
       break;
       }
     default:
-      jj_la1[10] = jj_gen;
+      jj_la1[11] = jj_gen;
       ;
     }
 if (hasExpr) {
@@ -322,7 +342,7 @@ hasAnd = true;
       break;
       }
     default:
-      jj_la1[11] = jj_gen;
+      jj_la1[12] = jj_gen;
       ;
     }
 if (hasAnd) {
@@ -351,7 +371,7 @@ if (hasAnd) {
         break;
         }
       default:
-        jj_la1[12] = jj_gen;
+        jj_la1[13] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
       }
@@ -360,7 +380,7 @@ hasEq = true;
       break;
       }
     default:
-      jj_la1[13] = jj_gen;
+      jj_la1[14] = jj_gen;
       ;
     }
 if (hasEq) {
@@ -399,7 +419,7 @@ if (hasEq) {
         break;
         }
       default:
-        jj_la1[14] = jj_gen;
+        jj_la1[15] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
       }
@@ -408,7 +428,7 @@ hasTerm = true;
       break;
       }
     default:
-      jj_la1[15] = jj_gen;
+      jj_la1[16] = jj_gen;
       ;
     }
 if (hasTerm) {
@@ -437,7 +457,7 @@ if (hasTerm) {
         break;
         }
       default:
-        jj_la1[16] = jj_gen;
+        jj_la1[17] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
       }
@@ -446,7 +466,7 @@ hasAdditiveTerm = true;
       break;
       }
     default:
-      jj_la1[17] = jj_gen;
+      jj_la1[18] = jj_gen;
       ;
     }
 if (hasAdditiveTerm) {
@@ -466,7 +486,7 @@ hasNotTerm = true;
       break;
       }
     default:
-      jj_la1[18] = jj_gen;
+      jj_la1[19] = jj_gen;
       ;
     }
     factor = factor();
@@ -498,7 +518,7 @@ if (hasNotTerm) {
       break;
       }
     default:
-      jj_la1[19] = jj_gen;
+      jj_la1[20] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -519,7 +539,7 @@ if (hasNotTerm) {
       }
     case ID:{
       t = jj_consume_token(ID);
-{if ("" != null) return new Id(t.image, false);}
+{if ("" != null) return new Id(t.image, false, false);}
       break;
       }
     case TRUE:
@@ -534,7 +554,7 @@ if (hasNotTerm) {
         break;
         }
       default:
-        jj_la1[20] = jj_gen;
+        jj_la1[21] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
       }
@@ -542,7 +562,7 @@ if (hasNotTerm) {
       break;
       }
     default:
-      jj_la1[21] = jj_gen;
+      jj_la1[22] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -558,7 +578,7 @@ if (hasNotTerm) {
   public Token jj_nt;
   private int jj_ntk;
   private int jj_gen;
-  final private int[] jj_la1 = new int[22];
+  final private int[] jj_la1 = new int[23];
   static private int[] jj_la1_0;
   static private int[] jj_la1_1;
   static {
@@ -566,10 +586,10 @@ if (hasNotTerm) {
 	   jj_la1_init_1();
 	}
 	private static void jj_la1_init_0() {
-	   jj_la1_0 = new int[] {0x2006140,0x10000000,0x10000000,0x10000000,0x2000140,0x2000,0x2c040280,0x2006140,0x8000,0x2006140,0x20000,0x10000,0x180000,0x180000,0x1e00000,0x1e00000,0x1800,0x1800,0x40000,0x2c000280,0xc000000,0xc000280,};
+	   jj_la1_0 = new int[] {0x400e140,0x20000000,0x20000000,0x20000000,0x20000000,0x4004140,0x2000,0x58080280,0x400e140,0x10000,0x400e140,0x40000,0x20000,0x300000,0x300000,0x3c00000,0x3c00000,0x1800,0x1800,0x80000,0x58000280,0x18000000,0x18000280,};
 	}
 	private static void jj_la1_init_1() {
-	   jj_la1_1 = new int[] {0x20,0x0,0x0,0x0,0x0,0x0,0x30,0x20,0x0,0x20,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x20,0x0,0x20,};
+	   jj_la1_1 = new int[] {0x40,0x0,0x0,0x0,0x0,0x0,0x0,0x60,0x40,0x0,0x40,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x40,0x0,0x40,};
 	}
 
   /** Constructor with InputStream. */
@@ -583,7 +603,7 @@ if (hasNotTerm) {
 	 token = new Token();
 	 jj_ntk = -1;
 	 jj_gen = 0;
-	 for (int i = 0; i < 22; i++) jj_la1[i] = -1;
+	 for (int i = 0; i < 23; i++) jj_la1[i] = -1;
   }
 
   /** Reinitialise. */
@@ -597,7 +617,7 @@ if (hasNotTerm) {
 	 token = new Token();
 	 jj_ntk = -1;
 	 jj_gen = 0;
-	 for (int i = 0; i < 22; i++) jj_la1[i] = -1;
+	 for (int i = 0; i < 23; i++) jj_la1[i] = -1;
   }
 
   /** Constructor. */
@@ -607,7 +627,7 @@ if (hasNotTerm) {
 	 token = new Token();
 	 jj_ntk = -1;
 	 jj_gen = 0;
-	 for (int i = 0; i < 22; i++) jj_la1[i] = -1;
+	 for (int i = 0; i < 23; i++) jj_la1[i] = -1;
   }
 
   /** Reinitialise. */
@@ -625,7 +645,7 @@ if (hasNotTerm) {
 	 token = new Token();
 	 jj_ntk = -1;
 	 jj_gen = 0;
-	 for (int i = 0; i < 22; i++) jj_la1[i] = -1;
+	 for (int i = 0; i < 23; i++) jj_la1[i] = -1;
   }
 
   /** Constructor with generated Token Manager. */
@@ -634,7 +654,7 @@ if (hasNotTerm) {
 	 token = new Token();
 	 jj_ntk = -1;
 	 jj_gen = 0;
-	 for (int i = 0; i < 22; i++) jj_la1[i] = -1;
+	 for (int i = 0; i < 23; i++) jj_la1[i] = -1;
   }
 
   /** Reinitialise. */
@@ -643,7 +663,7 @@ if (hasNotTerm) {
 	 token = new Token();
 	 jj_ntk = -1;
 	 jj_gen = 0;
-	 for (int i = 0; i < 22; i++) jj_la1[i] = -1;
+	 for (int i = 0; i < 23; i++) jj_la1[i] = -1;
   }
 
   private Token jj_consume_token(int kind) throws ParseException {
@@ -694,12 +714,12 @@ if (hasNotTerm) {
   /** Generate ParseException. */
   public ParseException generateParseException() {
 	 jj_expentries.clear();
-	 boolean[] la1tokens = new boolean[38];
+	 boolean[] la1tokens = new boolean[39];
 	 if (jj_kind >= 0) {
 	   la1tokens[jj_kind] = true;
 	   jj_kind = -1;
 	 }
-	 for (int i = 0; i < 22; i++) {
+	 for (int i = 0; i < 23; i++) {
 	   if (jj_la1[i] == jj_gen) {
 		 for (int j = 0; j < 32; j++) {
 		   if ((jj_la1_0[i] & (1<<j)) != 0) {
@@ -711,7 +731,7 @@ if (hasNotTerm) {
 		 }
 	   }
 	 }
-	 for (int i = 0; i < 38; i++) {
+	 for (int i = 0; i < 39; i++) {
 	   if (la1tokens[i]) {
 		 jj_expentry = new int[1];
 		 jj_expentry[0] = i;
