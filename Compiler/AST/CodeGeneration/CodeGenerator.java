@@ -70,7 +70,7 @@ public class CodeGenerator implements Visitor {
     public void visit(AssignmentOp node) {
         if (!(node.getCompAssOp().equals("notCompAssOp"))) {
             codeBuilder.append(InstructionSet.LDA.getInstruction() + " $01" + Integer.toHexString(symbolTable.lookup(node.getVariable()).getMemoryAddress()) + "\n");
-            codeBuilder.append(InstructionSet.STA.getInstruction() + " 01" + String.format("%02d", arithmeticOpCount) + "\n");
+            codeBuilder.append(InstructionSet.STA.getInstruction() + " $01" + String.format("%02d", arithmeticOpCount) + "\n");
             switch (node.getCompAssOp()) {
                 case "+=" -> operators.add("+");
                 case "-=" -> operators.add("-");
@@ -312,9 +312,12 @@ public class CodeGenerator implements Visitor {
                 codeBuilder.append(InstructionSet.SBC.getInstruction() + " $01" + String.format("%02d", (i - arithmeticOpCount + 1)) + "\n");
                 codeBuilder.append(InstructionSet.BCS.getInstruction() + " carry" + labelCount + "\n");
                 codeBuilder.append(InstructionSet.ADC.getInstruction() + " #1\n");
+                codeBuilder.append(InstructionSet.CLC.getInstruction() + "\n");
+                codeBuilder.append(InstructionSet.JMP.getInstruction() + " carryend" + labelCount + "\n");
                 codeBuilder.append("carry" + labelCount + ":\n");
                 codeBuilder.append(InstructionSet.CLC.getInstruction() + "\n");
                 codeBuilder.append(InstructionSet.ADC.getInstruction() + " #1\n");
+                codeBuilder.append("carryend" + labelCount + ":\n");
             }
             arithmeticOpCount--;
         }
