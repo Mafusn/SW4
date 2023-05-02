@@ -114,11 +114,17 @@ Node Stmt() :
     Node expr;
     Node whileLoop;
     Token t;
+    Token compAssOp = null;
 }
-{ t = < ID > < ASSIGN > expr = Expr() < END_OF_LINE >
+{ t = < ID > (compAssOp = <PLUS> | compAssOp = <MINUS>)? < ASSIGN > expr = Expr() < END_OF_LINE >
 {
     Id id = new Id(t.image);
-    return new AssignmentOp(t.image, id, expr);
+
+    if (compAssOp != null) {
+        return new AssignmentOp(t.image, id, expr, compAssOp.image);
+    } else {
+        return new AssignmentOp(t.image, id, expr);
+    }
 }
 | dcl = Dcl() < END_OF_LINE >
 {

@@ -26,18 +26,38 @@ public class PrettyPrint implements Visitor {
 
     @Override
     public void visit(AssignmentOp node) {
-        switch (node.getDeclaration().getClass().getSimpleName()) {
-            case "FloatDcl", "IntDcl", "BoolDcl" -> {
-                node.getDeclaration().accept(this);
-                sb.append(" = ");
-                node.getExpression().accept(this);
+
+        if (node.getCompAssOp() == "notCompAssOp") {
+            switch (node.getDeclaration().getClass().getSimpleName()) {
+                case "FloatDcl", "IntDcl", "BoolDcl" -> {
+                    node.getDeclaration().accept(this);
+                    sb.append(" = ");
+                    node.getExpression().accept(this);
+                }
+                default -> {
+                    sb.append("\n");
+                    printIndent();
+                    node.getDeclaration().accept(this);
+                    sb.append(" = ");
+                    node.getExpression().accept(this);
+                }
             }
-            default -> {
-                sb.append("\n");
-                printIndent();
-                node.getDeclaration().accept(this);
-                sb.append(" = ");
-                node.getExpression().accept(this);
+        } else {
+            switch (node.getCompAssOp()) {
+                case "+=" -> {
+                    sb.append("\n");
+                    printIndent();
+                    node.getDeclaration().accept(this); // variable not declaration, but works because it is still child 1
+                    sb.append(" += ");
+                    node.getExpression().accept(this);
+                }
+                case "-=" -> {
+                    sb.append("\n");
+                    printIndent();
+                    node.getDeclaration().accept(this); // variable not declaration, but works because it is still child 1
+                    sb.append(" -= ");
+                    node.getExpression().accept(this);
+                }
             }
         }
     }
