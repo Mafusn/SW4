@@ -5,6 +5,7 @@ import AST.Types.Type;
 import AST.Visitor;
 
 public class IfElseStmt extends Node {
+
     private Node condition;
     private Node child1;
     private Node child2;
@@ -35,4 +36,13 @@ public class IfElseStmt extends Node {
     public Node getElseBlock() {
         return child2;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        IfElseStmt ifElse = (IfElseStmt) o;
+        return condition.equals(ifElse.condition) && child1.equals(ifElse.child1) && child2.equals(ifElse.child2);
+    }
+
 }

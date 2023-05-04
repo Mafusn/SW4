@@ -4,7 +4,6 @@ import AST.SymbolTableFilling.SymbolTableFilling;
 import AST.Types.BooleanType;
 import AST.Types.Type;
 import AST.Visitor;
-
 public class ComparisonOp extends Node {
     private String operation;
     private Node child1;
@@ -46,5 +45,13 @@ public class ComparisonOp extends Node {
 
     public String getOperator() {
         return operation;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ComparisonOp comparisonOp = (ComparisonOp) o;
+        return operation.equals(comparisonOp.operation) && child1.equals(comparisonOp.child1) && child2.equals(comparisonOp.child2);
     }
 }
