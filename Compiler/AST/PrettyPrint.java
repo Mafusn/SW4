@@ -25,25 +25,45 @@ public class PrettyPrint implements Visitor {
     }
 
     @Override
-    public void visit(Assigning node) {
-        switch (node.getDeclaration().getClass().getSimpleName()) {
-            case "FloatDcl", "IntDcl", "BoolDcl" -> {
-                node.getDeclaration().accept(this);
-                sb.append(" = ");
-                node.getExpression().accept(this);
+    public void visit(AssignmentOp node) {
+
+        if (node.getCompAssOp() == "notCompAssOp") {
+            switch (node.getDeclaration().getClass().getSimpleName()) {
+                case "FloatDcl", "IntDcl", "BoolDcl" -> {
+                    node.getDeclaration().accept(this);
+                    sb.append(" = ");
+                    node.getExpression().accept(this);
+                }
+                default -> {
+                    sb.append("\n");
+                    printIndent();
+                    node.getDeclaration().accept(this);
+                    sb.append(" = ");
+                    node.getExpression().accept(this);
+                }
             }
-            default -> {
-                sb.append("\n");
-                printIndent();
-                node.getDeclaration().accept(this);
-                sb.append(" = ");
-                node.getExpression().accept(this);
+        } else {
+            switch (node.getCompAssOp()) {
+                case "+=" -> {
+                    sb.append("\n");
+                    printIndent();
+                    node.getDeclaration().accept(this); // variable not declaration, but works because it is still child 1
+                    sb.append(" += ");
+                    node.getExpression().accept(this);
+                }
+                case "-=" -> {
+                    sb.append("\n");
+                    printIndent();
+                    node.getDeclaration().accept(this); // variable not declaration, but works because it is still child 1
+                    sb.append(" -= ");
+                    node.getExpression().accept(this);
+                }
             }
         }
     }
 
     @Override
-    public void visit(BinOperator node) {
+    public void visit(ComparisonOp node) {
         node.getLeftOperand().accept(this);
         sb.append(" " + node.getOperator() + " ");
         node.getRightOperand().accept(this);
@@ -71,7 +91,7 @@ public class PrettyPrint implements Visitor {
     }
 
     @Override
-    public void visit(Computing node) {
+    public void visit(ArithmeticOp node) {
         node.getLeftOperand().accept(this);
         sb.append(" " + node.getOperator() + " ");
         node.getRightOperand().accept(this);
@@ -95,7 +115,7 @@ public class PrettyPrint implements Visitor {
     }
 
     @Override
-    public void visit(If node) {
+    public void visit(IfStmt node) {
         sb.append("\n");
         printIndent();
         sb.append("if(");
@@ -105,7 +125,7 @@ public class PrettyPrint implements Visitor {
     }
 
     @Override
-    public void visit(IfElse node) {
+    public void visit(IfElseStmt node) {
         sb.append("\n");
         printIndent();
         sb.append("if(");
@@ -131,17 +151,10 @@ public class PrettyPrint implements Visitor {
     }
 
     @Override
-    public void visit(Not node) {
+    public void visit(NegationOp node) {
         sb.append("!(");
         node.getExpression().accept(this);
         sb.append(")");
-    }
-
-    @Override
-    public void visit(Print node) {
-        sb.append("\n");
-        printIndent();
-        sb.append("print(" + node.getId() + ")");
     }
 
     @Override
@@ -149,5 +162,15 @@ public class PrettyPrint implements Visitor {
         for(Node n : node.getChildren()){
             n.accept(this);
         }
+    }
+
+    @Override
+    public void visit(WhileLoop node) {
+        sb.append("\n");
+        printIndent();
+        sb.append("while (");
+        node.getCondition().accept(this);
+        sb.append(")");
+        node.getBlock().accept(this);
     }
 }

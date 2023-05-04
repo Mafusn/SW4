@@ -1,6 +1,0 @@
-1. Tilføj ny .java fil som har nodens navn.
-2. Sørg for den ligner de andre node filer.
-3. Tilføj en metode i visitor klassen som har den nye node som parameter.
-4. Tilføj metode i prettyprinter, (AST generator), type checking og codegeneration klasserne.
-5. Tilføj i parse.jj hvor det er nødvendigt.
-6. Du er nu en maskine for at have tilføjet en ny node til vores vanvittige parser.

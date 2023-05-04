@@ -4,11 +4,11 @@ import AST.SymbolTableFilling.SymbolTableFilling;
 import AST.Types.Type;
 import AST.Visitor;
 
-public class Not extends Node{
+public class NegationOp extends Node{
     private Node child;
     private Type type;
 
-    public Not(Node child) {
+    public NegationOp(Node child) {
         this.child = child;
     }
 

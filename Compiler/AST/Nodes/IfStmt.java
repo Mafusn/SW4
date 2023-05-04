@@ -4,13 +4,12 @@ import AST.SymbolTableFilling.SymbolTableFilling;
 import AST.Types.Type;
 import AST.Visitor;
 
-import java.util.Objects;
+public class IfStmt extends Node {
 
-public class If extends Node {
     private Node condition;
     private Node child1;
 
-    public If(Node condition, Node child1){
+    public IfStmt(Node condition, Node child1){
         this.condition = condition;
         this.child1 = child1;
     }
@@ -37,11 +36,7 @@ public class If extends Node {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         If anIf = (If) o;
-        return condition.equals(anIf.condition) && child1.equals(anIf.child1);
+        return condition.equals(anIf.getCondition()) && child1.equals(anIf.child1);
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(condition, child1);
-    }
 }
