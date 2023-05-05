@@ -13,7 +13,7 @@ public class CodeGenerator implements Visitor {
     private int scopeLevel = 0;
     private StringBuilder codeBuilder;
     private final ArrayList<SymbolTableFilling> symbolTables;
-    private int stackAddress = 0xff;
+    private int stackAddress = 0;
     private int arithmeticOpCount = 0;
     private ArrayList operators = new ArrayList<Integer>();
     private int binOperatorCount = 0;
@@ -38,12 +38,12 @@ public class CodeGenerator implements Visitor {
 
     private void pushAccumulator() {
         codeBuilder.append("PHA\n");
-        decrementStackAddress();
+        incrementStackAddress();
     }
 
     private void pullAccumulator() {
         codeBuilder.append(InstructionSet.PLA.getInstruction() + "\n");
-        incrementStackAddress();
+        decrementStackAddress();
     }
 
     private int getScopeLevel() {
@@ -59,7 +59,12 @@ public class CodeGenerator implements Visitor {
 
     private void storeXRegisterInVariable(String id) {
         Symbol symbol = symbolTables.get(getScopeLevel()).lookup(id);
-        codeBuilder.append(InstructionSet.STX.getInstruction() + " $01" + Integer.toHexString(symbol.getMemoryAddress()) + "\n");
+        codeBuilder.append(InstructionSet.TXA.getInstruction() + "\n");
+        codeBuilder.append(InstructionSet.TSX.getInstruction() + "\n");
+        for (int i = 0; i < stackAddress - symbol.getMemoryAddress(); i++) {
+            codeBuilder.append(InstructionSet.INX.getInstruction() + "\n");
+        }
+        codeBuilder.append(InstructionSet.STA.getInstruction() + " $0100, x" + "\n");
     }
 
     public CodeGenerator(ArrayList<SymbolTableFilling> symbolTables) {
@@ -79,7 +84,11 @@ public class CodeGenerator implements Visitor {
     @Override
     public void visit(AssignmentOp node) {
         if (!(node.getCompAssOp().equals("notCompAssOp"))) {
-            codeBuilder.append(InstructionSet.LDA.getInstruction() + " $01" + Integer.toHexString(symbolTables.get(getScopeLevel()).lookup(node.getVariable()).getMemoryAddress()) + "\n");
+            codeBuilder.append(InstructionSet.TSX.getInstruction() + "\n");
+            for (int i = 0; i < stackAddress - symbolTables.get(getScopeLevel()).lookup(node.getVariable()).getMemoryAddress(); i++) {
+                codeBuilder.append(InstructionSet.INX.getInstruction() + "\n");
+            }
+            codeBuilder.append(InstructionSet.LDA.getInstruction() + " $0100, x" + "\n");
             codeBuilder.append(InstructionSet.STA.getInstruction() + " $01" + String.format("%02d", arithmeticOpCount) + "\n");
             switch (node.getCompAssOp()) {
                 case "+=" -> operators.add("+");
@@ -133,7 +142,7 @@ public class CodeGenerator implements Visitor {
         for (Node n : node.getChildren()) {
             n.accept(this);
         }
-        for (int i = stackAddressPlaceHolder - stackAddress; i > 0; i--) {
+        for (int i = stackAddress - stackAddressPlaceHolder; i > 0; i--) {
             codeBuilder.append(InstructionSet.PLA.getInstruction() + "\n");
         }
         stackAddress = stackAddressPlaceHolder;
@@ -174,7 +183,13 @@ public class CodeGenerator implements Visitor {
     public void visit(Id node) {
         // Man skriver $01 foran adressen fordi den metode man kalder efter er 8-bit og derfor kun 2 decimaler.
         // Når vi skriver $01 foran ender vi i stacken.
-        codeBuilder.append(InstructionSet.LDX.getInstruction() + " $01" + Integer.toHexString(symbolTables.get(getScopeLevel()).lookup(node.getName()).getMemoryAddress()) + "\n");
+        codeBuilder.append(InstructionSet.TSX.getInstruction() + "\n");
+        for (int i = 0; i < stackAddress - symbolTables.get(getScopeLevel()).lookup(node.getName()).getMemoryAddress(); i++) {
+            codeBuilder.append(InstructionSet.INX.getInstruction() + "\n");
+        }
+        codeBuilder.append(InstructionSet.TXA.getInstruction() + "\n");
+        codeBuilder.append(InstructionSet.TAY.getInstruction() + "\n");
+        codeBuilder.append(InstructionSet.LDX.getInstruction() + " $0100, y" + "\n");
     }
 
     @Override

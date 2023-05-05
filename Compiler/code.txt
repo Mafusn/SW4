@@ -1,3 +1,13 @@
 int a = 2;
 a += 2 - 3;
+int b = 4;
+if (b == b) {
+    int c = 1;
+    if (c == 1) {
+        int d = 2;
+        c = 3;
+    }
+} else {
+    int d = 2;
+}
 END;
