@@ -27,7 +27,7 @@ public class PrettyPrint implements Visitor {
     @Override
     public void visit(AssignmentOp node) {
 
-        if (node.getCompAssOp() == "notCompAssOp") {
+        if (node.getCompAssOp() == null) {
             switch (node.getDeclaration().getClass().getSimpleName()) {
                 case "FloatDcl", "IntDcl", "BoolDcl" -> {
                     node.getDeclaration().accept(this);

@@ -13,11 +13,11 @@ import java.util.ArrayList;
 public class Compiler {
     public static void main(String[] args) {
         try {
-            Compiler compiler = new Compiler(new java.io.FileReader("code.txt"));
+            Compiler compiler = new Compiler(new java.io.FileReader("Compiler/code.txt"));
             Node prog = compiler.Prog();
 
             PrettyPrint prettyPrint = new PrettyPrint();
-            ArrayList<SymbolTableFilling> symbolTableFillings; // = new ArrayList<>();
+            ArrayList<SymbolTableFilling> symbolTableFillings = new ArrayList<>();
             SymbolTableFilling symbolTableFilling = new SymbolTableFilling(symbolTableFillings , 0);
             TypeChecking typeChecking = new TypeChecking(symbolTableFillings);
             CodeGenerator codeGenerator = new CodeGenerator(symbolTableFillings);
@@ -228,86 +228,61 @@ Node Expr() :
 
 Node OrOp() :
 {
-    boolean hasExpr = false;
-    Node andOp;
-    Node expr = null;
+    Node left = null;
     Token op = null;
+    Node right = null;
 }
-{ andOp = AndOp() (( op = <OR> ) expr = Expr() { hasExpr = true; } )?
+{ left = AndOp() (( op = <OR> ) right = AndOp() { left = new ComparisonOp(left, op.image, right); })*
 {
-    if (hasExpr) {
-        return new ComparisonOp(op.image, andOp, expr);
-    } else {
-        return andOp;
-    }
+    return left;
 }
 }
 
 Node AndOp() :
 {
-    boolean hasAndOp = false;
-    Node equalityOp;
-    Node andOp = null;
+    Node left = null;
     Token op = null;
+    Node right = null;
 }
-{equalityOp = EqualityOp() (( op = <AND>) andOp = AndOp() {hasAndOp = true;})?
+{ left = EqualityOp() (( op = <AND>) right = EqualityOp() { left = new ComparisonOp(left, op.image, right); })*
 {
-    if (hasAndOp) {
-        return new ComparisonOp(op.image, equalityOp, andOp);
-    } else {
-        return equalityOp;
-    }
+    return left;
 }
 }
 
 Node EqualityOp() :
 {
-    boolean hasEqualityOp = false;
-    Node comparisonOp;
-    Node equalityOp = null;
+    Node left = null;
     Token op = null;
+    Node right = null;
 }
-{comparisonOp = ComparisonOp() (( op = <EQ> | op = <NE>) equalityOp = EqualityOp() {hasEqualityOp = true;})?
+{ left = ComparisonOp() (( op = <EQ> | op = <NE>) right = ComparisonOp() { left = new ComparisonOp(left, op.image, right); })*
 {
-    if (hasEqualityOp) {
-        return new ComparisonOp(op.image, comparisonOp, equalityOp);
-    } else {
-        return comparisonOp;
-    }
+    return left;
 }
 }
 
 Node ComparisonOp() :
 {
-    boolean hasComparisonOp = false;
-     Node arithmeticOp;
-     Node comparisonOp = null;
-     Token op = null;
+    Node left = null;
+    Token op = null;
+    Node right = null;
  }
-{arithmeticOp = ArithmeticOp() (( op = <LT> | op = <GT> | op = <GE> | op = <LE> )comparisonOp = ComparisonOp() { hasComparisonOp = true; })?
+{left = ArithmeticOp() (( op = <LT> | op = <GT> | op = <GE> | op = <LE> ) right = ArithmeticOp() { left = new ComparisonOp(left, op.image, right); })*
 {
-    if (hasComparisonOp) {
-        return new ComparisonOp(op.image, arithmeticOp, comparisonOp);
-    } else {
-        return arithmeticOp;
-    }
+    return left;
 }
 }
 
 Node ArithmeticOp() :
 {
-    boolean hasArithmeticOp = false;
-    Node negationOp;
-    Node arithmeticOp = null;
+    Node left = null;
     Token op = null;
+    Node right = null;
  }
-{ negationOp = NegationOp() ((op = <PLUS> | op = <MINUS> ) arithmeticOp = ArithmeticOp() { hasArithmeticOp = true; })?
+{ left = NegationOp() ((op = <PLUS> | op = <MINUS> ) right = NegationOp() { left = new ArithmeticOp(left, op.image, right); })*
 {
-    if (hasArithmeticOp) {
-        return new ArithmeticOp(op.image, negationOp, arithmeticOp);
-    } else {
-        return negationOp;
-    }
+    return left;
 }
 
 }

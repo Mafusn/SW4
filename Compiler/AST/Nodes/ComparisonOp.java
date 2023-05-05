@@ -6,15 +6,15 @@ import AST.Types.Type;
 import AST.Visitor;
 
 public class ComparisonOp extends Node {
+    private Node left;
     private String operation;
-    private Node child1;
-    private Node child2;
+    private Node right;
     private Type type;
 
-    public ComparisonOp(String operation, Node child1, Node child2){
+    public ComparisonOp(Node left, String operation, Node right) {
+        this.left = left;
         this.operation = operation;
-        this.child1 = child1;
-        this.child2 = child2;
+        this.right = right;
         this.type = new BooleanType();
     }
 
@@ -25,8 +25,8 @@ public class ComparisonOp extends Node {
     @Override
     public Type getType(SymbolTableFilling symbolTable) {
         if (this.type == null) {
-            Type leftType = child1.getType(symbolTable);
-            Type rightType = child2.getType(symbolTable);
+            Type leftType = left.getType(symbolTable);
+            Type rightType = right.getType(symbolTable);
             setType(leftType.getResultType(operation, rightType));
         }
         return this.type;
@@ -37,11 +37,11 @@ public class ComparisonOp extends Node {
     }
 
     public Node getLeftOperand() {
-        return child1;
+        return left;
     }
 
     public Node getRightOperand() {
-        return child2;
+        return right;
     }
 
     public String getOperator() {

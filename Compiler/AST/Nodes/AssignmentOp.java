@@ -16,7 +16,7 @@ public class AssignmentOp extends Node {
         this.name = name;
         this.child1 = child1;
         this.child2 = child2;
-        this.compAssOp = "notCompAssOp";
+        this.compAssOp = null;
     }
 
     public AssignmentOp(String name, Node child1, Node child2, String compAssOp){
@@ -61,7 +61,7 @@ public class AssignmentOp extends Node {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        AssignmentOp that = (AssignmentOp) o;
-        return Objects.equals(name, that.name) && Objects.equals(child1, that.child1) && Objects.equals(child2, that.child2) && Objects.equals(compAssOp, that.compAssOp);
+        AssignmentOp assignmentOp = (AssignmentOp) o;
+        return name.equals(assignmentOp.name) && child1.equals(assignmentOp.child1) && child2.equals(assignmentOp.child2) && compAssOp.equals(assignmentOp.compAssOp);
     }
 }
