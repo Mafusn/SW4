@@ -6,9 +6,7 @@ import AST.Types.Type;
 import AST.Visitor;
 
 public class ComparisonOp extends Node {
-    private Node left;
     private String operation;
-    private Node right;
     private Type type;
 
     public ComparisonOp(Node left, String operation, Node right) {
@@ -34,14 +32,6 @@ public class ComparisonOp extends Node {
 
     public void setType(Type type) {
         this.type = type;
-    }
-
-    public Node getLeftOperand() {
-        return left;
-    }
-
-    public Node getRightOperand() {
-        return right;
     }
 
     public String getOperator() {

@@ -5,12 +5,10 @@ import AST.Types.Type;
 import AST.Visitor;
 
 public class IfStmt extends Node {
-    private Node condition;
-    private Node child1;
 
-    public IfStmt(Node condition, Node child1){
-        this.condition = condition;
-        this.child1 = child1;
+    public IfStmt(Node left, Node right){
+        this.left = left;
+        this.right = right;
     }
 
     public void accept(Visitor v){
@@ -22,11 +20,4 @@ public class IfStmt extends Node {
         return null;
     }
 
-    public Node getCondition() {
-        return condition;
-    }
-
-    public Node getThenBlock() {
-        return child1;
-    }
 }

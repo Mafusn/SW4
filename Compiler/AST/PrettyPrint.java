@@ -28,18 +28,18 @@ public class PrettyPrint implements Visitor {
     public void visit(AssignmentOp node) {
 
         if (node.getCompAssOp() == null) {
-            switch (node.getDeclaration().getClass().getSimpleName()) {
+            switch (node.getLeft().getClass().getSimpleName()) {
                 case "FloatDcl", "IntDcl", "BoolDcl" -> {
-                    node.getDeclaration().accept(this);
+                    node.getLeft().accept(this);
                     sb.append(" = ");
-                    node.getExpression().accept(this);
+                    node.getRight().accept(this);
                 }
                 default -> {
                     sb.append("\n");
                     printIndent();
-                    node.getDeclaration().accept(this);
+                    node.getLeft().accept(this);
                     sb.append(" = ");
-                    node.getExpression().accept(this);
+                    node.getRight().accept(this);
                 }
             }
         } else {
@@ -47,16 +47,16 @@ public class PrettyPrint implements Visitor {
                 case "+=" -> {
                     sb.append("\n");
                     printIndent();
-                    node.getDeclaration().accept(this); // variable not declaration, but works because it is still child 1
+                    node.getLeft().accept(this); // variable not declaration, but works because it is still child 1
                     sb.append(" += ");
-                    node.getExpression().accept(this);
+                    node.getRight().accept(this);
                 }
                 case "-=" -> {
                     sb.append("\n");
                     printIndent();
-                    node.getDeclaration().accept(this); // variable not declaration, but works because it is still child 1
+                    node.getLeft().accept(this); // variable not declaration, but works because it is still child 1
                     sb.append(" -= ");
-                    node.getExpression().accept(this);
+                    node.getRight().accept(this);
                 }
             }
         }
@@ -64,9 +64,9 @@ public class PrettyPrint implements Visitor {
 
     @Override
     public void visit(ComparisonOp node) {
-        node.getLeftOperand().accept(this);
+        node.getLeft().accept(this);
         sb.append(" " + node.getOperator() + " ");
-        node.getRightOperand().accept(this);
+        node.getRight().accept(this);
     }
 
     @Override
@@ -92,9 +92,9 @@ public class PrettyPrint implements Visitor {
 
     @Override
     public void visit(ArithmeticOp node) {
-        node.getLeftOperand().accept(this);
+        node.getLeft().accept(this);
         sb.append(" " + node.getOperator() + " ");
-        node.getRightOperand().accept(this);
+        node.getRight().accept(this);
     }
 
     @Override
@@ -119,9 +119,9 @@ public class PrettyPrint implements Visitor {
         sb.append("\n");
         printIndent();
         sb.append("if(");
-        node.getCondition().accept(this);
+        node.getLeft().accept(this);
         sb.append(")");
-        node.getThenBlock().accept(this);
+        node.getRight().accept(this);
     }
 
     @Override
@@ -131,11 +131,11 @@ public class PrettyPrint implements Visitor {
         sb.append("if(");
         node.getCondition().accept(this);
         sb.append(")");
-        node.getThenBlock().accept(this);
+        node.getLeft().accept(this);
         sb.append("\n");
         printIndent();
         sb.append("else");
-        node.getElseBlock().accept(this);
+        node.getRight().accept(this);
     }
 
     @Override
@@ -153,7 +153,7 @@ public class PrettyPrint implements Visitor {
     @Override
     public void visit(NegationOp node) {
         sb.append("!(");
-        node.getExpression().accept(this);
+        node.getLeft().accept(this);
         sb.append(")");
     }
 
@@ -169,8 +169,8 @@ public class PrettyPrint implements Visitor {
         sb.append("\n");
         printIndent();
         sb.append("while (");
-        node.getCondition().accept(this);
+        node.getLeft().accept(this);
         sb.append(")");
-        node.getBlock().accept(this);
+        node.getRight().accept(this);
     }
 }

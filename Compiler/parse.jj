@@ -20,6 +20,7 @@ public class Compiler {
             ArrayList<SymbolTableFilling> symbolTableFillings = new ArrayList<>();
             SymbolTableFilling symbolTableFilling = new SymbolTableFilling(symbolTableFillings , 0);
             TypeChecking typeChecking = new TypeChecking(symbolTableFillings);
+            ConstantFolding constantFolding = new ConstantFolding();
             CodeGenerator codeGenerator = new CodeGenerator(symbolTableFillings);
 
             prog.accept(prettyPrint);
@@ -30,6 +31,7 @@ public class Compiler {
             System.out.println("Symbol table is good");
             prog.accept(typeChecking);
             System.out.println("Type check is good");
+            prog.accept(constantFolding);
             prog.accept(codeGenerator);
             System.out.println("Code generator is good");
 
@@ -88,6 +90,7 @@ TOKEN : /* ASSIGNMENT OPERATION AND BASIC CONTROL STRUCTURE */
 | <RBRACE: "}">
 | <END_OF_LINE: ";">
 | <ADDRESS: "&">
+| <HASHTAG: "#">
 | <END_OF_FILE: "END">
 | <WHILE: "while">
 }
@@ -119,7 +122,6 @@ Node Stmt() :
 { t = < ID > (compAssOp = <PLUS> | compAssOp = <MINUS>)? < ASSIGN > expr = Expr() < END_OF_LINE >
 {
     Id id = new Id(t.image);
-
     if (compAssOp != null) {
         return new AssignmentOp(t.image, id, expr, compAssOp.image);
     } else {
@@ -323,11 +325,11 @@ Node Val() :
  }
 { t = < INT >
 {
-    return new IntNum(t.image);
+    return new IntNum(Integer.parseInt(t.image));
 }
 | t = < FLOAT >
 {
-    return new FloatNum(t.image);
+    return new FloatNum(Float.parseFloat(t.image));
 }
 | t = < ID >
 {
@@ -335,7 +337,7 @@ Node Val() :
 }
 | (t = < TRUE > | t = < FALSE >)
 {
-    return new Bool(t.image);
+    return new Bool(Boolean.parseBoolean(t.image));
 }
 /*
 | < ADDRESS > t = < ID >

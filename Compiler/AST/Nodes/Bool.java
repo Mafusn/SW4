@@ -9,8 +9,8 @@ public class Bool extends Node {
     private boolean value;
     private Type type;
 
-    public Bool(String value){
-        this.value = Boolean.parseBoolean(value);
+    public Bool(Boolean value){
+        this.value = value;
         this.type = new BooleanType();
     }
 

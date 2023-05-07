@@ -6,13 +6,11 @@ import AST.Visitor;
 
 public class IfElseStmt extends Node {
     private Node condition;
-    private Node child1;
-    private Node child2;
 
-    public IfElseStmt(Node condition, Node child1, Node child2){
+    public IfElseStmt(Node condition, Node left, Node right){
         this.condition = condition;
-        this.child1 = child1;
-        this.child2 = child2;
+        this.left = left;
+        this.right = right;
     }
 
     public void accept(Visitor v){
@@ -26,13 +24,5 @@ public class IfElseStmt extends Node {
 
     public Node getCondition() {
         return condition;
-    }
-
-    public Node getThenBlock() {
-        return child1;
-    }
-
-    public Node getElseBlock() {
-        return child2;
     }
 }

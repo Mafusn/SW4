@@ -9,8 +9,8 @@ public class FloatNum extends Node {
     private float value;
     private Type type;
 
-    public FloatNum(String value){
-        this.value = Float.parseFloat(value);
+    public FloatNum(float value){
+        this.value = value;
         this.type = new FloatType();
     }
 

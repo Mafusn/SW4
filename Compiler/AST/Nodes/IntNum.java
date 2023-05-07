@@ -9,8 +9,8 @@ public class IntNum extends Node {
     private int value;
     private Type type;
 
-    public IntNum(String value){
-        this.value = Integer.parseInt(value);
+    public IntNum(int value){
+        this.value = value;
         this.type = new IntType();
     }
 

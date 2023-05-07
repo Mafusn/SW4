@@ -16,6 +16,7 @@ public class Compiler implements CompilerConstants {
             ArrayList<SymbolTableFilling> symbolTableFillings = new ArrayList<>();
             SymbolTableFilling symbolTableFilling = new SymbolTableFilling(symbolTableFillings , 0);
             TypeChecking typeChecking = new TypeChecking(symbolTableFillings);
+            ConstantFolding constantFolding = new ConstantFolding();
             CodeGenerator codeGenerator = new CodeGenerator(symbolTableFillings);
 
             prog.accept(prettyPrint);
@@ -26,6 +27,7 @@ public class Compiler implements CompilerConstants {
             System.out.println("Symbol table is good");
             prog.accept(typeChecking);
             System.out.println("Type check is good");
+            prog.accept(constantFolding);
             prog.accept(codeGenerator);
             System.out.println("Code generator is good");
 
@@ -507,12 +509,12 @@ if (hasNegationOp) {
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
     case INT:{
       t = jj_consume_token(INT);
-{if ("" != null) return new IntNum(t.image);}
+{if ("" != null) return new IntNum(Integer.parseInt(t.image));}
       break;
       }
     case FLOAT:{
       t = jj_consume_token(FLOAT);
-{if ("" != null) return new FloatNum(t.image);}
+{if ("" != null) return new FloatNum(Float.parseFloat(t.image));}
       break;
       }
     case ID:{
@@ -536,7 +538,7 @@ if (hasNegationOp) {
         jj_consume_token(-1);
         throw new ParseException();
       }
-{if ("" != null) return new Bool(t.image);}
+{if ("" != null) return new Bool(Boolean.parseBoolean(t.image));}
       break;
       }
     default:

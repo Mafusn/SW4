@@ -1,13 +1,12 @@
 package AST.Nodes;
 
+import AST.OperationSet;
 import AST.SymbolTableFilling.SymbolTableFilling;
 import AST.Types.Type;
 import AST.Visitor;
 
 public class ArithmeticOp extends Node {
-    private Node left;
     private String operation;
-    private Node right;
     private Type type;
 
     public ArithmeticOp(Node left, String operation, Node right){
@@ -32,14 +31,6 @@ public class ArithmeticOp extends Node {
             setType(leftType.getResultType(operation, rightType));
         }
         return this.type;
-    }
-
-    public Node getLeftOperand() {
-        return left;
-    }
-
-    public Node getRightOperand() {
-        return right;
     }
 
     public String getOperator() {
