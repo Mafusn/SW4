@@ -19,5 +19,12 @@ public class IfStmt extends Node {
     public Type getType(SymbolTableFilling symbolTable) {
         return null;
     }
-
+    
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        If anIf = (If) o;
+        return left.equals(anIf.left)) && right.equals(anIf.right);
+    }
 }

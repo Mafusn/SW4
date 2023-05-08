@@ -5,6 +5,8 @@ import AST.Types.FloatType;
 import AST.Types.Type;
 import AST.Visitor;
 
+import java.util.Objects;
+
 public class FloatDcl extends Node {
     private String id;
     private Type type;
@@ -27,11 +29,16 @@ public class FloatDcl extends Node {
         return this.type;
     }
 
-    /*
     @Override
-    public boolean equals(Object obj) {
-        return super.equals(obj);
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        FloatDcl floatDcl = (FloatDcl) o;
+        return id.equals(floatDcl.id) && type.equals(floatDcl.type);
     }
 
-     */
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, type);
+    }
 }
