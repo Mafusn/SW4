@@ -44,14 +44,14 @@ public class SymbolTableFilling implements Visitor {
 
     @Override
     public void visit(AssignmentOp node) {
-        node.getDeclaration().accept(this);
-        node.getExpression().accept(this);
+        node.getLeft().accept(this);
+        node.getRight().accept(this);
     }
 
     @Override
     public void visit(ComparisonOp node) {
-        node.getLeftOperand().accept(this);
-        node.getRightOperand().accept(this);
+        node.getLeft().accept(this);
+        node.getRight().accept(this);
     }
 
     @Override
@@ -78,8 +78,8 @@ public class SymbolTableFilling implements Visitor {
 
     @Override
     public void visit(ArithmeticOp node) {
-        node.getLeftOperand().accept(this);
-        node.getRightOperand().accept(this);
+        node.getLeft().accept(this);
+        node.getRight().accept(this);
     }
 
     @Override
@@ -106,15 +106,15 @@ public class SymbolTableFilling implements Visitor {
 
     @Override
     public void visit(IfStmt node) {
-        node.getCondition().accept(this);
-        node.getThenBlock().accept(this);
+        node.getLeft().accept(this);
+        node.getRight().accept(this);
     }
 
     @Override
     public void visit(IfElseStmt node) {
         node.getCondition().accept(this);
-        node.getThenBlock().accept(this);
-        node.getElseBlock().accept(this);
+        node.getLeft().accept(this);
+        node.getRight().accept(this);
     }
 
     @Override
@@ -133,7 +133,7 @@ public class SymbolTableFilling implements Visitor {
 
     @Override
     public void visit(NegationOp node) {
-        node.getExpression().accept(this);
+        node.getLeft().accept(this);
     }
 
     @Override
@@ -146,8 +146,8 @@ public class SymbolTableFilling implements Visitor {
 
     @Override
     public void visit(WhileLoop node) {
-        node.getCondition().accept(this);
-        node.getBlock().accept(this);
+        node.getLeft().accept(this);
+        node.getRight().accept(this);
     }
 
     private void error(String message) {

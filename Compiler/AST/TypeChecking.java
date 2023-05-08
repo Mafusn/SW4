@@ -18,7 +18,7 @@ public class TypeChecking implements Visitor {
     @Override
     public void visit(AssignmentOp node) {
         // Get the type of the expression on the right-hand side of the assignment
-        Type rhsType = node.getExpression().getType(symbolTables.get(scopeLevel));
+        Type rhsType = node.getRight().getType(symbolTables.get(scopeLevel));
 
         // Get the symbol for the variable being assigned to
         Symbol symbol = symbolTables.get(scopeLevel).lookup(node.getVariable());
@@ -32,8 +32,8 @@ public class TypeChecking implements Visitor {
 
     @Override
     public void visit(ComparisonOp node) {
-        Type leftType = node.getLeftOperand().getType(symbolTables.get(scopeLevel));
-        Type rightType = node.getRightOperand().getType(symbolTables.get(scopeLevel));
+        Type leftType = node.getLeft().getType(symbolTables.get(scopeLevel));
+        Type rightType = node.getRight().getType(symbolTables.get(scopeLevel));
 
         if (!(leftType.isEqual(rightType))) {
             error("Binary operator used with incompatible types");
@@ -62,8 +62,8 @@ public class TypeChecking implements Visitor {
 
     @Override
     public void visit(ArithmeticOp node) {
-        Type leftType = node.getLeftOperand().getType(symbolTables.get(scopeLevel));
-        Type rightType = node.getRightOperand().getType(symbolTables.get(scopeLevel));
+        Type leftType = node.getLeft().getType(symbolTables.get(scopeLevel));
+        Type rightType = node.getRight().getType(symbolTables.get(scopeLevel));
 
         if (!(leftType.isEqual(rightType))) {
             error("Computing operator used with incompatible types");
@@ -100,13 +100,13 @@ public class TypeChecking implements Visitor {
 
     @Override
     public void visit(IfStmt node) {
-        Type conditionType = node.getCondition().getType(symbolTables.get(scopeLevel));
+        Type conditionType = node.getLeft().getType(symbolTables.get(scopeLevel));
 
         if (!(conditionType instanceof BooleanType)) {
             error("If statement condition must be boolean");
         }
 
-        node.getThenBlock().accept(this);
+        node.getRight().accept(this);
     }
 
     @Override
@@ -117,8 +117,8 @@ public class TypeChecking implements Visitor {
             error("If-else statement condition must be boolean");
         }
 
-        node.getThenBlock().accept(this);
-        node.getElseBlock().accept(this);
+        node.getLeft().accept(this);
+        node.getRight().accept(this);
     }
 
     @Override
@@ -133,7 +133,7 @@ public class TypeChecking implements Visitor {
 
     @Override
     public void visit(NegationOp node) {
-        Type exprType = node.getExpression().getType(symbolTables.get(scopeLevel));
+        Type exprType = node.getLeft().getType(symbolTables.get(scopeLevel));
         if (!(exprType instanceof BooleanType)) {
             error("Type mismatch in Not operator");
         }
@@ -149,13 +149,13 @@ public class TypeChecking implements Visitor {
 
     @Override
     public void visit(WhileLoop node) {
-        Type conditionType = node.getCondition().getType(symbolTables.get(scopeLevel));
+        Type conditionType = node.getLeft().getType(symbolTables.get(scopeLevel));
 
         if (!(conditionType instanceof BooleanType)) {
             error("While-loop statement is not of type boolean");
         }
 
-        node.getBlock().accept(this);
+        node.getRight().accept(this);
     }
 
     private void error(String message) {

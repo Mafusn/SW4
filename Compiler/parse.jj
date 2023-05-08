@@ -13,13 +13,14 @@ import java.util.ArrayList;
 public class Compiler {
     public static void main(String[] args) {
         try {
-            Compiler compiler = new Compiler(new java.io.FileReader("code.txt"));
+            Compiler compiler = new Compiler(new java.io.FileReader("Compiler/code.txt"));
             Node prog = compiler.Prog();
 
             PrettyPrint prettyPrint = new PrettyPrint();
-            ArrayList<SymbolTableFilling> symbolTableFillings; // = new ArrayList<>();
+            ArrayList<SymbolTableFilling> symbolTableFillings = new ArrayList<>();
             SymbolTableFilling symbolTableFilling = new SymbolTableFilling(symbolTableFillings , 0);
             TypeChecking typeChecking = new TypeChecking(symbolTableFillings);
+            ConstantFolding constantFolding = new ConstantFolding();
             CodeGenerator codeGenerator = new CodeGenerator(symbolTableFillings);
 
             prog.accept(prettyPrint);
@@ -30,6 +31,7 @@ public class Compiler {
             System.out.println("Symbol table is good");
             prog.accept(typeChecking);
             System.out.println("Type check is good");
+            prog.accept(constantFolding);
             prog.accept(codeGenerator);
             System.out.println("Code generator is good");
 
@@ -88,6 +90,7 @@ TOKEN : /* ASSIGNMENT OPERATION AND BASIC CONTROL STRUCTURE */
 | <RBRACE: "}">
 | <END_OF_LINE: ";">
 | <ADDRESS: "&">
+| <HASHTAG: "#">
 | <END_OF_FILE: "END">
 | <WHILE: "while">
 }
@@ -119,7 +122,6 @@ Node Stmt() :
 { t = < ID > (compAssOp = <PLUS> | compAssOp = <MINUS>)? < ASSIGN > expr = Expr() < END_OF_LINE >
 {
     Id id = new Id(t.image);
-
     if (compAssOp != null) {
         return new AssignmentOp(t.image, id, expr, compAssOp.image);
     } else {
@@ -228,86 +230,61 @@ Node Expr() :
 
 Node OrOp() :
 {
-    boolean hasExpr = false;
-    Node andOp;
-    Node expr = null;
+    Node left = null;
     Token op = null;
+    Node right = null;
 }
-{ andOp = AndOp() (( op = <OR> ) expr = Expr() { hasExpr = true; } )?
+{ left = AndOp() (( op = <OR> ) right = AndOp() { left = new ComparisonOp(left, op.image, right); })*
 {
-    if (hasExpr) {
-        return new ComparisonOp(op.image, andOp, expr);
-    } else {
-        return andOp;
-    }
+    return left;
 }
 }
 
 Node AndOp() :
 {
-    boolean hasAndOp = false;
-    Node equalityOp;
-    Node andOp = null;
+    Node left = null;
     Token op = null;
+    Node right = null;
 }
-{equalityOp = EqualityOp() (( op = <AND>) andOp = AndOp() {hasAndOp = true;})?
+{ left = EqualityOp() (( op = <AND>) right = EqualityOp() { left = new ComparisonOp(left, op.image, right); })*
 {
-    if (hasAndOp) {
-        return new ComparisonOp(op.image, equalityOp, andOp);
-    } else {
-        return equalityOp;
-    }
+    return left;
 }
 }
 
 Node EqualityOp() :
 {
-    boolean hasEqualityOp = false;
-    Node comparisonOp;
-    Node equalityOp = null;
+    Node left = null;
     Token op = null;
+    Node right = null;
 }
-{comparisonOp = ComparisonOp() (( op = <EQ> | op = <NE>) equalityOp = EqualityOp() {hasEqualityOp = true;})?
+{ left = ComparisonOp() (( op = <EQ> | op = <NE>) right = ComparisonOp() { left = new ComparisonOp(left, op.image, right); })*
 {
-    if (hasEqualityOp) {
-        return new ComparisonOp(op.image, comparisonOp, equalityOp);
-    } else {
-        return comparisonOp;
-    }
+    return left;
 }
 }
 
 Node ComparisonOp() :
 {
-    boolean hasComparisonOp = false;
-     Node arithmeticOp;
-     Node comparisonOp = null;
-     Token op = null;
+    Node left = null;
+    Token op = null;
+    Node right = null;
  }
-{arithmeticOp = ArithmeticOp() (( op = <LT> | op = <GT> | op = <GE> | op = <LE> )comparisonOp = ComparisonOp() { hasComparisonOp = true; })?
+{left = ArithmeticOp() (( op = <LT> | op = <GT> | op = <GE> | op = <LE> ) right = ArithmeticOp() { left = new ComparisonOp(left, op.image, right); })*
 {
-    if (hasComparisonOp) {
-        return new ComparisonOp(op.image, arithmeticOp, comparisonOp);
-    } else {
-        return arithmeticOp;
-    }
+    return left;
 }
 }
 
 Node ArithmeticOp() :
 {
-    boolean hasArithmeticOp = false;
-    Node negationOp;
-    Node arithmeticOp = null;
+    Node left = null;
     Token op = null;
+    Node right = null;
  }
-{ negationOp = NegationOp() ((op = <PLUS> | op = <MINUS> ) arithmeticOp = ArithmeticOp() { hasArithmeticOp = true; })?
+{ left = NegationOp() ((op = <PLUS> | op = <MINUS> ) right = NegationOp() { left = new ArithmeticOp(left, op.image, right); })*
 {
-    if (hasArithmeticOp) {
-        return new ArithmeticOp(op.image, negationOp, arithmeticOp);
-    } else {
-        return negationOp;
-    }
+    return left;
 }
 
 }
@@ -348,11 +325,11 @@ Node Val() :
  }
 { t = < INT >
 {
-    return new IntNum(t.image);
+    return new IntNum(Integer.parseInt(t.image));
 }
 | t = < FLOAT >
 {
-    return new FloatNum(t.image);
+    return new FloatNum(Float.parseFloat(t.image));
 }
 | t = < ID >
 {
@@ -360,7 +337,7 @@ Node Val() :
 }
 | (t = < TRUE > | t = < FALSE >)
 {
-    return new Bool(t.image);
+    return new Bool(Boolean.parseBoolean(t.image));
 }
 /*
 | < ADDRESS > t = < ID >

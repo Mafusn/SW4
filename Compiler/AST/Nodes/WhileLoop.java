@@ -5,12 +5,10 @@ import AST.Types.Type;
 import AST.Visitor;
 
 public class WhileLoop extends Node {
-    Node condition;
-    Node block;
 
     public WhileLoop(Node condition, Node block) {
-        this.condition = condition;
-        this.block = block;
+        this.left = condition;
+        this.right = block;
     }
 
     @Override
@@ -21,13 +19,5 @@ public class WhileLoop extends Node {
     @Override
     public Type getType(SymbolTableFilling symbolTable) {
         return null;
-    }
-
-    public Node getCondition() {
-        return condition;
-    }
-
-    public Node getBlock() {
-        return block;
     }
 }
