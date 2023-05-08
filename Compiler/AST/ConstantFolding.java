@@ -83,7 +83,7 @@ public class ConstantFolding implements Visitor {
                 parent.setRight(newChild);
             }
 
-        } else if (node.getLeft() instanceof Bool || node.getRight() instanceof Bool) {
+        } else if (node.getLeft() instanceof Bool && node.getRight() instanceof Bool) {
             boolean leftValueBool = ((Bool) node.getLeft()).getValue();
             boolean rightValueBool = ((Bool) node.getRight()).getValue();
 
