@@ -24,7 +24,7 @@ public class IfStmt extends Node {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        If anIf = (If) o;
-        return left.equals(anIf.left)) && right.equals(anIf.right);
+        IfStmt anIf = (IfStmt) o;
+        return left.equals(anIf.left) && right.equals(anIf.right);
     }
 }

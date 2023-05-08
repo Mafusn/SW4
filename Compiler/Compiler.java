@@ -28,6 +28,7 @@ public class Compiler implements CompilerConstants {
             prog.accept(typeChecking);
             System.out.println("Type check is good");
             prog.accept(constantFolding);
+            System.out.println("Constant folding is good");
             prog.accept(codeGenerator);
             System.out.println("Code generator is good");
 
@@ -102,7 +103,6 @@ prog.addChild(stmt);
       expr = Expr();
       jj_consume_token(END_OF_LINE);
 Id id = new Id(t.image);
-
     if (compAssOp != null) {
         {if ("" != null) return new AssignmentOp(t.image, id, expr, compAssOp.image);}
     } else {
@@ -569,7 +569,7 @@ if (hasNegationOp) {
 	   jj_la1_0 = new int[] {0x2004140,0x1800,0x1800,0x2004140,0x10000000,0x10000000,0x10000000,0x2000140,0x8000,0x2004140,0x20000,0x10000,0x180000,0x180000,0x1e00000,0x1e00000,0x1800,0x1800,0x40000,0x2c000280,0xc000000,0xc000280,};
 	}
 	private static void jj_la1_init_1() {
-	   jj_la1_1 = new int[] {0x30,0x0,0x0,0x30,0x0,0x0,0x0,0x0,0x0,0x30,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x20,0x0,0x20,};
+	   jj_la1_1 = new int[] {0x60,0x0,0x0,0x60,0x0,0x0,0x0,0x0,0x0,0x60,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x40,0x0,0x40,};
 	}
 
   /** Constructor with InputStream. */
@@ -694,7 +694,7 @@ if (hasNegationOp) {
   /** Generate ParseException. */
   public ParseException generateParseException() {
 	 jj_expentries.clear();
-	 boolean[] la1tokens = new boolean[38];
+	 boolean[] la1tokens = new boolean[39];
 	 if (jj_kind >= 0) {
 	   la1tokens[jj_kind] = true;
 	   jj_kind = -1;
@@ -711,7 +711,7 @@ if (hasNegationOp) {
 		 }
 	   }
 	 }
-	 for (int i = 0; i < 38; i++) {
+	 for (int i = 0; i < 39; i++) {
 	   if (la1tokens[i]) {
 		 jj_expentry = new int[1];
 		 jj_expentry[0] = i;

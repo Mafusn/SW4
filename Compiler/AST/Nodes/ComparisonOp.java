@@ -42,6 +42,6 @@ public class ComparisonOp extends Node {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ComparisonOp comparisonOp = (ComparisonOp) o;
-        return operation.equals(comparisonOp.operation) && child1.equals(comparisonOp.child1) && child2.equals(comparisonOp.child2);
+        return operation.equals(comparisonOp.operation) && left.equals(comparisonOp.left) && right.equals(comparisonOp.right);
     }
 }

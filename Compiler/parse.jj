@@ -32,6 +32,7 @@ public class Compiler {
             prog.accept(typeChecking);
             System.out.println("Type check is good");
             prog.accept(constantFolding);
+            System.out.println("Constant folding is good");
             prog.accept(codeGenerator);
             System.out.println("Code generator is good");
 

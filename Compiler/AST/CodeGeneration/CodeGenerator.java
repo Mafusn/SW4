@@ -99,26 +99,26 @@ public class CodeGenerator implements Visitor {
                 }
             }
             arithmeticOpCount++;
-            node.getExpression().accept(this);
-            if (node.getExpression() instanceof ArithmeticOp) {
+            node.getRight().accept(this);
+            if (node.getRight() instanceof ArithmeticOp) {
                 clearTheBottomOfStackForArithmeticOp();
                 codeBuilder.append(InstructionSet.TAX.getInstruction() + "\n");
             }
-            storeXRegisterInVariable(((Id) node.getDeclaration()).getName());
+            storeXRegisterInVariable(((Id) node.getLeft()).getName());
         } else {
-            if (node.getDeclaration() instanceof Id) {
-                node.getExpression().accept(this);
+            if (node.getLeft() instanceof Id) {
+                node.getRight().accept(this);
 
-                if (node.getExpression() instanceof ArithmeticOp) {
+                if (node.getRight() instanceof ArithmeticOp) {
                     clearTheBottomOfStackForArithmeticOp();
                     codeBuilder.append(InstructionSet.TAX.getInstruction() + "\n");
                 }
-                storeXRegisterInVariable(((Id) node.getDeclaration()).getName());
+                storeXRegisterInVariable(((Id) node.getLeft()).getName());
             } else {
-                node.getDeclaration().accept(this);
-                node.getExpression().accept(this);
+                node.getLeft().accept(this);
+                node.getRight().accept(this);
 
-                if (node.getExpression() instanceof ArithmeticOp) {
+                if (node.getRight() instanceof ArithmeticOp) {
                     clearTheBottomOfStackForArithmeticOp();
                 } else {
                     codeBuilder.append(InstructionSet.TXA.getInstruction() + "\n");
@@ -196,11 +196,11 @@ public class CodeGenerator implements Visitor {
     public void visit(IfStmt node) {
         int label = labelCount;
         labelCount++;
-        node.getCondition().accept(this);
+        node.getLeft().accept(this);
         binOperatorCount = 0;
-        if (node.getCondition() instanceof Bool) {
+        if (node.getLeft() instanceof Bool) {
             codeBuilder.append(InstructionSet.TXA.getInstruction() + "\n");
-        } else if (node.getCondition() instanceof Id) {
+        } else if (node.getLeft() instanceof Id) {
 
         } else {
             pullAccumulator();
@@ -208,7 +208,7 @@ public class CodeGenerator implements Visitor {
         codeBuilder.append(InstructionSet.CMP.getInstruction() + " #1\n");
         codeBuilder.append(InstructionSet.BNE.getInstruction() + " end" + label + "\n");
         codeBuilder.append("ifthen" + label + ":\n");
-        node.getThenBlock().accept(this);
+        node.getRight().accept(this);
         codeBuilder.append("end" + label + ":\n");
     }
 
@@ -228,10 +228,10 @@ public class CodeGenerator implements Visitor {
         codeBuilder.append(InstructionSet.CMP.getInstruction() + " #1\n");
         codeBuilder.append(InstructionSet.BNE.getInstruction() + " else" + label + "\n");
         codeBuilder.append("ifthen" + label + ":\n");
-        node.getThenBlock().accept(this);
+        node.getLeft().accept(this);
         codeBuilder.append(InstructionSet.JMP.getInstruction() + " end" + label + "\n");
         codeBuilder.append("else" + label + ":\n");
-        node.getElseBlock().accept(this);
+        node.getRight().accept(this);
         codeBuilder.append("end" + label + ":\n");
     }
 
@@ -248,7 +248,7 @@ public class CodeGenerator implements Visitor {
 
     @Override
     public void visit(NegationOp node) {
-        node.getExpression().accept(this);
+        node.getLeft().accept(this);
         codeBuilder.append(InstructionSet.TXA.getInstruction() + "\n");
         codeBuilder.append(InstructionSet.EOR.getInstruction() + " #1\n");
     }
@@ -264,17 +264,17 @@ public class CodeGenerator implements Visitor {
     @Override
     public void visit(WhileLoop node) {
         codeBuilder.append("while" + whileLoopCount + ":\n");
-        node.getCondition().accept(this);
-        if (node.getCondition() instanceof Bool) {
+        node.getLeft().accept(this);
+        if (node.getLeft() instanceof Bool) {
             codeBuilder.append(InstructionSet.TXA.getInstruction() + "\n");
-        } else if (node.getCondition() instanceof Id) {
+        } else if (node.getLeft() instanceof Id) {
 
         } else {
             pullAccumulator();
         }
         codeBuilder.append(InstructionSet.CMP.getInstruction() + " #1\n");
         codeBuilder.append(InstructionSet.BNE.getInstruction() + " end" + labelCount + "\n");
-        node.getBlock().accept(this);
+        node.getRight().accept(this);
         codeBuilder.append(InstructionSet.JMP.getInstruction() + " while" + whileLoopCount + "\n");
         whileLoopCount++;
         codeBuilder.append("end" + labelCount + ":\n");
@@ -297,29 +297,29 @@ public class CodeGenerator implements Visitor {
     }
 
     public void evaluateArithmeticOp(ArithmeticOp node) {
-        boolean isLeftOperandArithmeticOp = node.getLeftOperand() instanceof ArithmeticOp;
-        boolean isRightOperandArithmeticOp = node.getRightOperand() instanceof ArithmeticOp;
+        boolean isLeftOperandArithmeticOp = node.getLeft() instanceof ArithmeticOp;
+        boolean isRightOperandArithmeticOp = node.getRight() instanceof ArithmeticOp;
 
         if (isLeftOperandArithmeticOp) {
             if (!isRightOperandArithmeticOp) {
                 operators.add(node.getOperator());
             }
-            evaluateParentheses((ArithmeticOp) node.getLeftOperand());
+            evaluateParentheses((ArithmeticOp) node.getLeft());
             codeBuilder.append(InstructionSet.STA.getInstruction() + " $01" + String.format("%02d", arithmeticOpCount) +"\n");
             arithmeticOpCount++;
-            node.getRightOperand().accept(this);
+            node.getRight().accept(this);
             if (!isRightOperandArithmeticOp) {
                 codeBuilder.append(InstructionSet.STX.getInstruction() + " $01" + String.format("%02d", arithmeticOpCount) + "\n");
                 arithmeticOpCount++;
             }
         } else {
             operators.add(node.getOperator());
-            node.getLeftOperand().accept(this);
+            node.getLeft().accept(this);
             if (!(isLeftOperandArithmeticOp)) {
                 codeBuilder.append(InstructionSet.STX.getInstruction() + " $01" + String.format("%02d", arithmeticOpCount) +"\n");
                 arithmeticOpCount++;
             }
-            node.getRightOperand().accept(this);
+            node.getRight().accept(this);
             if (!(isRightOperandArithmeticOp)) {
                 codeBuilder.append(InstructionSet.STX.getInstruction() + " $01" + String.format("%02d", arithmeticOpCount) + "\n");
                 arithmeticOpCount++;
@@ -328,9 +328,9 @@ public class CodeGenerator implements Visitor {
     }
 
     public void evaluateParentheses(ArithmeticOp node) {
-        node.getLeftOperand().accept(this);
+        node.getLeft().accept(this);
         codeBuilder.append(InstructionSet.TXA.getInstruction() + "\n");
-        node.getRightOperand().accept(this);
+        node.getRight().accept(this);
         addTwoNumbers(node);
     }
 
@@ -359,27 +359,27 @@ public class CodeGenerator implements Visitor {
     }
 
     public void evaluateBinOperator(ComparisonOp node){
-        node.getLeftOperand().accept(this);
-        if (node.getLeftOperand() instanceof Id ||
-            node.getLeftOperand() instanceof IntNum ||
-            node.getLeftOperand() instanceof FloatNum ||
-            node.getLeftOperand() instanceof Bool)
+        node.getLeft().accept(this);
+        if (node.getLeft() instanceof Id ||
+            node.getLeft() instanceof IntNum ||
+            node.getLeft() instanceof FloatNum ||
+            node.getLeft() instanceof Bool)
         {
             codeBuilder.append(InstructionSet.TXA.getInstruction() + "\n");
             pushAccumulator();
-        } else if (node.getLeftOperand() instanceof ArithmeticOp) {
+        } else if (node.getLeft() instanceof ArithmeticOp) {
             clearTheBottomOfStackForArithmeticOp();
             pushAccumulator();
         }
-        node.getRightOperand().accept(this);
-        if (node.getRightOperand() instanceof ArithmeticOp) {
+        node.getRight().accept(this);
+        if (node.getRight() instanceof ArithmeticOp) {
             clearTheBottomOfStackForArithmeticOp();
             codeBuilder.append(InstructionSet.TAX.getInstruction() + "\n");
             pullAccumulator();
         } else if ((node.getOperator().equals("||") || node.getOperator().equals("&&"))
                 && binOperatorCount > 0
-                && !(node.getRightOperand() instanceof Bool)
-                && !(node.getRightOperand() instanceof NegationOp))
+                && !(node.getRight() instanceof Bool)
+                && !(node.getRight() instanceof NegationOp))
         {
             pullAccumulator();
             codeBuilder.append(InstructionSet.TAX.getInstruction() + "\n");
