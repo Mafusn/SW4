@@ -148,6 +148,11 @@ public class TypeChecking implements Visitor {
     }
 
     @Override
+    public void visit(PointerDcl node) {
+
+    }
+
+
     public void visit(WhileLoop node) {
         Type conditionType = node.getLeft().getType(symbolTables.get(scopeLevel));
 

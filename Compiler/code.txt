@@ -1,3 +1,5 @@
-
+int c = 2;
+pointer navn = &c;
+#navn = 2 + 2;
+c = *navn + 2;
 END;
-

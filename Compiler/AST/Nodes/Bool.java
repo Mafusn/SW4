@@ -34,5 +34,4 @@ public class Bool extends Node {
         Bool bool = (Bool) o;
         return value == bool.value && type.equals(bool.type);
     }
-
 }

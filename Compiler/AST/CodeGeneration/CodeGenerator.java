@@ -1,6 +1,7 @@
 package AST.CodeGeneration;
 
 import AST.Nodes.*;
+import AST.OperationSet;
 import AST.SymbolTableFilling.Symbol;
 import AST.SymbolTableFilling.SymbolTableFilling;
 import AST.Visitor;
@@ -37,7 +38,7 @@ public class CodeGenerator implements Visitor {
     }
 
     private void pushAccumulator() {
-        codeBuilder.append("PHA\n");
+        codeBuilder.append(InstructionSet.PHA.getInstruction() + "\n");
         incrementStackAddress();
     }
 
@@ -83,20 +84,20 @@ public class CodeGenerator implements Visitor {
 
     @Override
     public void visit(AssignmentOp node) {
-        if (!(node.getCompAssOp().equals("notCompAssOp"))) {
+        if (node.getCompAssOp() != null) {
             codeBuilder.append(InstructionSet.TSX.getInstruction() + "\n");
             for (int i = 0; i < stackAddress - symbolTables.get(getScopeLevel()).lookup(node.getVariable()).getMemoryAddress(); i++) {
                 codeBuilder.append(InstructionSet.INX.getInstruction() + "\n");
             }
             codeBuilder.append(InstructionSet.LDA.getInstruction() + " $0100, x" + "\n");
             codeBuilder.append(InstructionSet.STA.getInstruction() + " $01" + String.format("%02d", arithmeticOpCount) + "\n");
-            switch (node.getCompAssOp()) {
-                case "+=" -> operators.add("+");
-                case "-=" -> operators.add("-");
-                default -> {
-                    RuntimeException e = new RuntimeException("invalid operator");
-                    System.out.println(node.getVariable() + ": has an " + e);
-                }
+            if (node.getCompAssOp().equals(OperationSet.COMPASSPLUS.getOperation())) {
+                operators.add("+");
+            } else if (node.getCompAssOp().equals(OperationSet.COMPASSMINUS.getOperation())) {
+                operators.add("-");
+            } else {
+                RuntimeException e = new RuntimeException("invalid operator");
+                System.out.println(node.getVariable() + ": has an " + e);
             }
             arithmeticOpCount++;
             node.getRight().accept(this);
@@ -262,6 +263,10 @@ public class CodeGenerator implements Visitor {
     }
 
     @Override
+    public void visit(PointerDcl node) {
+
+    }
+
     public void visit(WhileLoop node) {
         codeBuilder.append("while" + whileLoopCount + ":\n");
         node.getLeft().accept(this);
@@ -283,7 +288,6 @@ public class CodeGenerator implements Visitor {
 
     public void addTwoNumbers(ArithmeticOp node) {
         codeBuilder.append(InstructionSet.STX.getInstruction() + " $01" + String.format("%02d", arithmeticOpCount) + "\n");
-
         if (node.getOperator().equals("+")) {
             codeBuilder.append(InstructionSet.ADC.getInstruction() + " $01" + String.format("%02d", arithmeticOpCount) + "\n");
         } else {

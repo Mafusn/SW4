@@ -7,11 +7,35 @@ import AST.Visitor;
 import java.util.Objects;
 
 public class Id extends Node {
+    private String prefix;
     private String id;
     private Type type;
+    private String address;
 
     public Id(String id){
+        this.prefix = null;
         this.id = id;
+    }
+
+    public Id(String prefix, String id){
+        this.prefix = prefix;
+        this.id = id;
+    }
+
+    public String getPrefix() {
+        return prefix;
+    }
+
+    public void setPrefix(String prefix) {
+        this.prefix = prefix;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String adress) {
+        this.address = adress;
     }
 
     public void accept(Visitor v){
@@ -38,12 +62,10 @@ public class Id extends Node {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Id id1 = (Id) o;
-        return id.equals(id1.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id);
+        Id idNode = (Id) o;
+        if (prefix != null) {
+            return prefix.equals(idNode.prefix) && id.equals(idNode.id);
+        }
+        return id.equals(idNode.id);
     }
 }

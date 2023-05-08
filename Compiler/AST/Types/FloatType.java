@@ -1,5 +1,9 @@
 package AST.Types;
 
+import AST.OperationSet;
+
+import java.lang.management.OperatingSystemMXBean;
+
 public class FloatType extends Type{
     public static final FloatType INSTANCE = new FloatType();
 
@@ -23,12 +27,13 @@ public class FloatType extends Type{
     public Type getResultType(String operator, Type other) {
         if (other instanceof FloatType) {
             // Arithmetic operators return an int result when both operands are ints
-            return switch (operator) {
-                case "+", "-" -> FloatType.INSTANCE;
-                // Comparison operators return a boolean result
-                case "<", "<=", ">", ">=", "==", "!=" -> BooleanType.INSTANCE;
-                default -> null;
-            };
+            if (operator.equals(OperationSet.PLUS.getOperation()) || operator.equals(OperationSet.MINUS.getOperation())) {
+                return FloatType.INSTANCE;
+            } else if (operator.equals(OperationSet.LESSTHAN.getOperation()) || operator.equals(OperationSet.LESSEQUAL.getOperation()) ||
+                operator.equals(OperationSet.GREATERTHAN.getOperation()) || operator.equals(OperationSet.GREATEREQUAL.getOperation()) ||
+                operator.equals(OperationSet.EQUAL.getOperation()) || operator.equals(OperationSet.NOTEQUAL.getOperation())) {
+                return BooleanType.INSTANCE;
+            }
         }
         return null;
     }

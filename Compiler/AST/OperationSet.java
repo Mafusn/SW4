@@ -13,7 +13,10 @@ public enum OperationSet {
     NOT("!"),
     OR("||"),
     COMPASSPLUS("+="),
-    COMPASSMINUS("-=");
+    COMPASSMINUS("-="),
+    HASHTAG("#"),
+    MULTIPLY("*"),
+    ADDRESS("&");
 
     private final String operation;
 

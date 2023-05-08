@@ -64,6 +64,7 @@ TOKEN : /* NUMBERS AND ARITHMETIC OPERATIONS */
 | <PLUS: "+">
 | <MINUS: "-">
 | <MULTIPLY: "*">
+| <POINTERDCL: "pointer">
 }
 
 TOKEN: /* LOGIC */
@@ -115,19 +116,33 @@ Node Stmt() :
 {
     Node ifStmt;
     Node dcl;
-    Node expr;
+    Node expr = null;
     Node whileLoop;
     Token t;
+    Token prefix = null;
+    Token prefix2 = null;
+    Token tAddress = null;
     Token compAssOp = null;
 }
-{ t = < ID > (compAssOp = <PLUS> | compAssOp = <MINUS>)? < ASSIGN > expr = Expr() < END_OF_LINE >
+{ ( prefix = < HASHTAG > )? t = < ID > (compAssOp = <PLUS> | compAssOp = <MINUS>)? < ASSIGN > ( prefix2 = < ADDRESS > tAddress = < ID > | expr = Expr() ) < END_OF_LINE >
 {
-    Id id = new Id(t.image);
-    if (compAssOp != null) {
-        return new AssignmentOp(t.image, id, expr, compAssOp.image);
+    Id id;
+    AssignmentOp assignmentOp;
+    if (prefix != null) {
+        id = new Id(prefix.image, t.image);
     } else {
-        return new AssignmentOp(t.image, id, expr);
+        id = new Id(t.image);
     }
+    if (compAssOp != null) {
+        assignmentOp = new AssignmentOp(t.image, id, expr, compAssOp.image);
+    } else {
+        assignmentOp = new AssignmentOp(t.image, id, expr);
+    }
+    if (tAddress != null) {
+        Id address = new Id(prefix2.image, tAddress.image);
+        assignmentOp.setRight(address);
+    }
+    return assignmentOp;
 }
 | dcl = Dcl() < END_OF_LINE >
 {
@@ -145,54 +160,59 @@ Node Stmt() :
 
 Node Dcl() :
 {
- boolean hasExpr = false;
  Node expr = null;
+ Token tAddress = null;
+ Token prefix = null;
  Token t;
  }
-{ < FLOATDCL > t = < ID > ( < ASSIGN > expr = Expr() { hasExpr = true; } )?
+{ < FLOATDCL > t = < ID > ( < ASSIGN > expr = Expr() )?
 {
-   if (hasExpr) {
+   if (expr != null) {
        FloatDcl floatDcl = new FloatDcl(t.image);
        return new AssignmentOp(t.image, floatDcl, expr);
-   } else {
-       return new FloatDcl(t.image);
    }
+   return new FloatDcl(t.image);
 }
-| < INTDCL > t = < ID > ( < ASSIGN > expr = Expr() { hasExpr = true; } )?
+| < INTDCL > t = < ID > ( < ASSIGN > expr = Expr() )?
 {
-    if (hasExpr) {
+    if (expr != null) {
         IntDcl intDcl = new IntDcl(t.image);
         return new AssignmentOp(t.image, intDcl, expr);
-    } else {
-        return new IntDcl(t.image);
     }
+    return new IntDcl(t.image);
 }
-| < BOOLDCL > t = < ID > ( < ASSIGN > expr = Expr() { hasExpr = true; } )?
+| < BOOLDCL > t = < ID > ( < ASSIGN > expr = Expr() )?
 {
-    if (hasExpr) {
+    if (expr != null) {
         BoolDcl boolDcl = new BoolDcl(t.image);
         return new AssignmentOp(t.image, boolDcl, expr);
-    } else {
-        return new BoolDcl(t.image);
     }
+    return new BoolDcl(t.image);
+}
+| < POINTERDCL > t = < ID > ( < ASSIGN > prefix = < ADDRESS > tAddress = < ID > )?
+{
+    if (tAddress != null) {
+        PointerDcl pointerDcl = new PointerDcl(t.image);
+        Id id = new Id(prefix.image, tAddress.image);
+        return new AssignmentOp(t.image, pointerDcl, id);
+    }
+    return new PointerDcl(t.image);
 }
 }
 
 Node IfStmt() :
 {
- Node expr;
- Node ifBlock;
- Node elseBlock = null;
- boolean withElse = false;
+    Node expr;
+    Node ifBlock;
+    Node elseBlock = null;
 }
 {
-< IF > < LPAREN > expr = Expr() < RPAREN > < LBRACE > ifBlock = Block() < RBRACE > ( < ELSE > < LBRACE > elseBlock = Block() < RBRACE > { withElse = true; })?
+< IF > < LPAREN > expr = Expr() < RPAREN > < LBRACE > ifBlock = Block() < RBRACE > ( < ELSE > < LBRACE > elseBlock = Block() < RBRACE > )?
 {
-    if (withElse) {
+    if (elseBlock != null) {
         return new IfElseStmt(expr, ifBlock, elseBlock);
-    } else {
-        return new IfStmt(expr, ifBlock);
     }
+    return new IfStmt(expr, ifBlock);
 }
 }
 
@@ -299,9 +319,8 @@ Node NegationOp() :
 {
     if (hasNegationOp) {
         return new NegationOp(factor);
-    } else {
-        return factor;
     }
+    return factor;
 }
 }
 
@@ -322,6 +341,7 @@ Node Factor() :
 
 Node Val() :
 {
+    Token prefix = null;
     Token t;
  }
 { t = < INT >
@@ -332,20 +352,16 @@ Node Val() :
 {
     return new FloatNum(Float.parseFloat(t.image));
 }
-| t = < ID >
+| ( prefix = < MULTIPLY > )? t = < ID >
 {
+    if (prefix != null) {
+        return new Id(prefix.image, t.image);
+    }
     return new Id(t.image);
 }
 | (t = < TRUE > | t = < FALSE >)
 {
     return new Bool(Boolean.parseBoolean(t.image));
 }
-/*
-| < ADDRESS > t = < ID >
-{
-    return new Bool(t.image);
-}
-
- */
 }
 
