@@ -1,2 +1,2 @@
 ptr = 2 + &a;
-BYE;
+END;

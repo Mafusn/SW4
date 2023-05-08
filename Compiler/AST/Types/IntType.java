@@ -1,7 +1,5 @@
 package AST.Types;
 
-import AST.Nodes.IntNum;
-
 public class IntType extends Type{
     public static final IntType INSTANCE = new IntType();
 

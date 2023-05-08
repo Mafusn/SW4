@@ -7,40 +7,35 @@ import AST.Visitor;
 import java.util.Objects;
 
 public class Id extends Node {
+    private String prefix;
     private String id;
     private Type type;
-    private boolean isAdressRef;
-    private boolean isPointer;
-    private String adress;
+    private String address;
 
-    public Id(String id, boolean isAdressRef, boolean isPointer){
+    public Id(String id){
+        this.prefix = null;
         this.id = id;
-        this.isAdressRef = isAdressRef;
-        this.isPointer = isPointer;
     }
 
-    public boolean isAdressRef() {
-        return isAdressRef;
+    public Id(String prefix, String id){
+        this.prefix = prefix;
+        this.id = id;
     }
 
-    public boolean isPointer() {
-        return isPointer;
+    public String getPrefix() {
+        return prefix;
     }
 
-    public String getAdress() {
-        return adress;
+    public void setPrefix(String prefix) {
+        this.prefix = prefix;
     }
 
-    public void setAdress(String adress) {
-        this.adress = adress;
+    public String getAddress() {
+        return address;
     }
 
-    public void setAdressRef(boolean adressRef) {
-        isAdressRef = adressRef;
-    }
-
-    public void setPointer(boolean pointer) {
-        isPointer = pointer;
+    public void setAddress(String adress) {
+        this.address = adress;
     }
 
     public void accept(Visitor v){
@@ -68,6 +63,9 @@ public class Id extends Node {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Id idNode = (Id) o;
-        return isAdressRef == idNode.isAdressRef && isPointer == idNode.isPointer && id.equals(idNode.id);
+        if (prefix != null) {
+            return prefix.equals(idNode.prefix) && id.equals(idNode.id);
+        }
+        return id.equals(idNode.id);
     }
 }

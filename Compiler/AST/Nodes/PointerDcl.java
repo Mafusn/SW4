@@ -29,6 +29,6 @@ public class PointerDcl extends Node {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         PointerDcl pointer = (PointerDcl) o;
-        return (id.equals(pointer.id));
+        return id.equals(pointer.id);
     }
 }

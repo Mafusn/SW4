@@ -1,81 +1,34 @@
-LDX #16
-TXA
-PHA
-CLC
-LDX #2
-TXA
-LDX #4
-STX $0100
-ADC $0100
-PHA
-LDX $01ff
-PLA
-STX $0100
-CLC
-CMP $0100
-BEQ false0
-BCC false0
-LDA #1
-JMP store0
-false0:
- LDA #0
-store0:
-  PHA
 LDX #2
 TXA
 PHA
-CLC
-LDX $01ff
+TSX
+INX
 TXA
-LDX #3
-STX $0100
-SBC $0100
-CLC
-ADC #1
+TAY
+LDX $0100, y
 TXA
-PLA
-STX $0100
-CLC
-CMP $0100
-BNE false1
-LDA #1
-JMP store1
-false1:
- LDA #0
-store1:
-  PHA
-PLA
-TXA
-PLA
-STX $0100
-CLC
-AND $0100
-BEQ false2
-LDA #1
-JMP store2
-false2:
- LDA #0
-store2:
-  PHA
-PLA
-CMP #1
-BNE else1
-ifthen1:
-CLC
-LDX #5
-TXA
+PHA
 LDX #4
-STX $0100
-ADC $0100
-PHA
-JMP end1
-else1:
-CLC
-LDX #5
 TXA
-LDX #5
+TSX
+INX
+INX
+STA $0100, x
+TSX
+INX
+INX
+TXA
+TAY
+LDX $0100, y
 STX $0100
-ADC $0100
-PHA
-end0:
+LDX #2
+STX $0101
+LDA $0100
+ADC $0101
+TAX
+TXA
+TSX
+INX
+INX
+STA $0100, x
 BRK

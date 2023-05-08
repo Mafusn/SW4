@@ -40,7 +40,7 @@ public class ArithmeticOp extends Node {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Computing computing = (Computing) o;
-        return operation.equals(computing.operation) && child1.equals(computing.child1) && child2.equals(computing.child2);
+        ArithmeticOp computing = (ArithmeticOp) o;
+        return operation.equals(computing.operation) && left.equals(computing.left) && right.equals(computing.right);
     }
 }

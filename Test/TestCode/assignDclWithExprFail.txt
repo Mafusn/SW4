@@ -1,2 +1,2 @@
 boolean a = 2 << 4 !test;
-BYE;
+END;
