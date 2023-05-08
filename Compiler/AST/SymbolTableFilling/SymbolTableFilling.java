@@ -4,39 +4,61 @@ import AST.Nodes.*;
 import AST.Types.*;
 import AST.Visitor;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
 public class SymbolTableFilling implements Visitor {
-
+    private int scopeLevel = 0;
     private Map<String,Symbol> symbolTable = new HashMap<>();
+    private ArrayList<SymbolTableFilling> symbolTableFillings;
+    private SymbolTableFilling parent;
+
+    public SymbolTableFilling(ArrayList<SymbolTableFilling> symbolTableFillings, int scopeLevel) {
+        this.symbolTableFillings = symbolTableFillings;
+        this.scopeLevel = scopeLevel;
+    }
 
     public Map<String, Symbol> getSymbolTable() {
         return symbolTable;
     }
 
+    public SymbolTableFilling getSymbolTableFillings() {
+        return this;
+    }
+
     public Symbol lookup(String id) {
-        return symbolTable.get(id);
+        Symbol symbol = symbolTable.get(id);
+        if (symbol == null && parent != null) {
+            return parent.lookup(id);
+        }
+        return symbol;
     }
 
-    private int scopeLevel = 0;
-
-    @Override
-    public void visit(Assigning node) {
-        node.getDeclaration().accept(this);
-        node.getExpression().accept(this);
+    public SymbolTableFilling enterScope() {
+        SymbolTableFilling symbolTableFilling = new SymbolTableFilling(symbolTableFillings, scopeLevel + 1);
+        symbolTableFilling.parent = this;
+        symbolTableFillings.add(symbolTableFilling);
+        return symbolTableFilling;
     }
 
     @Override
-    public void visit(BinOperator node) {
-        node.getLeftOperand().accept(this);
-        node.getRightOperand().accept(this);
+    public void visit(AssignmentOp node) {
+        node.getLeft().accept(this);
+        node.getRight().accept(this);
+    }
+
+    @Override
+    public void visit(ComparisonOp node) {
+        node.getLeft().accept(this);
+        node.getRight().accept(this);
     }
 
     @Override
     public void visit(Block node) {
+        SymbolTableFilling symbolTableFilling = enterScope();
         for(Node n : node.getChildren()){
-            n.accept(this);
+            n.accept(symbolTableFilling);
         }
     }
 
@@ -55,9 +77,9 @@ public class SymbolTableFilling implements Visitor {
     }
 
     @Override
-    public void visit(Computing node) {
-        node.getLeftOperand().accept(this);
-        node.getRightOperand().accept(this);
+    public void visit(ArithmeticOp node) {
+        node.getLeft().accept(this);
+        node.getRight().accept(this);
     }
 
     @Override
@@ -76,22 +98,23 @@ public class SymbolTableFilling implements Visitor {
 
     @Override
     public void visit(Id node) {
-        if (symbolTable.get(node.getName()) == null) {
+        Symbol symbol = lookup(node.getName());
+        if (symbol == null) {
             error("variable " + node.getName() + " is not declared");
         }
     }
 
     @Override
-    public void visit(If node) {
-        node.getCondition().accept(this);
-        node.getThenBlock().accept(this);
+    public void visit(IfStmt node) {
+        node.getLeft().accept(this);
+        node.getRight().accept(this);
     }
 
     @Override
-    public void visit(IfElse node) {
+    public void visit(IfElseStmt node) {
         node.getCondition().accept(this);
-        node.getThenBlock().accept(this);
-        node.getElseBlock().accept(this);
+        node.getLeft().accept(this);
+        node.getRight().accept(this);
     }
 
     @Override
@@ -109,21 +132,22 @@ public class SymbolTableFilling implements Visitor {
     }
 
     @Override
-    public void visit(Not node) {
-        node.getExpression().accept(this);
-    }
-
-    @Override
-    public void visit(Print node) {
-
+    public void visit(NegationOp node) {
+        node.getLeft().accept(this);
     }
 
     @Override
     public void visit(Prog node) {
+        symbolTableFillings.add(this);
         for(Node n : node.getChildren()){
             n.accept(this);
         }
-        System.out.println();
+    }
+
+    @Override
+    public void visit(WhileLoop node) {
+        node.getLeft().accept(this);
+        node.getRight().accept(this);
     }
 
     @Override

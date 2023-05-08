@@ -1,4 +1,0 @@
-float*ptr;
-float* pointer;
-float *samePointer123;
-BYE;

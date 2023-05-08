@@ -4,23 +4,20 @@ import AST.SymbolTableFilling.SymbolTableFilling;
 import AST.Types.Type;
 import AST.Visitor;
 
-public class Print extends Node {
-    private String id;
+public class WhileLoop extends Node {
 
-    public Print(String i){
-        id = i;
+    public WhileLoop(Node condition, Node block) {
+        this.left = condition;
+        this.right = block;
     }
 
-    public void accept(Visitor v){
+    @Override
+    public void accept(Visitor v) {
         v.visit(this);
     }
 
     @Override
     public Type getType(SymbolTableFilling symbolTable) {
         return null;
-    }
-
-    public String getId() {
-        return id;
     }
 }

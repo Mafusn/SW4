@@ -6,6 +6,8 @@ import java.io.FileNotFoundException;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+//CHANGED LOGIC IN AST SO TESTS ARE FAILING
+
 class ParserTest {
 
     @Test
@@ -24,7 +26,7 @@ class ParserTest {
 
         // [WHEN] We try to parse the code from the file
         try {
-            Prog AST = (Prog) compiler.prog();
+            Prog AST = (Prog) compiler.Prog();
             // [THEN] Assert that the created AST is equal to the expected AST
             assertTrue(AST.equals(expectedAST));
         } catch (Throwable e) {
@@ -49,7 +51,7 @@ class ParserTest {
 
         // [WHEN] We try to parse the code from the file
         try {
-            Prog AST = (Prog) compiler.prog();
+            Prog AST = (Prog) compiler.Prog();
             // [THEN] Assert that the created AST is equal to the expected AST
             assertTrue(AST.equals(expectedAST));
         } catch (Throwable e) {
@@ -74,7 +76,7 @@ class ParserTest {
 
         // [WHEN] We try to parse the code from the file
         try {
-            Prog AST = (Prog) compiler.prog();
+            Prog AST = (Prog) compiler.Prog();
             // [THEN] Assert that the created AST is equal to the expected AST
             assertTrue(AST.equals(expectedAST));
         } catch (Throwable e) {
@@ -99,7 +101,7 @@ class ParserTest {
 
         // [WHEN] We try to parse the code from the file
         try {
-            Prog AST = (Prog) compiler.prog();
+            Prog AST = (Prog) compiler.Prog();
             // [THEN] Assert that the created AST is equal to the expected AST
             assertTrue(AST.equals(expectedAST));
         } catch (Throwable e) {
@@ -115,7 +117,7 @@ class ParserTest {
 
         // [WHEN] [THEN] We try to parse the code from the file, and it gives an error
         try {
-            compiler.prog();
+            compiler.Prog();
             assert false;
         } catch (Throwable e) {
             System.out.println("Syntax error: " + e.getMessage());
@@ -130,7 +132,7 @@ class ParserTest {
 
         // [WHEN] [THEN] We try to parse the code from the file, and it gives an error
         try {
-            compiler.prog();
+            compiler.Prog();
             assert false;
         } catch (Throwable e) {
             System.out.println("Syntax error: " + e.getMessage());
@@ -145,14 +147,14 @@ class ParserTest {
 
         // [GIVEN] That we create the expected AST from the code from the file
         Prog expectedAST = new Prog();
-        Assigning intAssign = new Assigning("a", new Id("a", false), new IntNum("5"));
-        Assigning intAssign2 = new Assigning("b", new Id("b", false), new IntNum("10"));
+        AssignmentOp intAssign = new AssignmentOp("a", new Id("a"), new IntNum(5));
+        AssignmentOp intAssign2 = new AssignmentOp("b", new Id("b"), new IntNum(10));
         expectedAST.addChild(intAssign);
         expectedAST.addChild(intAssign2);
 
         // [WHEN] We try to parse the code from the file
         try {
-            Prog AST = (Prog) compiler.prog();
+            Prog AST = (Prog) compiler.Prog();
             // [THEN] Assert that the created AST is equal to the expected AST
             assertTrue(AST.equals(expectedAST));
         } catch (Throwable e) {
@@ -168,17 +170,17 @@ class ParserTest {
 
         // [GIVEN] That we create the expected AST from the code from the file
         Prog expectedAST = new Prog();
-        Computing computingA1 = new Computing("-", new IntNum("3"), new IntNum("4"));
-        Computing computingA2 = new Computing("-", new IntNum("5"), computingA1);
-        Computing computingA3 = new Computing("+", new IntNum("4"), computingA2);
-        Computing computingA4 = new Computing("+", new IntNum("5"), new IntNum("10"));
-        Computing computingA5 = new Computing("-", computingA4, computingA3);
-        Computing computingA6 = new Computing("+", new IntNum("5"), computingA5);
-        Computing computingB1 = new Computing("-", new IntNum("10"), new IntNum("5"));
-        Computing computingC1 = new Computing("+", new IntNum("0"), new IntNum("10005"));
-        Assigning intAssign = new Assigning("a", new Id("a", false), computingA6);
-        Assigning intAssign2 = new Assigning("b",new Id("b", false), computingB1);
-        Assigning intAssign3 = new Assigning("c",new Id("c", false), computingC1);
+        ArithmeticOp computingA1 = new ArithmeticOp(new IntNum(3), "-", new IntNum(4));
+        ArithmeticOp computingA2 = new ArithmeticOp(new IntNum(5), "-", computingA1);
+        ArithmeticOp computingA3 = new ArithmeticOp(new IntNum(4), "+", computingA2);
+        ArithmeticOp computingA4 = new ArithmeticOp(new IntNum(5), "+", new IntNum(10));
+        ArithmeticOp computingA5 = new ArithmeticOp(computingA4, "-", computingA3);
+        ArithmeticOp computingA6 = new ArithmeticOp(new IntNum(5), "+", computingA5);
+        ArithmeticOp computingB1 = new ArithmeticOp(new IntNum(10), "-", new IntNum(5));
+        ArithmeticOp computingC1 = new ArithmeticOp(new IntNum(0), "+", new IntNum(10005));
+        AssignmentOp intAssign = new AssignmentOp("a", new Id("a"), computingA6);
+        AssignmentOp intAssign2 = new AssignmentOp("b",new Id("b"), computingB1);
+        AssignmentOp intAssign3 = new AssignmentOp("c",new Id("c"), computingC1);
 
         expectedAST.addChild(intAssign);
         expectedAST.addChild(intAssign2);
@@ -186,7 +188,7 @@ class ParserTest {
 
         // [WHEN] We try to parse the code from the file
         try {
-            Prog AST = (Prog) compiler.prog();
+            Prog AST = (Prog) compiler.Prog();
             // [THEN] Assert that the created AST is equal to the expected AST
             assertTrue(AST.equals(expectedAST));
         } catch (Throwable e) {
@@ -202,17 +204,17 @@ class ParserTest {
 
         // [GIVEN] That we create the expected AST from the code from the file
         Prog expectedAST = new Prog();
-        Computing computingA1 = new Computing("-", new FloatNum("3.2"), new FloatNum("4.3562"));
-        Computing computingA2 = new Computing("-", new FloatNum("5.42"), computingA1);
-        Computing computingA3 = new Computing("+", new FloatNum("4.92"), computingA2);
-        Computing computingA4 = new Computing("+", new FloatNum("5.00005"), new FloatNum("10.4"));
-        Computing computingA5 = new Computing("-", computingA4, computingA3);
-        Computing computingA6 = new Computing("+", new FloatNum("5.0"), computingA5);
-        Computing computingB1 = new Computing("-", new FloatNum("10.0"), new FloatNum("5.43"));
-        Computing computingC1 = new Computing("+", new FloatNum("0.3"), new FloatNum("10005.78"));
-        Assigning floatAssign = new Assigning("a", new Id("a", false), computingA6);
-        Assigning floatAssign2 = new Assigning("b",new Id("b", false), computingB1);
-        Assigning floatAssign3 = new Assigning("c",new Id("c", false), computingC1);
+        ArithmeticOp computingA1 = new ArithmeticOp(new FloatNum(3.2F), "-", new FloatNum(4.3562F));
+        ArithmeticOp computingA2 = new ArithmeticOp(new FloatNum(5.42F), "-", computingA1);
+        ArithmeticOp computingA3 = new ArithmeticOp(new FloatNum(4.92F), "+", computingA2);
+        ArithmeticOp computingA4 = new ArithmeticOp(new FloatNum(5.00005F), "+", new FloatNum(10.4F));
+        ArithmeticOp computingA5 = new ArithmeticOp(computingA4, "-", computingA3);
+        ArithmeticOp computingA6 = new ArithmeticOp(new FloatNum(5.0F), "+", computingA5);
+        ArithmeticOp computingB1 = new ArithmeticOp(new FloatNum(10.0F), "-", new FloatNum(5.43F));
+        ArithmeticOp computingC1 = new ArithmeticOp(new FloatNum(0.3F), "+", new FloatNum(10005.78F));
+        AssignmentOp floatAssign = new AssignmentOp("a", new Id("a"), computingA6);
+        AssignmentOp floatAssign2 = new AssignmentOp("b", new Id("b"), computingB1);
+        AssignmentOp floatAssign3 = new AssignmentOp("c", new Id("c"), computingC1);
 
         expectedAST.addChild(floatAssign);
         expectedAST.addChild(floatAssign2);
@@ -220,7 +222,30 @@ class ParserTest {
 
         // [WHEN] We try to parse the code from the file
         try {
-            Prog AST = (Prog) compiler.prog();
+            Prog AST = (Prog) compiler.Prog();
+            // [THEN] Assert that the created AST is equal to the expected AST
+            assertTrue(AST.equals(expectedAST));
+        } catch (Throwable e) {
+            System.out.println("Syntax error: " + e.getMessage());
+            assert false;
+        }
+    }
+
+    @Test
+    void AssignFloatTest() throws FileNotFoundException {
+        // [GIVEN] That we run the parser with a file
+        Compiler compiler = readFileToParse("Test/TestCode/assignFloat.txt");
+
+        // [GIVEN] That we create the expected AST from the code from the file
+        Prog expectedAST = new Prog();
+        AssignmentOp floatAssign = new AssignmentOp("a", new Id("a"), new FloatNum(3.14F));
+        AssignmentOp floatAssign2 = new AssignmentOp("b", new Id("b"), new FloatNum(0.025F));
+        expectedAST.addChild(floatAssign);
+        expectedAST.addChild(floatAssign2);
+
+        // [WHEN] We try to parse the code from the file
+        try {
+            Prog AST = (Prog) compiler.Prog();
             // [THEN] Assert that the created AST is equal to the expected AST
             assertTrue(AST.equals(expectedAST));
         } catch (Throwable e) {
@@ -237,25 +262,25 @@ class ParserTest {
         // [GIVEN] That we create the expected AST from the code from the file
         Prog expectedAST = new Prog();
 
-        BinOperator binOperatorA1 = new BinOperator("||", new Bool("true"), new Bool("false"));
-        BinOperator binOperatorA2 = new BinOperator("&&", new Bool("true"), new Not(new Id("x", false)));
-        BinOperator binOperatorA3 = new BinOperator("&&", binOperatorA1, binOperatorA2);
-        BinOperator binOperatorB1 = new BinOperator("||", new Bool("true"), new Bool("false"));
-        BinOperator binOperatorC1 = new BinOperator("&&", new Bool("false"), new Bool("true"));
-        BinOperator binOperatorD1 = new BinOperator("<", new FloatNum("2.5"), new FloatNum("4.3"));
-        BinOperator binOperatorD2 = new BinOperator("&&", binOperatorD1, new Bool("true"));
-        BinOperator binOperatorE1 = new BinOperator(">", new IntNum("5"), new IntNum("5"));
-        BinOperator binOperatorE2 = new BinOperator("<=", new IntNum("4"), binOperatorE1);
-        BinOperator binOperatorE3 = new BinOperator("<", new IntNum("2"), binOperatorE2);
-        BinOperator binOperatorE4 = new BinOperator(">=", new IntNum("5"), new IntNum("40"));
-        BinOperator binOperatorE5 = new BinOperator("!=", new IntNum("5"), new IntNum("10"));
-        BinOperator binOperatorE6 = new BinOperator("==", binOperatorE4, binOperatorE5);
-        BinOperator binOperatorE7 = new BinOperator("&&", binOperatorE3, binOperatorE6);
-        Assigning boolAssign = new Assigning("a", new Id("a", false), binOperatorA3);
-        Assigning boolAssign2 = new Assigning("b",new Id("b", false), binOperatorB1);
-        Assigning boolAssign3 = new Assigning("c",new Id("c", false), binOperatorC1);
-        Assigning boolAssign4 = new Assigning("d",new Id("d", false), binOperatorD2);
-        Assigning boolAssign5 = new Assigning("e",new Id("e", false), binOperatorE7);
+        ComparisonOp binOperatorA1 = new ComparisonOp(new Bool(true), "||", new Bool(false));
+        ComparisonOp binOperatorA2 = new ComparisonOp(new Bool(true), "&&", new NegationOp(new Id("x")));
+        ComparisonOp binOperatorA3 = new ComparisonOp(binOperatorA1, "&&", binOperatorA2);
+        ComparisonOp binOperatorB1 = new ComparisonOp(new Bool(true), "||", new Bool(false));
+        ComparisonOp binOperatorC1 = new ComparisonOp(new Bool(false), "&&", new Bool(true));
+        ComparisonOp binOperatorD1 = new ComparisonOp(new FloatNum(2.5F), "<", new FloatNum(4.3F));
+        ComparisonOp binOperatorD2 = new ComparisonOp(binOperatorD1, "&&", new Bool(true));
+        ComparisonOp binOperatorE1 = new ComparisonOp(new IntNum(5), ">", new IntNum(5));
+        ComparisonOp binOperatorE2 = new ComparisonOp(new IntNum(4), "<=", binOperatorE1);
+        ComparisonOp binOperatorE3 = new ComparisonOp(new IntNum(2), "<", binOperatorE2);
+        ComparisonOp binOperatorE4 = new ComparisonOp(new IntNum(5), ">=", new IntNum(40));
+        ComparisonOp binOperatorE5 = new ComparisonOp(new IntNum(5), "!=", new IntNum(10));
+        ComparisonOp binOperatorE6 = new ComparisonOp(binOperatorE4, "==", binOperatorE5);
+        ComparisonOp binOperatorE7 = new ComparisonOp(binOperatorE3, "&&", binOperatorE6);
+        AssignmentOp boolAssign = new AssignmentOp("a", new Id("a"), binOperatorA3);
+        AssignmentOp boolAssign2 = new AssignmentOp("b",new Id("b"), binOperatorB1);
+        AssignmentOp boolAssign3 = new AssignmentOp("c",new Id("c"), binOperatorC1);
+        AssignmentOp boolAssign4 = new AssignmentOp("d",new Id("d"), binOperatorD2);
+        AssignmentOp boolAssign5 = new AssignmentOp("e",new Id("e"), binOperatorE7);
 
         expectedAST.addChild(boolAssign);
         expectedAST.addChild(boolAssign2);
@@ -265,7 +290,31 @@ class ParserTest {
 
         // [WHEN] We try to parse the code from the file
         try {
-            Prog AST = (Prog) compiler.prog();
+            Prog AST = (Prog) compiler.Prog();
+            // [THEN] Assert that the created AST is equal to the expected AST
+            assertTrue(AST.equals(expectedAST));
+        } catch (Throwable e) {
+            System.out.println("Syntax error: " + e.getMessage());
+            assert false;
+        }
+    }
+
+    @Test
+    void AssignBoolTest() throws FileNotFoundException {
+        // [GIVEN] That we run the parser with a file
+        Compiler compiler = readFileToParse("Test/TestCode/assignBool.txt");
+
+        // [GIVEN] That we create the expected AST from the code from the file
+        Prog expectedAST = new Prog();
+
+        AssignmentOp boolAssign = new AssignmentOp("a", new Id("a"), new Bool(true));
+        AssignmentOp boolAssign2 = new AssignmentOp("b", new Id("b"), new Bool(false));
+        expectedAST.addChild(boolAssign);
+        expectedAST.addChild(boolAssign2);
+
+        // [WHEN] We try to parse the code from the file
+        try {
+            Prog AST = (Prog) compiler.Prog();
             // [THEN] Assert that the created AST is equal to the expected AST
             assertTrue(AST.equals(expectedAST));
         } catch (Throwable e) {
@@ -281,17 +330,17 @@ class ParserTest {
 
         // [GIVEN] That we create the expected AST from the code from the file
         Prog expectedAST = new Prog();
-        Computing computingA1 = new Computing("-", new IntNum("3"), new IntNum("4"));
-        Computing computingA2 = new Computing("-", new IntNum("5"), computingA1);
-        Computing computingA3 = new Computing("+", new IntNum("4"), computingA2);
-        Computing computingA4 = new Computing("+", new IntNum("5"), new IntNum("10"));
-        Computing computingA5 = new Computing("-", computingA4, computingA3);
-        Computing computingA6 = new Computing("+", new IntNum("5"), computingA5);
-        Computing computingB1 = new Computing("-", new IntNum("10"), new IntNum("5"));
-        Computing computingC1 = new Computing("+", new IntNum("0"), new IntNum("10005"));
-        Assigning intAssign = new Assigning("a", new IntDcl("a"), computingA6);
-        Assigning intAssign2 = new Assigning("b",new IntDcl("b"), computingB1);
-        Assigning intAssign3 = new Assigning("c",new IntDcl("c"), computingC1);
+        ComparisonOp computingA1 = new ComparisonOp(new IntNum(3), "-", new IntNum(4));
+        ComparisonOp computingA2 = new ComparisonOp(new IntNum(5), "-", computingA1);
+        ComparisonOp computingA3 = new ComparisonOp(new IntNum(4), "+", computingA2);
+        ComparisonOp computingA4 = new ComparisonOp(new IntNum(5), "+", new IntNum(10));
+        ComparisonOp computingA5 = new ComparisonOp(computingA4, "-", computingA3);
+        ComparisonOp computingA6 = new ComparisonOp(new IntNum(5), "+", computingA5);
+        ComparisonOp computingB1 = new ComparisonOp(new IntNum(10), "-", new IntNum(5));
+        ComparisonOp computingC1 = new ComparisonOp(new IntNum(0), "+", new IntNum(10005));
+        AssignmentOp intAssign = new AssignmentOp("a", new IntDcl("a"), computingA6);
+        AssignmentOp intAssign2 = new AssignmentOp("b", new IntDcl("b"), computingB1);
+        AssignmentOp intAssign3 = new AssignmentOp("c", new IntDcl("c"), computingC1);
 
         expectedAST.addChild(intAssign);
         expectedAST.addChild(intAssign2);
@@ -299,7 +348,30 @@ class ParserTest {
 
         // [WHEN] We try to parse the code from the file
         try {
-            Prog AST = (Prog) compiler.prog();
+            Prog AST = (Prog) compiler.Prog();
+            // [THEN] Assert that the created AST is equal to the expected AST
+            assertTrue(AST.equals(expectedAST));
+        } catch (Throwable e) {
+            System.out.println("Syntax error: " + e.getMessage());
+            assert false;
+        }
+    }
+
+    @Test
+    void AssignIntDclTest() throws FileNotFoundException {
+        // [GIVEN] That we run the parser with a file
+        Compiler compiler = readFileToParse("Test/TestCode/assignIntDcl.txt");
+
+        // [GIVEN] That we create the expected AST from the code from the file
+        Prog expectedAST = new Prog();
+        AssignmentOp intAssign = new AssignmentOp("a", new IntDcl("a"), new IntNum(3));
+        AssignmentOp intAssign2 = new AssignmentOp("b", new IntDcl("b"), new IntNum(12));
+        expectedAST.addChild(intAssign);
+        expectedAST.addChild(intAssign2);
+
+        // [WHEN] We try to parse the code from the file
+        try {
+            Prog AST = (Prog) compiler.Prog();
             // [THEN] Assert that the created AST is equal to the expected AST
             assertTrue(AST.equals(expectedAST));
         } catch (Throwable e) {
@@ -315,17 +387,17 @@ class ParserTest {
 
         // [GIVEN] That we create the expected AST from the code from the file
         Prog expectedAST = new Prog();
-        Computing computingA1 = new Computing("-", new FloatNum("3.2"), new FloatNum("4.3562"));
-        Computing computingA2 = new Computing("-", new FloatNum("5.42"), computingA1);
-        Computing computingA3 = new Computing("+", new FloatNum("4.92"), computingA2);
-        Computing computingA4 = new Computing("+", new FloatNum("5.00005"), new FloatNum("10.4"));
-        Computing computingA5 = new Computing("-", computingA4, computingA3);
-        Computing computingA6 = new Computing("+", new FloatNum("5.0"), computingA5);
-        Computing computingB1 = new Computing("-", new FloatNum("10.0"), new FloatNum("5.43"));
-        Computing computingC1 = new Computing("+", new FloatNum("0.3"), new FloatNum("10005.78"));
-        Assigning floatAssign = new Assigning("a", new FloatDcl("a"), computingA6);
-        Assigning floatAssign2 = new Assigning("b",new FloatDcl("b"), computingB1);
-        Assigning floatAssign3 = new Assigning("c",new FloatDcl("c"), computingC1);
+        ArithmeticOp computingA1 = new ArithmeticOp(new FloatNum(3.2F), "-", new FloatNum(4.3562F));
+        ArithmeticOp computingA2 = new ArithmeticOp(new FloatNum(5.42F), "-", computingA1);
+        ArithmeticOp computingA3 = new ArithmeticOp(new FloatNum(4.92F), "+", computingA2);
+        ArithmeticOp computingA4 = new ArithmeticOp(new FloatNum(5.00005F), "+", new FloatNum(10.4F));
+        ArithmeticOp computingA5 = new ArithmeticOp(computingA4, "-", computingA3);
+        ArithmeticOp computingA6 = new ArithmeticOp(new FloatNum(5.0F), "+", computingA5);
+        ArithmeticOp computingB1 = new ArithmeticOp(new FloatNum(10.0F), "-", new FloatNum(5.43F));
+        ArithmeticOp computingC1 = new ArithmeticOp(new FloatNum(0.3F), "+", new FloatNum(10005.78F));
+        AssignmentOp floatAssign = new AssignmentOp("a", new Id("a"), computingA6);
+        AssignmentOp floatAssign2 = new AssignmentOp("b", new Id("b"), computingB1);
+        AssignmentOp floatAssign3 = new AssignmentOp("c", new Id("c"), computingC1);
 
         expectedAST.addChild(floatAssign);
         expectedAST.addChild(floatAssign2);
@@ -333,7 +405,29 @@ class ParserTest {
 
         // [WHEN] We try to parse the code from the file
         try {
-            Prog AST = (Prog) compiler.prog();
+            Prog AST = (Prog) compiler.Prog();
+            // [THEN] Assert that the created AST is equal to the expected AST
+            assertTrue(AST.equals(expectedAST));
+        } catch (Throwable e) {
+            System.out.println("Syntax error: " + e.getMessage());
+            assert false;
+        }
+    }
+
+    void AssignFloatDclTest() throws FileNotFoundException {
+        // [GIVEN] That we run the parser with a file
+        Compiler compiler = readFileToParse("Test/TestCode/assignFloatDcl.txt");
+
+        // [GIVEN] That we create the expected AST from the code from the file
+        Prog expectedAST = new Prog();
+        AssignmentOp floatAssign = new AssignmentOp("a", new FloatDcl("a"), new FloatNum(8.32F));
+        AssignmentOp floatAssign2 = new AssignmentOp("b", new FloatDcl("b"), new FloatNum(0.97F));
+        expectedAST.addChild(floatAssign);
+        expectedAST.addChild(floatAssign2);
+
+        // [WHEN] We try to parse the code from the file
+        try {
+            Prog AST = (Prog) compiler.Prog();
             // [THEN] Assert that the created AST is equal to the expected AST
             assertTrue(AST.equals(expectedAST));
         } catch (Throwable e) {
@@ -350,25 +444,25 @@ class ParserTest {
         // [GIVEN] That we create the expected AST from the code from the file
         Prog expectedAST = new Prog();
 
-        BinOperator binOperatorA1 = new BinOperator("||", new Bool("true"), new Bool("false"));
-        BinOperator binOperatorA2 = new BinOperator("&&", new Bool("true"), new Not(new Id("x", false)));
-        BinOperator binOperatorA3 = new BinOperator("&&", binOperatorA1, binOperatorA2);
-        BinOperator binOperatorB1 = new BinOperator("||", new Bool("true"), new Bool("false"));
-        BinOperator binOperatorC1 = new BinOperator("&&", new Bool("false"), new Bool("true"));
-        BinOperator binOperatorD1 = new BinOperator("<", new FloatNum("2.5"), new FloatNum("4.3"));
-        BinOperator binOperatorD2 = new BinOperator("&&", binOperatorD1, new Bool("true"));
-        BinOperator binOperatorE1 = new BinOperator(">", new IntNum("5"), new IntNum("5"));
-        BinOperator binOperatorE2 = new BinOperator("<=", new IntNum("4"), binOperatorE1);
-        BinOperator binOperatorE3 = new BinOperator("<", new IntNum("2"), binOperatorE2);
-        BinOperator binOperatorE4 = new BinOperator(">=", new IntNum("5"), new IntNum("40"));
-        BinOperator binOperatorE5 = new BinOperator("!=", new IntNum("5"), new IntNum("10"));
-        BinOperator binOperatorE6 = new BinOperator("==", binOperatorE4, binOperatorE5);
-        BinOperator binOperatorE7 = new BinOperator("&&", binOperatorE3, binOperatorE6);
-        Assigning boolAssign = new Assigning("a", new BoolDcl("a"), binOperatorA3);
-        Assigning boolAssign2 = new Assigning("b", new BoolDcl("b"), binOperatorB1);
-        Assigning boolAssign3 = new Assigning("c", new BoolDcl("c"), binOperatorC1);
-        Assigning boolAssign4 = new Assigning("d", new BoolDcl("d"), binOperatorD2);
-        Assigning boolAssign5 = new Assigning("e", new BoolDcl("e"), binOperatorE7);
+        ComparisonOp binOperatorA1 = new ComparisonOp(new Bool(true), "||", new Bool(false));
+        ComparisonOp binOperatorA2 = new ComparisonOp(new Bool(true), "&&", new NegationOp(new Id("x")));
+        ComparisonOp binOperatorA3 = new ComparisonOp(binOperatorA1, "&&", binOperatorA2);
+        ComparisonOp binOperatorB1 = new ComparisonOp(new Bool(true), "||", new Bool(false));
+        ComparisonOp binOperatorC1 = new ComparisonOp(new Bool(false), "&&", new Bool(true));
+        ComparisonOp binOperatorD1 = new ComparisonOp(new FloatNum(2.5F), "<", new FloatNum(4.3F));
+        ComparisonOp binOperatorD2 = new ComparisonOp(binOperatorD1, "&&", new Bool(true));
+        ComparisonOp binOperatorE1 = new ComparisonOp(new IntNum(5), ">", new IntNum(5));
+        ComparisonOp binOperatorE2 = new ComparisonOp(new IntNum(4), "<=", binOperatorE1);
+        ComparisonOp binOperatorE3 = new ComparisonOp(new IntNum(2), "<", binOperatorE2);
+        ComparisonOp binOperatorE4 = new ComparisonOp(new IntNum(5), ">=", new IntNum(40));
+        ComparisonOp binOperatorE5 = new ComparisonOp(new IntNum(5), "!=", new IntNum(10));
+        ComparisonOp binOperatorE6 = new ComparisonOp(binOperatorE4, "==", binOperatorE5);
+        ComparisonOp binOperatorE7 = new ComparisonOp(binOperatorE3, "&&", binOperatorE6);
+        AssignmentOp boolAssign = new AssignmentOp("a", new Id("a"), binOperatorA3);
+        AssignmentOp boolAssign2 = new AssignmentOp("b",new Id("b"), binOperatorB1);
+        AssignmentOp boolAssign3 = new AssignmentOp("c",new Id("c"), binOperatorC1);
+        AssignmentOp boolAssign4 = new AssignmentOp("d",new Id("d"), binOperatorD2);
+        AssignmentOp boolAssign5 = new AssignmentOp("e",new Id("e"), binOperatorE7);
 
         expectedAST.addChild(boolAssign);
         expectedAST.addChild(boolAssign2);
@@ -378,7 +472,55 @@ class ParserTest {
 
         // [WHEN] We try to parse the code from the file
         try {
-            Prog AST = (Prog) compiler.prog();
+            Prog AST = (Prog) compiler.Prog();
+            // [THEN] Assert that the created AST is equal to the expected AST
+            assertTrue(AST.equals(expectedAST));
+        } catch (Throwable e) {
+            System.out.println("Syntax error: " + e.getMessage());
+            assert false;
+        }
+    }
+
+    @Test
+    void AssignBoolDclTest() throws FileNotFoundException {
+        // [GIVEN] That we run the parser with a file
+        Compiler compiler = readFileToParse("Test/TestCode/assignBoolDcl.txt");
+
+        // [GIVEN] That we create the expected AST from the code from the file
+        Prog expectedAST = new Prog();
+        AssignmentOp boolAssign = new AssignmentOp("p", new BoolDcl("p"), new Bool(true));
+        AssignmentOp boolAssign2 = new AssignmentOp("q",new BoolDcl("q"), new Bool(false));
+        expectedAST.addChild(boolAssign);
+        expectedAST.addChild(boolAssign2);
+
+        // [WHEN] We try to parse the code from the file
+        try {
+            Prog AST = (Prog) compiler.Prog();
+            // [THEN] Assert that the created AST is equal to the expected AST
+            assertTrue(AST.equals(expectedAST));
+        } catch (Throwable e) {
+            System.out.println("Syntax error: " + e.getMessage());
+            assert false;
+        }
+    }
+
+    @Test
+    void MixAssignDclTest() throws FileNotFoundException {
+        // [GIVEN] That we run the parser with a file
+        Compiler compiler = readFileToParse("Test/TestCode/mixAssignWithDcls.txt");
+
+        // [GIVEN] That we create the expected AST from the code from the file
+        Prog expectedAST = new Prog();
+        AssignmentOp intAssign = new AssignmentOp("a", new IntDcl("a"), new IntNum(1));
+        AssignmentOp boolAssign = new AssignmentOp("b", new BoolDcl("b"), new Bool(false));
+        AssignmentOp floatAssign = new AssignmentOp("c", new FloatDcl("c"), new FloatNum(6.2F));
+        expectedAST.addChild(intAssign);
+        expectedAST.addChild(boolAssign);
+        expectedAST.addChild(floatAssign);
+
+        // [WHEN] We try to parse the code from the file
+        try {
+            Prog AST = (Prog) compiler.Prog();
             // [THEN] Assert that the created AST is equal to the expected AST
             assertTrue(AST.equals(expectedAST));
         } catch (Throwable e) {
@@ -394,7 +536,22 @@ class ParserTest {
 
         // [WHEN] [THEN] We try to parse the code from the file, and it gives an error
         try {
-            compiler.prog();
+            compiler.Prog();
+            assert false;
+        } catch (Throwable e) {
+            System.out.println("Syntax error: " + e.getMessage());
+            assert true;
+        }
+    }
+
+    @Test
+    void WrongAssignTest() throws FileNotFoundException {
+        // [GIVEN] That we run the parser with a file
+        Compiler compiler = readFileToParse("Test/TestCode/wrongAssign.txt");
+
+        // [WHEN] [THEN] We try to parse the code from the file, and it gives an error
+        try {
+            compiler.Prog();
             assert false;
         } catch (Throwable e) {
             System.out.println("Syntax error: " + e.getMessage());
@@ -409,7 +566,7 @@ class ParserTest {
 
         // [WHEN] [THEN] We try to parse the code from the file, and it gives an error
         try {
-            compiler.prog();
+            compiler.Prog();
             assert false;
         } catch (Throwable e) {
             System.out.println("Syntax error: " + e.getMessage());
@@ -417,6 +574,77 @@ class ParserTest {
         }
     }
 
+    @Test
+    void IfTest() throws FileNotFoundException {
+        // [GIVEN] That we run the parser with a file
+        Compiler compiler = readFileToParse("Test/TestCode/if.txt");
+
+        // [GIVEN] That we create the expected AST from the code from the file
+        Prog expectedAST = new Prog();
+
+        ComparisonOp binOp = new ComparisonOp(new IntNum(2), "<", new IntNum(4));
+        AssignmentOp assigning = new AssignmentOp("t", new Id("t"), new Bool(true));
+        Block block = new Block();
+        block.addChild(assigning);
+        IfStmt ifStmt = new IfStmt (binOp, block);
+        expectedAST.addChild(ifStmt);
+
+        // [WHEN] We try to parse the code from the file
+        try {
+            Prog AST = (Prog) compiler.Prog();
+            // [THEN] Assert that the created AST is equal to the expected AST
+            assertTrue(AST.equals(expectedAST));
+        } catch (Throwable e) {
+            System.out.println("Syntax error: " + e.getMessage());
+            assert false;
+        }
+    }
+
+    @Test
+    void IfElseTest() throws FileNotFoundException {
+        // [GIVEN] That we run the parser with a file
+        Compiler compiler = readFileToParse("Test/TestCode/ifElse.txt");
+
+        // [GIVEN] That we create the expected AST from the code from the file
+        Prog expectedAST = new Prog();
+
+        ComparisonOp binOp = new ComparisonOp(new IntNum(1), ">", new IntNum(2));
+        AssignmentOp assigning = new AssignmentOp("t", new Id("t"), new Bool(true));
+        AssignmentOp assigning2 = new AssignmentOp("t", new Id("t"), new Bool (false));
+        Block block = new Block();
+        block.addChild(assigning);
+        Block block2 = new Block();
+        block2.addChild(assigning2);
+        IfElseStmt ifElseStmt = new IfElseStmt(binOp, block, block2);
+        expectedAST.addChild(ifElseStmt);
+
+        // [WHEN] We try to parse the code from the file
+        try {
+            Prog AST = (Prog) compiler.Prog();
+            // [THEN] Assert that the created AST is equal to the expected AST
+            assertTrue(AST.equals(expectedAST));
+        } catch (Throwable e) {
+            System.out.println("Syntax error: " + e.getMessage());
+            assert false;
+        }
+    }
+
+    @Test
+    void WrongIfElseTest() throws FileNotFoundException {
+        // [GIVEN] That we run the parser with a file
+        Compiler compiler = readFileToParse("Test/TestCode/wrongIfElse.txt");
+
+        // [WHEN] [THEN] We try to parse the code from the file, and it gives an error
+        try {
+            compiler.Prog();
+            assert false;
+        } catch (Throwable e) {
+            System.out.println("Syntax error: " + e.getMessage());
+            assert true;
+        }
+    }
+
+    /*
     @Test
     void AssignPointerWithAddressTest() throws FileNotFoundException {
         // [GIVEN] That we run the parser with a file
@@ -430,10 +658,41 @@ class ParserTest {
         expectedAST.addChild(pointerAssign);
         expectedAST.addChild(pointerAssign2);
         expectedAST.addChild(pointerAssign3);
+    */
+
+    @Test
+    void NestedIfElseTest() throws FileNotFoundException {
+        // [GIVEN] That we run the parser with a file
+        Compiler compiler = readFileToParse("Test/TestCode/nestedIfElse.txt");
+
+        // [GIVEN] That we create the expected AST from the code from the file
+        Prog expectedAST = new Prog();
+
+        // elseBlock
+        AssignmentOp assigning = new AssignmentOp("b", new Id("b"), new FloatNum(3.5F));
+        Block elseBlock = new Block();
+        elseBlock.addChild(assigning);
+
+        Block ifBlockInner = new Block();
+
+        // condition for if-else statement
+        ComparisonOp binOp2 = new ComparisonOp(new Bool(true), "==", new Bool(false));
+
+        IfElseStmt ifElseStmt = new IfElseStmt(binOp2, ifBlockInner, elseBlock);
+
+        Block ifBlockOuter = new Block();
+        ifBlockOuter.addChild(ifElseStmt);
+
+        // condition for outer if-statement
+        ComparisonOp binOp = new ComparisonOp(new IntNum(1), "<", new IntNum(2));
+
+        IfStmt ifStmt = new IfStmt(binOp, ifBlockOuter);
+        
+        expectedAST.addChild(ifStmt);
 
         // [WHEN] We try to parse the code from the file
         try {
-            Prog AST = (Prog) compiler.prog();
+            Prog AST = (Prog) compiler.Prog();
             // [THEN] Assert that the created AST is equal to the expected AST
             assertTrue(AST.equals(expectedAST));
         } catch (Throwable e) {

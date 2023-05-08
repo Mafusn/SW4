@@ -1,4 +1,0 @@
-int*ptr;
-int* pointer;
-int *samePointer123;
-BYE;

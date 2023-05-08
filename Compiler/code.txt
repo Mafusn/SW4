@@ -1,4 +1,5 @@
-pointer *ptr = &a;
-*ptr2 = &example;
-*ptr3 = 20;
-BYE;
+int c = 2;
+pointer navn = &c;
+#navn = 2 + 2;
+c = *navn + 2;
+END;
