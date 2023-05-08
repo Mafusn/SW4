@@ -27,57 +27,59 @@ public interface CompilerConstants {
   /** RegularExpression Id. */
   int MULTIPLY = 13;
   /** RegularExpression Id. */
-  int POINTERDCL = 14;
+  int DIVIDE = 14;
   /** RegularExpression Id. */
-  int IF = 15;
+  int POINTERDCL = 15;
   /** RegularExpression Id. */
-  int ELSE = 16;
+  int IF = 16;
   /** RegularExpression Id. */
-  int AND = 17;
+  int ELSE = 17;
   /** RegularExpression Id. */
-  int OR = 18;
+  int AND = 18;
   /** RegularExpression Id. */
-  int NOT = 19;
+  int OR = 19;
   /** RegularExpression Id. */
-  int EQ = 20;
+  int NOT = 20;
   /** RegularExpression Id. */
-  int NE = 21;
+  int EQ = 21;
   /** RegularExpression Id. */
-  int LT = 22;
+  int NE = 22;
   /** RegularExpression Id. */
-  int LE = 23;
+  int LT = 23;
   /** RegularExpression Id. */
-  int GT = 24;
+  int LE = 24;
   /** RegularExpression Id. */
-  int GE = 25;
+  int GT = 25;
   /** RegularExpression Id. */
-  int BOOLDCL = 26;
+  int GE = 26;
   /** RegularExpression Id. */
-  int TRUE = 27;
+  int BOOLDCL = 27;
   /** RegularExpression Id. */
-  int FALSE = 28;
+  int TRUE = 28;
   /** RegularExpression Id. */
-  int ASSIGN = 29;
+  int FALSE = 29;
   /** RegularExpression Id. */
-  int LPAREN = 30;
+  int ASSIGN = 30;
   /** RegularExpression Id. */
-  int RPAREN = 31;
+  int LPAREN = 31;
   /** RegularExpression Id. */
-  int LBRACE = 32;
+  int RPAREN = 32;
   /** RegularExpression Id. */
-  int RBRACE = 33;
+  int LBRACE = 33;
   /** RegularExpression Id. */
-  int END_OF_LINE = 34;
+  int RBRACE = 34;
   /** RegularExpression Id. */
-  int ADDRESS = 35;
+  int END_OF_LINE = 35;
   /** RegularExpression Id. */
-  int HASHTAG = 36;
+  int ADDRESS = 36;
   /** RegularExpression Id. */
-  int END_OF_FILE = 37;
+  int HASHTAG = 37;
   /** RegularExpression Id. */
-  int WHILE = 38;
+  int END_OF_FILE = 38;
   /** RegularExpression Id. */
-  int ID = 39;
+  int WHILE = 39;
+  /** RegularExpression Id. */
+  int ID = 40;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -98,6 +100,7 @@ public interface CompilerConstants {
     "\"+\"",
     "\"-\"",
     "\"*\"",
+    "\"/\"",
     "\"pointer\"",
     "\"if\"",
     "\"else\"",

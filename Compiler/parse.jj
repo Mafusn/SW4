@@ -64,6 +64,7 @@ TOKEN : /* NUMBERS AND ARITHMETIC OPERATIONS */
 | <PLUS: "+">
 | <MINUS: "-">
 | <MULTIPLY: "*">
+| <DIVIDE: "/">
 | <POINTERDCL: "pointer">
 }
 
@@ -291,24 +292,37 @@ Node ComparisonOp() :
     Token op = null;
     Node right = null;
  }
-{left = ArithmeticOp() (( op = <LT> | op = <GT> | op = <GE> | op = <LE> ) right = ArithmeticOp() { left = new ComparisonOp(left, op.image, right); })*
+{left = ArithmeticPlusMinusOp() (( op = <LT> | op = <GT> | op = <GE> | op = <LE> ) right = ArithmeticPlusMinusOp() { left = new ComparisonOp(left, op.image, right); })*
 {
     return left;
 }
 }
 
-Node ArithmeticOp() :
+Node ArithmeticPlusMinusOp() :
 {
     Node left = null;
     Token op = null;
     Node right = null;
  }
-{ left = NegationOp() ((op = <PLUS> | op = <MINUS> ) right = NegationOp() { left = new ArithmeticOp(left, op.image, right); })*
+{ left = ArithmeticMulDivOp() ((op = <PLUS> | op = <MINUS> ) right = ArithmeticMulDivOp() { left = new ArithmeticOp(left, op.image, right); })*
 {
     return left;
 }
-
 }
+
+Node ArithmeticMulDivOp() :
+{
+    Node left = null;
+    Token op = null;
+    Node right = null;
+ }
+{ left = NegationOp() ((op = < MULTIPLY > | op = < DIVIDE > ) right = NegationOp() { left = new ArithmeticOp(left, op.image, right); })*
+{
+    return left;
+}
+}
+
+
 Node NegationOp() :
 {
     Node factor;
