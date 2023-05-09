@@ -85,7 +85,7 @@ public class CodeGenerator implements Visitor {
     @Override
     public void visit(AssignmentOp node) {
         // If statement som tjekker om det er en compound assignment.
-        if (node.getCompAssOp() != null) {
+        if (node.getCompAssOp() == null) {
             // If statement som tjekker for om det er en ny dekleration
             if (node.getLeft() instanceof Id) {
                 node.getRight().accept(this);
@@ -108,13 +108,13 @@ public class CodeGenerator implements Visitor {
                 node.getLeft().accept(this);
                 codeBuilder.append(InstructionSet.STX.getInstruction() + " $01" + String.format("%02d", arithmeticOpCount) + "\n");
                 arithmeticOpCount++;
-                switch (node.getCompAssOp()) {
-                    case "+=" -> operators.add("+");
-                    case "-=" -> operators.add("-");
-                    default -> {
-                        RuntimeException e = new RuntimeException("invalid operator");
-                        System.out.println(node.getVariable() + ": has an " + e);
-                    }
+                if (node.getCompAssOp().equals(OperationSet.COMPASSPLUS.getOp())) {
+                    operators.add("+");
+                } else if (node.getCompAssOp().equals(OperationSet.COMPASSMINUS.getOp())) {
+                    operators.add("-");
+                } else {
+                    RuntimeException e = new RuntimeException("invalid operator");
+                    System.out.println(node.getVariable() + ": has an " + e);
                 }
                 node.getRight().accept(this);
                 clearTheBottomOfStackForArithmeticOp();
@@ -171,7 +171,7 @@ public class CodeGenerator implements Visitor {
             codeBuilder.append(InstructionSet.TAX.getInstruction() + "\n");
         }
         pullAccumulator();
-        if (binOperatorCount > 0 && (node.getOperator().equals("&&") || node.getOperator().equals("||"))) {
+        if (binOperatorCount > 0 && (node.getOperator().equals("&&") || node.getOperator().equals("||")) && !(node.getRight() instanceof Bool)) {
             codeBuilder.append(InstructionSet.TAX.getInstruction() + "\n");
             pullAccumulator();
         }
