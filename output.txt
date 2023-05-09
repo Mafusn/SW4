@@ -12,12 +12,18 @@ TAY
 LDX $0100, y
 TXA
 PHA
-LDX #3
+TSX
+INX
+INX
+TXA
+TAY
+LDX $0100, y
 PLA
 STX $0100
 CLC
 CMP $0100
-BNE false1
+BEQ false1
+BCS false1
 LDA #1
 JMP store1
 false1:
@@ -32,25 +38,13 @@ TAY
 LDX $0100, y
 TXA
 PHA
-TSX
-INX
-INX
-INX
-INX
-TXA
-TAY
-LDX $0100, y
-STX $0100
-LDX #1
-STX $0101
-LDA $0100
-ADC $0101
-TAX
+LDX #2
 PLA
 STX $0101
 CLC
 CMP $0101
-BNE false2
+BEQ false2
+BCC false2
 LDA #1
 JMP store2
 false2:
@@ -70,17 +64,40 @@ false3:
  LDA #0
 store3:
   PHA
-LDX #0
+TSX
+INX
+INX
+INX
+TXA
+TAY
+LDX $0100, y
+TXA
+PHA
+LDX #3
 PLA
 STX $0103
 CLC
-ORA $0103
+CMP $0103
 BEQ false4
+BCC false4
 LDA #1
 JMP store4
 false4:
  LDA #0
 store4:
+  PHA
+PLA
+TAX
+PLA
+STX $0104
+CLC
+AND $0104
+BEQ false5
+LDA #1
+JMP store5
+false5:
+ LDA #0
+store5:
   PHA
 PLA
 CMP #1

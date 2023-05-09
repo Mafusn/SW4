@@ -363,38 +363,6 @@ public class CodeGenerator implements Visitor {
         arithmeticOpCount = 0;
     }
 
-    public void evaluateBinOperator(ComparisonOp node){
-        node.getLeft().accept(this);
-        if (node.getLeft() instanceof Id ||
-            node.getLeft() instanceof IntNum ||
-            node.getLeft() instanceof FloatNum ||
-            node.getLeft() instanceof Bool)
-        {
-            codeBuilder.append(InstructionSet.TXA.getInstruction() + "\n");
-            pushAccumulator();
-        } else if (node.getLeft() instanceof ArithmeticOp) {
-            clearTheBottomOfStackForArithmeticOp();
-            pushAccumulator();
-        }
-        node.getRight().accept(this);
-        if (node.getRight() instanceof ArithmeticOp) {
-            clearTheBottomOfStackForArithmeticOp();
-            codeBuilder.append(InstructionSet.TAX.getInstruction() + "\n");
-            pullAccumulator();
-        } else if ((node.getOperator().equals("||") || node.getOperator().equals("&&"))
-                && binOperatorCount > 0
-                && !(node.getRight() instanceof Bool)
-                && !(node.getRight() instanceof NegationOp))
-        {
-            pullAccumulator();
-            codeBuilder.append(InstructionSet.TAX.getInstruction() + "\n");
-            pullAccumulator();
-        } else {
-            pullAccumulator();
-        }
-        compareTwoBooleans(node.getOperator());
-    }
-
     public void compareTwoBooleans(String operator) {
         codeBuilder.append(InstructionSet.STX.getInstruction() + " $01" + String.format("%02d", binOperatorCount) + "\n");
         codeBuilder.append(InstructionSet.CLC.getInstruction() + "\n");
