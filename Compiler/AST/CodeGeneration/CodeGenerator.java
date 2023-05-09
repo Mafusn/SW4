@@ -317,7 +317,9 @@ public class CodeGenerator implements Visitor {
 
     @Override
     public void visit(PointerDcl node) {
-
+        /*int num = 255; // sample integer
+        String hex = String.format("%04X", num); // convert to 4-digit hexadecimal string
+        System.out.println(hex); // prints "00FF"*/
     }
 
     public void visit(WhileLoop node) {
