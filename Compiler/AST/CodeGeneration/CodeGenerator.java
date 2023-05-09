@@ -147,6 +147,7 @@ public class CodeGenerator implements Visitor {
     @Override
     public void visit(ComparisonOp node) {
         node.getLeft().accept(this);
+        // Hele det her if-statement tjekker for om venstre er alt andet end en comparison node.
         if (node.getLeft() instanceof Id ||
                 node.getLeft() instanceof IntNum ||
                 node.getLeft() instanceof FloatNum ||
@@ -159,14 +160,7 @@ public class CodeGenerator implements Visitor {
             pushAccumulator();
         }
         node.getRight().accept(this);
-        if (node.getRight() instanceof Id ||
-                node.getRight() instanceof IntNum ||
-                node.getRight() instanceof FloatNum ||
-                node.getRight() instanceof Bool)
-        {
-            /*codeBuilder.append(InstructionSet.TXA.getInstruction() + "\n");
-            pushAccumulator();*/
-        } else if (node.getRight() instanceof ArithmeticOp) {
+        if (node.getRight() instanceof ArithmeticOp) {
             clearTheBottomOfStackForArithmeticOp();
             codeBuilder.append(InstructionSet.TAX.getInstruction() + "\n");
         }
@@ -176,7 +170,6 @@ public class CodeGenerator implements Visitor {
             pullAccumulator();
         }
         compareTwoBooleans(node.getOperator());
-        //evaluateBinOperator(node);
     }
 
     @Override
@@ -220,7 +213,6 @@ public class CodeGenerator implements Visitor {
         codeBuilder.append(InstructionSet.STX.getInstruction() + " $01" + String.format("%02d", arithmeticOpCount) + "\n");
         arithmeticOpCount++;
         operators.add(node.getOperator());
-        //evaluateArithmeticOp(node);
     }
 
     @Override
@@ -409,7 +401,6 @@ public class CodeGenerator implements Visitor {
         codeBuilder.append("false" + labelCount + ":\n");
         codeBuilder.append(" " + InstructionSet.LDA.getInstruction() + " #0\n");
         codeBuilder.append("store" + labelCount + ":\n");
-        codeBuilder.append("  "); // gør at der kommer indent.
         pushAccumulator();
         labelCount++;
         binOperatorCount++;

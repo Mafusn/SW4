@@ -79,7 +79,7 @@ STX $0103
 CLC
 CMP $0103
 BEQ false4
-BCC false4
+BCS false4
 LDA #1
 JMP store4
 false4:
