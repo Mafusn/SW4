@@ -122,6 +122,10 @@ public class ConstantFolding implements Visitor {
                 foldedValue = leftValue + rightValue;
             } else if (operator.equals(OperationSet.MINUS.getOp())) {
                 foldedValue = leftValue - rightValue;
+            } else if (operator.equals(OperationSet.MULTIPLY.getOp())) {
+                foldedValue = leftValue * rightValue;
+            } else if (operator.equals(OperationSet.DIVIDE.getOp())) {
+                foldedValue = leftValue / rightValue;
             } else {
                 return;
             }
@@ -138,6 +142,10 @@ public class ConstantFolding implements Visitor {
                 foldedValue = leftValue + rightValue;
             } else if (operator.equals(OperationSet.MINUS.getOp())) {
                 foldedValue = leftValue - rightValue;
+            } else if (operator.equals(OperationSet.MULTIPLY.getOp())) {
+                foldedValue = leftValue * rightValue;
+            } else if (operator.equals(OperationSet.DIVIDE.getOp())) {
+                foldedValue = leftValue / rightValue;
             } else {
                 return;
             }
