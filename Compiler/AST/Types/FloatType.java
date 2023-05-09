@@ -27,11 +27,11 @@ public class FloatType extends Type{
     public Type getResultType(String operator, Type other) {
         if (other instanceof FloatType) {
             // Arithmetic operators return an int result when both operands are ints
-            if (operator.equals(OperationSet.PLUS.getOperation()) || operator.equals(OperationSet.MINUS.getOperation())) {
+            if (operator.equals(OperationSet.PLUS.getOp()) || operator.equals(OperationSet.MINUS.getOp())) {
                 return FloatType.INSTANCE;
-            } else if (operator.equals(OperationSet.LESSTHAN.getOperation()) || operator.equals(OperationSet.LESSEQUAL.getOperation()) ||
-                operator.equals(OperationSet.GREATERTHAN.getOperation()) || operator.equals(OperationSet.GREATEREQUAL.getOperation()) ||
-                operator.equals(OperationSet.EQUAL.getOperation()) || operator.equals(OperationSet.NOTEQUAL.getOperation())) {
+            } else if (operator.equals(OperationSet.LESSTHAN.getOp()) || operator.equals(OperationSet.LESSEQUAL.getOp()) ||
+                operator.equals(OperationSet.GREATERTHAN.getOp()) || operator.equals(OperationSet.GREATEREQUAL.getOp()) ||
+                operator.equals(OperationSet.EQUAL.getOp()) || operator.equals(OperationSet.NOTEQUAL.getOp())) {
                 return BooleanType.INSTANCE;
             }
         }

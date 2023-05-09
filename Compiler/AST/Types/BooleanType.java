@@ -21,11 +21,11 @@ public class BooleanType extends Type{
 
     @Override
     public Type getResultType(String operator, Type other) {
-        if (operator.equals(OperationSet.EQUAL.getOperation()) || operator.equals(OperationSet.NOTEQUAL.getOperation()) ||
-                operator.equals(OperationSet.LESSTHAN.getOperation()) || operator.equals(OperationSet.GREATERTHAN.getOperation()) ||
-                operator.equals(OperationSet.LESSEQUAL.getOperation()) || operator.equals(OperationSet.GREATEREQUAL.getOperation())) {
+        if (operator.equals(OperationSet.EQUAL.getOp()) || operator.equals(OperationSet.NOTEQUAL.getOp()) ||
+                operator.equals(OperationSet.LESSTHAN.getOp()) || operator.equals(OperationSet.GREATERTHAN.getOp()) ||
+                operator.equals(OperationSet.LESSEQUAL.getOp()) || operator.equals(OperationSet.GREATEREQUAL.getOp())) {
             return BooleanType.INSTANCE;
-        } else if (operator.equals(OperationSet.AND.getOperation()) || operator.equals(OperationSet.OR.getOperation())) {
+        } else if (operator.equals(OperationSet.AND.getOp()) || operator.equals(OperationSet.OR.getOp())) {
             if (other instanceof BooleanType) {
                 return BooleanType.INSTANCE;
             }

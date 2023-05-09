@@ -91,9 +91,9 @@ public class CodeGenerator implements Visitor {
             }
             codeBuilder.append(InstructionSet.LDA.getInstruction() + " $0100, x" + "\n");
             codeBuilder.append(InstructionSet.STA.getInstruction() + " $01" + String.format("%02d", arithmeticOpCount) + "\n");
-            if (node.getCompAssOp().equals(OperationSet.COMPASSPLUS.getOperation())) {
+            if (node.getCompAssOp().equals(OperationSet.COMPASSPLUS.getOp())) {
                 operators.add("+");
-            } else if (node.getCompAssOp().equals(OperationSet.COMPASSMINUS.getOperation())) {
+            } else if (node.getCompAssOp().equals(OperationSet.COMPASSMINUS.getOp())) {
                 operators.add("-");
             } else {
                 RuntimeException e = new RuntimeException("invalid operator");

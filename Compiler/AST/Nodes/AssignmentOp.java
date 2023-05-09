@@ -23,11 +23,11 @@ public class AssignmentOp extends Node {
         this.left = left;
         this.right = right;
 
-        if (compAssOp.equals(OperationSet.PLUS.getOperation())){
-            this.compAssOp = OperationSet.COMPASSPLUS.getOperation();
+        if (compAssOp.equals(OperationSet.PLUS.getOp())){
+            this.compAssOp = OperationSet.COMPASSPLUS.getOp();
         }
         else if (compAssOp.equals("-")){
-            this.compAssOp = OperationSet.COMPASSMINUS.getOperation();
+            this.compAssOp = OperationSet.COMPASSMINUS.getOp();
         }
     }
 

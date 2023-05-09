@@ -1,8 +1,9 @@
-int a = 2 + 3 * 4 + 6;
-/*
-int c = 2;
-pointer navn = &c;
-#navn = 2 + 2;
-c = *navn + 2;
-*/
+/*int a = 2 + 3 * 4 + 6;*/
+int a = 2;
+int b = 3;
+if (a == 3 && b == a + 1 || 2 + 4 > 1 + 2) {
+    int a = 3;
+} else {
+    int a = 4;
+}
 END;

@@ -16,6 +16,7 @@ public enum OperationSet {
     COMPASSMINUS("-="),
     HASHTAG("#"),
     MULTIPLY("*"),
+    DIVIDE("/"),
     ADDRESS("&");
 
     private final String operation;
@@ -24,7 +25,7 @@ public enum OperationSet {
         this.operation = operation;
     }
 
-    public String getOperation() {
+    public String getOp() {
         return operation;
     }
 

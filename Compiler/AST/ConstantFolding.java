@@ -3,6 +3,7 @@ package AST;
 import AST.Nodes.*;
 
 public class ConstantFolding implements Visitor {
+
     @Override
     public void visit(AssignmentOp node) {
         node.getLeft().setParent(node);
@@ -25,90 +26,63 @@ public class ConstantFolding implements Visitor {
             int leftValueInt = ((IntNum) node.getLeft()).getValue();
             int rightValueInt = ((IntNum) node.getRight()).getValue();
 
-            if (operator.equals(OperationSet.LESSTHAN.getOperation())) {
+            if (operator.equals(OperationSet.LESSTHAN.getOp())) {
                 foldedValue = leftValueInt < rightValueInt;
-            } else if (operator.equals(OperationSet.GREATERTHAN.getOperation())) {
+            } else if (operator.equals(OperationSet.GREATERTHAN.getOp())) {
                 foldedValue = leftValueInt > rightValueInt;
-            } else if (operator.equals(OperationSet.GREATEREQUAL.getOperation())) {
+            } else if (operator.equals(OperationSet.GREATEREQUAL.getOp())) {
                 foldedValue = leftValueInt >= rightValueInt;
-            } else if (operator.equals(OperationSet.LESSEQUAL.getOperation())) {
+            } else if (operator.equals(OperationSet.LESSEQUAL.getOp())) {
                 foldedValue = leftValueInt <= rightValueInt;
-            } else if (operator.equals(OperationSet.EQUAL.getOperation())) {
+            } else if (operator.equals(OperationSet.EQUAL.getOp())) {
                 foldedValue = leftValueInt == rightValueInt;
-            } else if (operator.equals(OperationSet.NOTEQUAL.getOperation())) {
+            } else if (operator.equals(OperationSet.NOTEQUAL.getOp())) {
                 foldedValue = leftValueInt != rightValueInt;
             } else {
                 return;
             }
 
-            Node newChild = new Bool(foldedValue);
-            Node parent = node.getParent();
-            if (parent instanceof AssignmentOp) {
-                parent.setRight(newChild);
-            }
-            else if (!(parent.getLeft() instanceof Bool)) {
-                parent.setLeft(newChild);
-            } else {
-                parent.setRight(newChild);
-            }
+            replaceParentChild(node.getParent(), node, new Bool(foldedValue));
 
         } else if (node.getLeft() instanceof FloatNum && node.getRight() instanceof FloatNum) {
             float leftValueFloat = ((FloatNum) node.getLeft()).getValue();
             float rightValueFloat = ((FloatNum) node.getRight()).getValue();
 
-            if (operator.equals(OperationSet.LESSTHAN.getOperation())) {
+            if (operator.equals(OperationSet.LESSTHAN.getOp())) {
                 foldedValue = leftValueFloat < rightValueFloat;
-            } else if (operator.equals(OperationSet.GREATERTHAN.getOperation())) {
+            } else if (operator.equals(OperationSet.GREATERTHAN.getOp())) {
                 foldedValue = leftValueFloat > rightValueFloat;
-            } else if (operator.equals(OperationSet.GREATEREQUAL.getOperation())) {
+            } else if (operator.equals(OperationSet.GREATEREQUAL.getOp())) {
                 foldedValue = leftValueFloat >= rightValueFloat;
-            } else if (operator.equals(OperationSet.LESSEQUAL.getOperation())) {
+            } else if (operator.equals(OperationSet.LESSEQUAL.getOp())) {
                 foldedValue = leftValueFloat <= rightValueFloat;
-            } else if (operator.equals(OperationSet.EQUAL.getOperation())) {
+            } else if (operator.equals(OperationSet.EQUAL.getOp())) {
                 foldedValue = leftValueFloat == rightValueFloat;
-            } else if (operator.equals(OperationSet.NOTEQUAL.getOperation())) {
+            } else if (operator.equals(OperationSet.NOTEQUAL.getOp())) {
                 foldedValue = leftValueFloat != rightValueFloat;
             } else {
                 return;
             }
 
-            Node newChild = new Bool(foldedValue);
-            Node parent = node.getParent();
-            if (parent instanceof AssignmentOp) {
-                parent.setRight(newChild);
-            }
-            else if (!(parent.getLeft() instanceof Bool)) {
-                parent.setLeft(newChild);
-            } else {
-                parent.setRight(newChild);
-            }
+            replaceParentChild(node.getParent(), node, new Bool(foldedValue));
 
-        } else if (node.getLeft() instanceof Bool || node.getRight() instanceof Bool) {
+        } else if (node.getLeft() instanceof Bool && node.getRight() instanceof Bool) {
             boolean leftValueBool = ((Bool) node.getLeft()).getValue();
             boolean rightValueBool = ((Bool) node.getRight()).getValue();
 
-            if (operator.equals(OperationSet.EQUAL.getOperation())) {
+            if (operator.equals(OperationSet.EQUAL.getOp())) {
                 foldedValue = leftValueBool == rightValueBool;
-            } else if (operator.equals(OperationSet.NOTEQUAL.getOperation())) {
+            } else if (operator.equals(OperationSet.NOTEQUAL.getOp())) {
                 foldedValue = leftValueBool != rightValueBool;
-            } else if (operator.equals(OperationSet.OR.getOperation())) {
+            } else if (operator.equals(OperationSet.OR.getOp())) {
                 foldedValue = leftValueBool || rightValueBool;
-            } else if (operator.equals(OperationSet.AND.getOperation())) {
+            } else if (operator.equals(OperationSet.AND.getOp())) {
                 foldedValue = leftValueBool && rightValueBool;
             } else {
                 return;
             }
 
-            Node newChild = new Bool(foldedValue);
-            Node parent = node.getParent();
-            if (parent instanceof AssignmentOp) {
-                parent.setRight(newChild);
-            }
-            else if (!(parent.getLeft() instanceof Bool)) {
-                parent.setLeft(newChild);
-            } else {
-                parent.setRight(newChild);
-            }
+            replaceParentChild(node.getParent(), node, new Bool(foldedValue));
         }
     }
 
@@ -136,7 +110,6 @@ public class ConstantFolding implements Visitor {
         node.getRight().setParent(node);
         node.getRight().accept(this);
 
-        Node newChild;
         String operator = node.getOperator();
 
         if (node.getLeft() instanceof IntNum && node.getRight() instanceof IntNum) {
@@ -145,24 +118,15 @@ public class ConstantFolding implements Visitor {
 
             int foldedValue;
 
-            if (operator.equals(OperationSet.PLUS.getOperation())) {
+            if (operator.equals(OperationSet.PLUS.getOp())) {
                 foldedValue = leftValue + rightValue;
-            } else if (operator.equals(OperationSet.MINUS.getOperation())) {
+            } else if (operator.equals(OperationSet.MINUS.getOp())) {
                 foldedValue = leftValue - rightValue;
             } else {
                 return;
             }
 
-            newChild = new IntNum(foldedValue);
-            Node parent = node.getParent();
-            if (parent instanceof AssignmentOp) {
-                parent.setRight(newChild);
-            }
-            else if (!(parent.getLeft() instanceof IntNum)) {
-                parent.setLeft(newChild);
-            } else {
-                parent.setRight(newChild);
-            }
+            replaceParentChild(node.getParent(), node, new IntNum(foldedValue));
         }
         if (node.getLeft() instanceof FloatNum && node.getRight() instanceof FloatNum) {
             float leftValue = ((FloatNum) node.getLeft()).getValue();
@@ -170,24 +134,15 @@ public class ConstantFolding implements Visitor {
 
             float foldedValue;
 
-            if (operator.equals(OperationSet.PLUS.getOperation())) {
+            if (operator.equals(OperationSet.PLUS.getOp())) {
                 foldedValue = leftValue + rightValue;
-            } else if (operator.equals(OperationSet.MINUS.getOperation())) {
+            } else if (operator.equals(OperationSet.MINUS.getOp())) {
                 foldedValue = leftValue - rightValue;
             } else {
                 return;
             }
 
-            newChild = new FloatNum(foldedValue);
-            Node parent = node.getParent();
-            if (parent instanceof AssignmentOp) {
-                parent.setRight(newChild);
-            }
-            else if (!(parent.getLeft() instanceof FloatNum)) {
-                parent.setLeft(newChild);
-            } else {
-                parent.setRight(newChild);
-            }
+            replaceParentChild(node.getParent(), node, new FloatNum(foldedValue));
         }
     }
 
@@ -238,17 +193,7 @@ public class ConstantFolding implements Visitor {
     public void visit(NegationOp node) {
         if (node.getLeft() instanceof Bool) {
             boolean leftValue = ((Bool) node.getLeft()).getValue();
-
-            Node newChild = new Bool(!leftValue);
-            Node parent = node.getParent();
-            if (parent instanceof AssignmentOp) {
-                parent.setRight(newChild);
-            }
-            else if (!(parent.getLeft() instanceof Bool)) {
-                parent.setLeft(newChild);
-            } else {
-                parent.setRight(newChild);
-            }
+            replaceParentChild(node.getParent(), node, new Bool(!leftValue));
         }
     }
 
@@ -270,5 +215,13 @@ public class ConstantFolding implements Visitor {
     @Override
     public void visit(PointerDcl node) {
 
+    }
+
+    private void replaceParentChild(Node parent, Node node, Node newChild) {
+        if (parent.getLeft().equals(node)) {
+            parent.setLeft(newChild);
+        } else {
+            parent.setRight(newChild);
+        }
     }
 }

@@ -42,13 +42,13 @@ public class PrettyPrint implements Visitor {
                 }
             }
         } else {
-            if (node.getCompAssOp().equals(OperationSet.COMPASSPLUS.getOperation())) {
+            if (node.getCompAssOp().equals(OperationSet.COMPASSPLUS.getOp())) {
                 sb.append("\n");
                 printIndent();
                 node.getLeft().accept(this); // variable not declaration, but works because it is still child 1
                 sb.append(" += ");
                 node.getRight().accept(this);
-            } else if (node.getCompAssOp().equals(OperationSet.COMPASSMINUS.getOperation())) {
+            } else if (node.getCompAssOp().equals(OperationSet.COMPASSMINUS.getOp())) {
                 sb.append("\n");
                 printIndent();
                 node.getLeft().accept(this); // variable not declaration, but works because it is still child 1
@@ -108,11 +108,11 @@ public class PrettyPrint implements Visitor {
     @Override
     public void visit(Id node) {
         if (node.getPrefix() != null) {
-            if (node.getPrefix().equals(OperationSet.MULTIPLY.getOperation())) {
+            if (node.getPrefix().equals(OperationSet.MULTIPLY.getOp())) {
                 sb.append("*");
-            } else if (node.getPrefix().equals(OperationSet.HASHTAG.getOperation())) {
+            } else if (node.getPrefix().equals(OperationSet.HASHTAG.getOp())) {
                 sb.append("#");
-            } else if (node.getPrefix().equals(OperationSet.ADDRESS.getOperation())) {
+            } else if (node.getPrefix().equals(OperationSet.ADDRESS.getOp())) {
                 sb.append("&");
             }
         }
