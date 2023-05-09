@@ -36,4 +36,11 @@ public class ArithmeticOp extends Node {
     public String getOperator() {
         return operation;
     }
+
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ArithmeticOp computing = (ArithmeticOp) o;
+        return operation.equals(computing.operation) && left.equals(computing.left) && right.equals(computing.right);
+    }
 }

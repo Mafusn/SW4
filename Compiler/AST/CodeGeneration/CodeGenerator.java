@@ -1,6 +1,7 @@
 package AST.CodeGeneration;
 
 import AST.Nodes.*;
+import AST.OperationSet;
 import AST.SymbolTableFilling.Symbol;
 import AST.SymbolTableFilling.SymbolTableFilling;
 import AST.Visitor;
@@ -37,7 +38,7 @@ public class CodeGenerator implements Visitor {
     }
 
     private void pushAccumulator() {
-        codeBuilder.append("PHA\n");
+        codeBuilder.append(InstructionSet.PHA.getInstruction() + "\n");
         incrementStackAddress();
     }
 
@@ -84,7 +85,7 @@ public class CodeGenerator implements Visitor {
     @Override
     public void visit(AssignmentOp node) {
         // If statement som tjekker om det er en compound assignment.
-        if (node.getCompAssOp() == null) {
+        if (node.getCompAssOp() != null) {
             // If statement som tjekker for om det er en ny dekleration
             if (node.getLeft() instanceof Id) {
                 node.getRight().accept(this);
@@ -315,6 +316,10 @@ public class CodeGenerator implements Visitor {
     }
 
     @Override
+    public void visit(PointerDcl node) {
+
+    }
+
     public void visit(WhileLoop node) {
         codeBuilder.append("while" + whileLoopCount + ":\n");
         node.getLeft().accept(this);

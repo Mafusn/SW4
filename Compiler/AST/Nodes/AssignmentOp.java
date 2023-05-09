@@ -18,16 +18,16 @@ public class AssignmentOp extends Node {
         this.compAssOp = null;
     }
 
-    public AssignmentOp(String name, Node child1, Node child2, String compAssOp){
+    public AssignmentOp(String name, Node left, Node right, String compAssOp){
         this.name = name;
-        this.left = child1;
-        this.right = child2;
+        this.left = left;
+        this.right = right;
 
-        if (compAssOp.equals(OperationSet.PLUS.getOperation())){
-            this.compAssOp = OperationSet.COMPASSPLUS.getOperation();
+        if (compAssOp.equals(OperationSet.PLUS.getOp())){
+            this.compAssOp = OperationSet.COMPASSPLUS.getOp();
         }
         else if (compAssOp.equals("-")){
-            this.compAssOp = OperationSet.COMPASSMINUS.getOperation();
+            this.compAssOp = OperationSet.COMPASSMINUS.getOp();
         }
     }
 
@@ -53,6 +53,9 @@ public class AssignmentOp extends Node {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         AssignmentOp assignmentOp = (AssignmentOp) o;
-        return name.equals(assignmentOp.name) && left.equals(assignmentOp.left) && right.equals(assignmentOp.right) && compAssOp.equals(assignmentOp.compAssOp);
+        if (compAssOp != null) {
+            return name.equals(assignmentOp.name) && left.equals(assignmentOp.left) && right.equals(assignmentOp.right) && compAssOp.equals(assignmentOp.compAssOp);
+        }
+        return name.equals(assignmentOp.name) && left.equals(assignmentOp.left) && right.equals(assignmentOp.right);
     }
 }

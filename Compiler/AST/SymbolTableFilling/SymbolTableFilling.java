@@ -150,6 +150,15 @@ public class SymbolTableFilling implements Visitor {
         node.getRight().accept(this);
     }
 
+    @Override
+    public void visit(PointerDcl node) {
+        if (symbolTable.get(node.getId()) == null) {
+            symbolTable.put(node.getId(), new Symbol(node.getId(), new IntType(), scopeLevel));
+        } else {
+            error("variable " + node.getId() + " is already declared");
+        }
+    }
+
     private void error(String message) {
         throw new Error(message);
     }

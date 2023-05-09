@@ -38,9 +38,4 @@ public class Block extends Node {
         Block block = (Block) o;
         return Objects.equals(children, block.children);
     }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(children);
-    }
 }

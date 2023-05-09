@@ -13,7 +13,11 @@ public enum OperationSet {
     NOT("!"),
     OR("||"),
     COMPASSPLUS("+="),
-    COMPASSMINUS("-=");
+    COMPASSMINUS("-="),
+    HASHTAG("#"),
+    MULTIPLY("*"),
+    DIVIDE("/"),
+    ADDRESS("&");
 
     private final String operation;
 
@@ -21,7 +25,7 @@ public enum OperationSet {
         this.operation = operation;
     }
 
-    public String getOperation() {
+    public String getOp() {
         return operation;
     }
 
