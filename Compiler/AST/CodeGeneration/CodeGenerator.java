@@ -85,6 +85,9 @@ public class CodeGenerator implements Visitor {
     @Override
     public void visit(AssignmentOp node) {
         // If statement som tjekker om det er en reassignment, pointerDcl eller compound assignment.
+        // Det første if statement tjekker om det er en reassignment, og at det ikke er en compound assignment.
+        // når vi ikke skriver # foran et id skal vi blot finde værdien af udtrykket på højre side
+        // og gemme værdien fra variablens forrige sted på det som udtrykket er lig med.
         if (node.getLeft() instanceof Id && node.getCompAssOp() == null) {
             node.getRight().accept(this);
             if (node.getRight() instanceof ArithmeticOp) {
@@ -98,6 +101,7 @@ public class CodeGenerator implements Visitor {
         // Går ind i nedenstående hvis det er en pointerDcl
         } else if (node.getLeft() instanceof PointerDcl) {
             node.getRight().accept(this);
+            node.getLeft().accept(this);
             pushAccumulator();
         // Går ind i nedenstående hvis det er en ny variabel deklarering
         } else if (node.getCompAssOp() == null) {
@@ -252,13 +256,26 @@ public class CodeGenerator implements Visitor {
     public void visit(Id node) {
         // Man skriver $01 foran adressen fordi den metode man kalder efter er 8-bit og derfor kun 2 decimaler.
         // Når vi skriver $01 foran ender vi i stacken.
-        codeBuilder.append(InstructionSet.TSX.getInstruction() + "\n");
-        for (int i = 0; i < stackAddress - symbolTables.get(getScopeLevel()).lookup(node.getName()).getMemoryAddress(); i++) {
-            codeBuilder.append(InstructionSet.INX.getInstruction() + "\n");
+        if (node.getPrefix().equals("*")) {
+            codeBuilder.append(InstructionSet.TSX.getInstruction() + "\n");
+            for (int i = 0; i < stackAddress - symbolTables.get(getScopeLevel()).lookup(node.getName()).getMemoryAddress(); i++) {
+                codeBuilder.append(InstructionSet.INX.getInstruction() + "\n");
+            }
+            codeBuilder.append(InstructionSet.TXA.getInstruction() + "\n");
+            codeBuilder.append(InstructionSet.TAY.getInstruction() + "\n");
+            codeBuilder.append(InstructionSet.LDX.getInstruction() + " $0100, y" + "\n");
+            codeBuilder.append(InstructionSet.TXA.getInstruction() + "\n");
+            codeBuilder.append(InstructionSet.TAY.getInstruction() + "\n");
+            codeBuilder.append(InstructionSet.LDX.getInstruction() + " $0100, y" + "\n");
+        } else {
+            codeBuilder.append(InstructionSet.TSX.getInstruction() + "\n");
+            for (int i = 0; i < stackAddress - symbolTables.get(getScopeLevel()).lookup(node.getName()).getMemoryAddress(); i++) {
+                codeBuilder.append(InstructionSet.INX.getInstruction() + "\n");
+            }
+            codeBuilder.append(InstructionSet.TXA.getInstruction() + "\n");
+            codeBuilder.append(InstructionSet.TAY.getInstruction() + "\n");
+            codeBuilder.append(InstructionSet.LDX.getInstruction() + " $0100, y" + "\n");
         }
-        codeBuilder.append(InstructionSet.TXA.getInstruction() + "\n");
-        codeBuilder.append(InstructionSet.TAY.getInstruction() + "\n");
-        codeBuilder.append(InstructionSet.LDX.getInstruction() + " $0100, y" + "\n");
     }
 
     @Override
@@ -347,11 +364,10 @@ public class CodeGenerator implements Visitor {
     public void visit(PointerDcl node) {
         /*int num = 255; // sample integer
         String hex = String.format("%04X", num); // convert to 4-digit hexadecimal string
-        System.out.println(hex); // prints "00FF"
+        System.out.println(hex); // prints "00FF"*/
 
         Symbol symbol = symbolTables.get(getScopeLevel()).lookup(node.getId());
         symbol.setMemoryAddress(stackAddress);
-        */
     }
 
     public void visit(WhileLoop node) {
