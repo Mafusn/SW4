@@ -171,7 +171,6 @@ public class PrettyPrint implements Visitor {
 
     @Override
     public void visit(PointerDcl node) {
-        sb.append("\n");
         printIndent();
         sb.append("pointer " + node.getId());
     }

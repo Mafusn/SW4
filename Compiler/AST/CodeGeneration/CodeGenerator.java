@@ -84,8 +84,20 @@ public class CodeGenerator implements Visitor {
 
     @Override
     public void visit(AssignmentOp node) {
-        // If statement som tjekker om det er en compound assignment.
-        if (node.getCompAssOp() == null) {
+        // If statement som tjekker om det er en compound assignment, pointerDcl eller reassignment.
+        if (node.getLeft() instanceof Id) {
+            node.getRight().accept(this);
+            if (node.getRight() instanceof ArithmeticOp) {
+                clearTheBottomOfStackForArithmeticOp();
+                codeBuilder.append(InstructionSet.TAX.getInstruction() + "\n");
+            } else if (node.getRight() instanceof ComparisonOp) {
+                codeBuilder.append(InstructionSet.TAX.getInstruction() + "\n");
+            }
+            storeXRegisterInVariable(node.getVariable());
+        } else if (node.getLeft() instanceof PointerDcl) {
+            node.getRight().accept(this);
+            pushAccumulator();
+        } else if (node.getCompAssOp() == null) {
             // If statement som tjekker for om det er en ny dekleration
             if (node.getLeft() instanceof Id) {
                 node.getRight().accept(this);
@@ -103,6 +115,7 @@ public class CodeGenerator implements Visitor {
                 node.getLeft().accept(this);
                 pushAccumulator();
             }
+        // Tjekker for om det er en pointer som får assignet en værdi
         } else {
             if (node.getRight() instanceof ArithmeticOp) {
                 node.getLeft().accept(this);
