@@ -84,38 +84,48 @@ public class CodeGenerator implements Visitor {
 
     @Override
     public void visit(AssignmentOp node) {
-        // If statement som tjekker om det er en compound assignment, pointerDcl eller reassignment.
-        if (node.getLeft() instanceof Id) {
+        // If statement som tjekker om det er en reassignment, pointerDcl eller compound assignment.
+        if (node.getLeft() instanceof Id && node.getCompAssOp() == null) {
             node.getRight().accept(this);
             if (node.getRight() instanceof ArithmeticOp) {
                 clearTheBottomOfStackForArithmeticOp();
                 codeBuilder.append(InstructionSet.TAX.getInstruction() + "\n");
             } else if (node.getRight() instanceof ComparisonOp) {
+                pullAccumulator();
                 codeBuilder.append(InstructionSet.TAX.getInstruction() + "\n");
             }
             storeXRegisterInVariable(node.getVariable());
+        // Går ind i nedenstående hvis det er en pointerDcl
         } else if (node.getLeft() instanceof PointerDcl) {
             node.getRight().accept(this);
             pushAccumulator();
+        // Går ind i nedenstående hvis det er en ny variabel deklarering
         } else if (node.getCompAssOp() == null) {
-            // If statement som tjekker for om det er en ny dekleration
             if (node.getLeft() instanceof Id) {
                 node.getRight().accept(this);
                 if (node.getRight() instanceof ArithmeticOp) {
                     clearTheBottomOfStackForArithmeticOp();
+                    codeBuilder.append(InstructionSet.TAX.getInstruction() + "\n");
+                } else if (node.getRight() instanceof ComparisonOp) {
+                    pullAccumulator();
+                    codeBuilder.append(InstructionSet.TAX.getInstruction() + "\n");
                 }
                 storeXRegisterInVariable(node.getVariable());
             } else {
                 node.getRight().accept(this);
                 if (node.getRight() instanceof ArithmeticOp) {
                     clearTheBottomOfStackForArithmeticOp();
+                    node.getLeft().accept(this);
+                    pushAccumulator();
+                } else if (node.getRight() instanceof ComparisonOp) {
+
                 } else {
                     codeBuilder.append(InstructionSet.TXA.getInstruction() + "\n");
+                    node.getLeft().accept(this);
+                    pushAccumulator();
                 }
-                node.getLeft().accept(this);
-                pushAccumulator();
             }
-        // Tjekker for om det er en pointer som får assignet en værdi
+        // Går ind i nedenstående hvis det er en compond assignment.
         } else {
             if (node.getRight() instanceof ArithmeticOp) {
                 node.getLeft().accept(this);
