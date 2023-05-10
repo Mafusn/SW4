@@ -32,6 +32,7 @@ public class SymbolTableFilling implements Visitor {
         if (symbol == null && parent != null) {
             return parent.lookup(id);
         }
+
         return symbol;
     }
 
@@ -153,7 +154,7 @@ public class SymbolTableFilling implements Visitor {
     @Override
     public void visit(PointerDcl node) {
         if (symbolTable.get(node.getId()) == null) {
-            symbolTable.put(node.getId(), new Symbol(node.getId(), new IntType(), scopeLevel));
+            symbolTable.put(node.getId(), new Symbol(node.getId(), new PointerType(), scopeLevel));
         } else {
             error("variable " + node.getId() + " is already declared");
         }

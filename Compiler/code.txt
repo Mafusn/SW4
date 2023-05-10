@@ -1,9 +1,9 @@
-/*int a = 2 + 3 * 4 + 6;*/
-int a = 2;
-int b = 3;
-if (a < b && b > 2 && a < 3) {
-    int a = 3;
-} else {
-    int a = 4;
-}
+
+int c = 2;
+float d;
+pointer ptr = &c;
+pointer ptr2 = &d;
+#ptr = *ptr + *ptr2;
+#ptr = 2.0;
+
 END;

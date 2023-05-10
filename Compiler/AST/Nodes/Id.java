@@ -1,5 +1,7 @@
 package AST.Nodes;
 
+import AST.OperationSet;
+import AST.SymbolTableFilling.Symbol;
 import AST.SymbolTableFilling.SymbolTableFilling;
 import AST.Types.Type;
 import AST.Visitor;
@@ -45,7 +47,12 @@ public class Id extends Node {
     @Override
     public Type getType(SymbolTableFilling symbolTable) {
         if (this.type == null) {
-            setType(symbolTable.lookup(id).getType());
+            Symbol symbol = symbolTable.lookup(id);
+            if (prefix.equals(OperationSet.HASHTAG.getOp()) || prefix.equals(OperationSet.MULTIPLY.getOp())) {
+                setType(symbol.getPointAtType());
+            } else {
+                setType(symbol.getType());
+            }
         }
         return this.type;
     }

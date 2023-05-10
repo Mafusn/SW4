@@ -26,3 +26,5 @@ Parser/*.java
 !AST/*.java
 Compiler/out
 .idea/.name
+output.txt
+Compiler/code.txt

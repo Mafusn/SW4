@@ -13,7 +13,7 @@ public class PointerType extends Type {
 
     @Override
     public Type getResultType(String operator, Type other) {
-        return null;
+        return other;
     }
 
     @Override

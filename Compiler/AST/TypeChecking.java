@@ -22,11 +22,24 @@ public class TypeChecking implements Visitor {
 
         // Get the symbol for the variable being assigned to
         Symbol symbol = symbolTables.get(scopeLevel).lookup(node.getVariable());
-
-        // Check that the types match
-        if (!symbol.getType().isAssignable(rhsType)) {
-            //throw new TypeMismatchException("Type mismatch in assignment");
-            error("Type mismatch in assignment " + node.getVariable());
+        if (symbol.getType() instanceof PointerType) {
+            if (node.getRight() instanceof Id) {
+                String prefix = ((Id) node.getRight()).getPrefix();
+                if (prefix.equals(OperationSet.ADDRESS.getOp())) {
+                    symbol.setPointAtType(rhsType);
+                }
+            }
+            // Check that the types match
+            if (!symbol.getPointAtType().isAssignable(rhsType)) {
+                //throw new TypeMismatchException("Type mismatch in assignment");
+                error("Type mismatch in assignment " + node.getVariable());
+            }
+        } else {
+            // Check that the types match
+            if (!symbol.getType().isAssignable(rhsType)) {
+                //throw new TypeMismatchException("Type mismatch in assignment");
+                error("Type mismatch in assignment " + node.getVariable());
+            }
         }
     }
 
