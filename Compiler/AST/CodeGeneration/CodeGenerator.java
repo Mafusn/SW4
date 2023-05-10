@@ -299,6 +299,19 @@ public class CodeGenerator implements Visitor {
         codeBuilder.append(InstructionSet.EOR.getInstruction() + " #1\n");
     }
 
+    /*@Override
+    public void visit(Proc node) {
+        for (Id idNode: node.getParams()) {
+            idnode.accept(this);
+            codeBuilder.append(InstructionSet.TXA.getInstruction() + "\n");
+            pushAccumulator();
+        }
+        node.getBlock().accept(this);
+        for (Id idNode: node.getParams()) {
+            pullAccumulator();
+        }
+    }*/
+
     @Override
     public void visit(Prog node) {
         for(Node n : node.getChildren()){
@@ -311,7 +324,11 @@ public class CodeGenerator implements Visitor {
     public void visit(PointerDcl node) {
         /*int num = 255; // sample integer
         String hex = String.format("%04X", num); // convert to 4-digit hexadecimal string
-        System.out.println(hex); // prints "00FF"*/
+        System.out.println(hex); // prints "00FF"
+
+        Symbol symbol = symbolTables.get(getScopeLevel()).lookup(node.getId());
+        symbol.setMemoryAddress(stackAddress);
+        */
     }
 
     public void visit(WhileLoop node) {
