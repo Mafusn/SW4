@@ -97,7 +97,19 @@ public class CodeGenerator implements Visitor {
                 pullAccumulator();
                 codeBuilder.append(InstructionSet.TAX.getInstruction() + "\n");
             }
-            storeXRegisterInVariable(node.getVariable());
+            if (((Id) node.getLeft()).getPrefix().equals(" ")) {
+                if (node.getRight() instanceof IntNum ||
+                    node.getRight() instanceof FloatNum ||
+                    node.getRight() instanceof Bool ||
+                    node.getRight() instanceof Id) {
+                    codeBuilder.append(InstructionSet.TXA.getInstruction() + "\n");
+                }
+                codeBuilder.append(InstructionSet.TAY.getInstruction() + "\n");
+                codeBuilder.append(InstructionSet.LDA.getInstruction()+ " #1\n");
+                codeBuilder.append(InstructionSet.STA.getInstruction() + " $0200, y\n");
+            } else {
+                storeXRegisterInVariable(node.getVariable());
+            }
         // Går ind i nedenstående hvis det er en pointerDcl
         } else if (node.getLeft() instanceof PointerDcl) {
             node.getRight().accept(this);
@@ -149,6 +161,7 @@ public class CodeGenerator implements Visitor {
                 codeBuilder.append(InstructionSet.STX.getInstruction() + " $0100\n");
                 // Alt det her er blot til at plusse eller minus variablen med en konstant.
                 if (node.getCompAssOp().equals("+=")) {
+                    codeBuilder.append(InstructionSet.CLC.getInstruction() + "\n");
                     codeBuilder.append(InstructionSet.ADC.getInstruction() + " $0100\n");
                 } else {
                     codeBuilder.append(InstructionSet.SBC.getInstruction() + " $0100\n");
@@ -254,7 +267,7 @@ public class CodeGenerator implements Visitor {
     public void visit(Id node) {
         // Man skriver $01 foran adressen fordi den metode man kalder efter er 8-bit og derfor kun 2 decimaler.
         // Når vi skriver $01 foran ender vi i stacken.
-        if (node.getPrefix() != null) {
+        if (!node.getPrefix().equals(" ")) {
             switch (node.getPrefix()) {
                 case "*":
                     codeBuilder.append(InstructionSet.TSX.getInstruction() + "\n");
@@ -271,6 +284,11 @@ public class CodeGenerator implements Visitor {
                 case "#":
                     break;
                 case "&":
+                    codeBuilder.append(InstructionSet.TSX.getInstruction() + "\n");
+                    for (int i = 0; i < stackAddress - symbolTables.get(getScopeLevel()).lookup(node.getName()).getMemoryAddress(); i++) {
+                        codeBuilder.append(InstructionSet.INX.getInstruction() + "\n");
+                    }
+                    codeBuilder.append(InstructionSet.TXA.getInstruction() + "\n");
                     break;
                 default:
                 System.out.println("Wrong prefix for variable: " + node.getName());
@@ -405,6 +423,7 @@ public class CodeGenerator implements Visitor {
         int i = arithmeticOpCount;
         while (arithmeticOpCount > 1 ) {
             if (operators.get(i - arithmeticOpCount).equals("+")) {
+                codeBuilder.append(InstructionSet.CLC.getInstruction() + "\n");
                 codeBuilder.append(InstructionSet.ADC.getInstruction() + " $01" + String.format("%02d", (i - arithmeticOpCount + 1)) + "\n");
             } else {
                 codeBuilder.append(InstructionSet.SBC.getInstruction() + " $01" + String.format("%02d", (i - arithmeticOpCount + 1)) + "\n");
