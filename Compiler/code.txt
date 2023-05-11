@@ -1,5 +1,5 @@
-int c = 2;
-pointer ptr = &c;
-ptr = *ptr + *ptr;
-
+boolean c = true;
+boolean d = false;
+boolean e;
+e = c && d;
 END;

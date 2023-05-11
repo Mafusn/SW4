@@ -22,10 +22,11 @@ public class TypeChecking implements Visitor {
 
         // Get the symbol for the variable being assigned to
         Symbol symbol = symbolTables.get(scopeLevel).lookup(node.getVariable());
+
         if (symbol.getType() instanceof PointerType) {
             if (node.getRight() instanceof Id) {
                 String prefix = ((Id) node.getRight()).getPrefix();
-                if (prefix.equals(OperationSet.ADDRESS.getOp())) {
+                if (prefix != null && prefix.equals(OperationSet.ADDRESS.getOp())) {
                     symbol.setPointAtType(rhsType);
                 }
             }
@@ -79,7 +80,7 @@ public class TypeChecking implements Visitor {
         Type rightType = node.getRight().getType(symbolTables.get(scopeLevel));
 
         if (!(leftType.isEqual(rightType))) {
-            error("Computing operator used with incompatible types");
+            error("Arithmetic operator used with incompatible types");
         }
 
         if (leftType instanceof IntType && rightType instanceof IntType) {
@@ -87,7 +88,7 @@ public class TypeChecking implements Visitor {
         } else if (leftType instanceof FloatType && rightType instanceof FloatType) {
             node.setType(new FloatType());
         } else {
-            error("Computing operator used with incompatible types");
+            error("Arithmetic operator used with incompatible types");
         }
     }
 

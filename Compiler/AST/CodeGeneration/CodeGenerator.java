@@ -85,9 +85,9 @@ public class CodeGenerator implements Visitor {
     @Override
     public void visit(AssignmentOp node) {
         // If statement som tjekker om det er en reassignment, pointerDcl eller compound assignment.
-        // Det første if statement tjekker om det er en reassignment, og at det ikke er en compound assignment.
-        // når vi ikke skriver # foran et id skal vi blot finde værdien af udtrykket på højre side
+        // Når vi ikke skriver # foran et id skal vi blot finde værdien af udtrykket på højre side
         // og gemme værdien fra variablens forrige sted på det som udtrykket er lig med.
+        // Det første if statement tjekker om det er en reassignment, og at det ikke er en compound assignment.
         if (node.getLeft() instanceof Id && node.getCompAssOp() == null) {
             node.getRight().accept(this);
             if (node.getRight() instanceof ArithmeticOp) {
@@ -102,7 +102,6 @@ public class CodeGenerator implements Visitor {
         } else if (node.getLeft() instanceof PointerDcl) {
             node.getRight().accept(this);
             node.getLeft().accept(this);
-            pushAccumulator();
         // Går ind i nedenstående hvis det er en ny variabel deklarering
         } else if (node.getCompAssOp() == null) {
             if (node.getLeft() instanceof Id) {
@@ -120,13 +119,11 @@ public class CodeGenerator implements Visitor {
                 if (node.getRight() instanceof ArithmeticOp) {
                     clearTheBottomOfStackForArithmeticOp();
                     node.getLeft().accept(this);
-                    pushAccumulator();
                 } else if (node.getRight() instanceof ComparisonOp) {
 
                 } else {
                     codeBuilder.append(InstructionSet.TXA.getInstruction() + "\n");
                     node.getLeft().accept(this);
-                    pushAccumulator();
                 }
             }
         // Går ind i nedenstående hvis det er en compond assignment.
@@ -226,10 +223,10 @@ public class CodeGenerator implements Visitor {
     @Override
     public void visit(BoolDcl node) {
         symbolTables.get(getScopeLevel()).lookup(node.getId()).setMemoryAddress(stackAddress);
+        pushAccumulator();
     }
 
     @Override
-
     public void visit(ArithmeticOp node) {
         node.getLeft().accept(this);
         if (!(node.getLeft() instanceof ArithmeticOp)) {
@@ -245,6 +242,7 @@ public class CodeGenerator implements Visitor {
     @Override
     public void visit(FloatDcl node) {
         symbolTables.get(getScopeLevel()).lookup(node.getId()).setMemoryAddress(stackAddress);
+        pushAccumulator();
     }
 
     @Override
@@ -256,17 +254,28 @@ public class CodeGenerator implements Visitor {
     public void visit(Id node) {
         // Man skriver $01 foran adressen fordi den metode man kalder efter er 8-bit og derfor kun 2 decimaler.
         // Når vi skriver $01 foran ender vi i stacken.
-        if (node.getPrefix().equals("*")) {
-            codeBuilder.append(InstructionSet.TSX.getInstruction() + "\n");
-            for (int i = 0; i < stackAddress - symbolTables.get(getScopeLevel()).lookup(node.getName()).getMemoryAddress(); i++) {
-                codeBuilder.append(InstructionSet.INX.getInstruction() + "\n");
+        if (node.getPrefix() != null) {
+            switch (node.getPrefix()) {
+                case "*":
+                    codeBuilder.append(InstructionSet.TSX.getInstruction() + "\n");
+                    for (int i = 0; i < stackAddress - symbolTables.get(getScopeLevel()).lookup(node.getName()).getMemoryAddress(); i++) {
+                        codeBuilder.append(InstructionSet.INX.getInstruction() + "\n");
+                    }
+                    codeBuilder.append(InstructionSet.TXA.getInstruction() + "\n");
+                    codeBuilder.append(InstructionSet.TAY.getInstruction() + "\n");
+                    codeBuilder.append(InstructionSet.LDX.getInstruction() + " $0100, y" + "\n");
+                    codeBuilder.append(InstructionSet.TXA.getInstruction() + "\n");
+                    codeBuilder.append(InstructionSet.TAY.getInstruction() + "\n");
+                    codeBuilder.append(InstructionSet.LDX.getInstruction() + " $0100, y" + "\n");
+                    break;
+                case "#":
+                    break;
+                case "&":
+                    break;
+                default:
+                System.out.println("Wrong prefix for variable: " + node.getName());
+                    break;
             }
-            codeBuilder.append(InstructionSet.TXA.getInstruction() + "\n");
-            codeBuilder.append(InstructionSet.TAY.getInstruction() + "\n");
-            codeBuilder.append(InstructionSet.LDX.getInstruction() + " $0100, y" + "\n");
-            codeBuilder.append(InstructionSet.TXA.getInstruction() + "\n");
-            codeBuilder.append(InstructionSet.TAY.getInstruction() + "\n");
-            codeBuilder.append(InstructionSet.LDX.getInstruction() + " $0100, y" + "\n");
         } else {
             codeBuilder.append(InstructionSet.TSX.getInstruction() + "\n");
             for (int i = 0; i < stackAddress - symbolTables.get(getScopeLevel()).lookup(node.getName()).getMemoryAddress(); i++) {
@@ -325,6 +334,7 @@ public class CodeGenerator implements Visitor {
     public void visit(IntDcl node) {
         Symbol symbol = symbolTables.get(getScopeLevel()).lookup(node.getId());
         symbol.setMemoryAddress(stackAddress);
+        pushAccumulator();
     }
 
     @Override
@@ -368,6 +378,7 @@ public class CodeGenerator implements Visitor {
 
         Symbol symbol = symbolTables.get(getScopeLevel()).lookup(node.getId());
         symbol.setMemoryAddress(stackAddress);
+        pushAccumulator();
     }
 
     public void visit(WhileLoop node) {
