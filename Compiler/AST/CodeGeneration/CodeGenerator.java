@@ -4,6 +4,7 @@ import AST.Nodes.*;
 import AST.OperationSet;
 import AST.SymbolTableFilling.Symbol;
 import AST.SymbolTableFilling.SymbolTableFilling;
+import AST.Types.PointerType;
 import AST.Visitor;
 
 import java.io.FileNotFoundException;
@@ -20,6 +21,7 @@ public class CodeGenerator implements Visitor {
     private int binOperatorCount = 0;
     private int labelCount = 0;
     private int whileLoopCount = 0;
+    private int pointerCounter = 0;
     private int blockCount = 0;
     // Gør det muligt at bruge float i vores kode, og kan adskille dem fra hinanden for 1/8.
     // Eksempel: 0,124 = 0, 0,125 = 1, 0,25 = 2
@@ -90,9 +92,6 @@ public class CodeGenerator implements Visitor {
         // Det første if statement tjekker om det er en reassignment, og at det ikke er en compound assignment.
         if (node.getLeft() instanceof Id && node.getCompAssOp() == null) {
             if (((Id) node.getLeft()).getPrefix().equals("#")) {
-                node.getLeft().accept(this);
-                codeBuilder.append(InstructionSet.TXA.getInstruction() + "\n");
-                codeBuilder.append(InstructionSet.TAY.getInstruction() + "\n");
                 node.getRight().accept(this);
                 if (node.getRight() instanceof IntNum ||
                         node.getRight() instanceof FloatNum ||
@@ -100,17 +99,38 @@ public class CodeGenerator implements Visitor {
                         node.getRight() instanceof Id) {
                     codeBuilder.append(InstructionSet.TXA.getInstruction() + "\n");
                 }
-                codeBuilder.append(InstructionSet.STA.getInstruction() + " $0100, y\n");
+                codeBuilder.append(InstructionSet.STA.getInstruction() + " $0100\n");
+                node.getLeft().accept(this);
+                codeBuilder.append(InstructionSet.LDA.getInstruction() + " $0100\n");
+                codeBuilder.append(InstructionSet.STA.getInstruction() + " ($00, x)\n");
             } else {
-                node.getRight().accept(this);
-                if (node.getRight() instanceof ArithmeticOp) {
-                    clearTheBottomOfStackForArithmeticOp();
-                    codeBuilder.append(InstructionSet.TAX.getInstruction() + "\n");
-                } else if (node.getRight() instanceof ComparisonOp) {
-                    pullAccumulator();
-                    codeBuilder.append(InstructionSet.TAX.getInstruction() + "\n");
+                if (node.getLeft().getType(symbolTables.get(getScopeLevel())) instanceof PointerType) {
+                    if (node.getRight() instanceof IntNum) {
+                        IntNum intNum = (IntNum) node.getRight();
+                        int value = intNum.getValue();
+                        int highBits = value / 255;
+                        value = value % 255;
+                        System.out.println("value: " + value + " highBits: " + highBits);
+                        // Nu Skal vi store value på den første plads på zero-page og highBits på den næste plads.
+                        node.getLeft().accept(this);
+                        // Nu har vi værdien af pointeren i x-register
+                        codeBuilder.append(InstructionSet.LDA.getInstruction() + " #" + value + "\n");
+                        codeBuilder.append(InstructionSet.STA.getInstruction() + " ($00, x)\n");
+                        codeBuilder.append(InstructionSet.INX.getInstruction() + "\n");
+                        codeBuilder.append(InstructionSet.LDA.getInstruction() + " #" + highBits + "\n");
+                        codeBuilder.append(InstructionSet.STA.getInstruction() + " ($00, x)\n");
+                    }
+                } else {
+                    node.getRight().accept(this);
+                    if (node.getRight() instanceof ArithmeticOp) {
+                        clearTheBottomOfStackForArithmeticOp();
+                        codeBuilder.append(InstructionSet.TAX.getInstruction() + "\n");
+                    } else if (node.getRight() instanceof ComparisonOp) {
+                        pullAccumulator();
+                        codeBuilder.append(InstructionSet.TAX.getInstruction() + "\n");
+                    }
+                    storeXRegisterInVariable(node.getVariable());
                 }
-                storeXRegisterInVariable(node.getVariable());
             }
         // Går ind i nedenstående hvis det er en pointerDcl
         } else if (node.getLeft() instanceof PointerDcl) {
@@ -293,10 +313,17 @@ public class CodeGenerator implements Visitor {
                     codeBuilder.append(InstructionSet.LDX.getInstruction() + " $0100, y" + "\n");
                     break;
                 case "&":
+                    int pointerCounterPlaceHolder = pointerCounter;
                     codeBuilder.append(InstructionSet.TSX.getInstruction() + "\n");
                     for (int i = 0; i < stackAddress - symbolTables.get(getScopeLevel()).lookup(node.getName()).getMemoryAddress(); i++) {
                         codeBuilder.append(InstructionSet.INX.getInstruction() + "\n");
                     }
+                    codeBuilder.append(InstructionSet.STX.getInstruction() + " $" + String.format("%02X", pointerCounter) + "\n");
+                    pointerCounter++;
+                    codeBuilder.append(InstructionSet.LDX.getInstruction() + " #1\n");
+                    codeBuilder.append(InstructionSet.STX.getInstruction() + " $" + String.format("%02X", pointerCounter) + "\n");
+                    pointerCounter++;
+                    codeBuilder.append(InstructionSet.LDX.getInstruction() + " #" + pointerCounterPlaceHolder + "\n");
                     codeBuilder.append(InstructionSet.TXA.getInstruction() + "\n");
                     break;
                 default:

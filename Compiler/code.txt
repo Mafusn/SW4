@@ -1,5 +1,4 @@
-int b = 0;
+int b = 2;
 pointer p = &b;
-p = 0;
-#p = 5;
+p = 5;
 END;
