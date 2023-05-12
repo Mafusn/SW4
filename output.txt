@@ -1,4 +1,4 @@
-LDX #2
+LDX #0
 TXA
 PHA
 TSX
@@ -14,9 +14,19 @@ INX
 TXA
 TAY
 LDX $0100, y
-LDA #5
-STA ($00, x)
-INX
 LDA #0
+STA $0, x
+INX
+LDA #2
+STA $0, x
+LDX #1
+TXA
+STA $0100
+TSX
+INX
+TXA
+TAY
+LDX $0100, y
+LDA $0100
 STA ($00, x)
 BRK

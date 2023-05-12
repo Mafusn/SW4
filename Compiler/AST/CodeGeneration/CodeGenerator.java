@@ -110,15 +110,15 @@ public class CodeGenerator implements Visitor {
                         int value = intNum.getValue();
                         int highBits = value / 255;
                         value = value % 255;
-                        System.out.println("value: " + value + " highBits: " + highBits);
+                        // System.out.println("value: " + value + " highBits: " + highBits);
                         // Nu Skal vi store value på den første plads på zero-page og highBits på den næste plads.
                         node.getLeft().accept(this);
                         // Nu har vi værdien af pointeren i x-register
                         codeBuilder.append(InstructionSet.LDA.getInstruction() + " #" + value + "\n");
-                        codeBuilder.append(InstructionSet.STA.getInstruction() + " ($00, x)\n");
+                        codeBuilder.append(InstructionSet.STA.getInstruction() + " $0, x\n");
                         codeBuilder.append(InstructionSet.INX.getInstruction() + "\n");
                         codeBuilder.append(InstructionSet.LDA.getInstruction() + " #" + highBits + "\n");
-                        codeBuilder.append(InstructionSet.STA.getInstruction() + " ($00, x)\n");
+                        codeBuilder.append(InstructionSet.STA.getInstruction() + " $0, x\n");
                     }
                 } else {
                     node.getRight().accept(this);
@@ -327,7 +327,7 @@ public class CodeGenerator implements Visitor {
                     codeBuilder.append(InstructionSet.TXA.getInstruction() + "\n");
                     break;
                 default:
-                System.out.println("Wrong prefix for variable: " + node.getName());
+                    System.out.println("Wrong prefix for variable: " + node.getName());
                     break;
             }
         } else {
