@@ -89,25 +89,27 @@ public class CodeGenerator implements Visitor {
         // og gemme værdien fra variablens forrige sted på det som udtrykket er lig med.
         // Det første if statement tjekker om det er en reassignment, og at det ikke er en compound assignment.
         if (node.getLeft() instanceof Id && node.getCompAssOp() == null) {
-            node.getRight().accept(this);
-            if (node.getRight() instanceof ArithmeticOp) {
-                clearTheBottomOfStackForArithmeticOp();
-                codeBuilder.append(InstructionSet.TAX.getInstruction() + "\n");
-            } else if (node.getRight() instanceof ComparisonOp) {
-                pullAccumulator();
-                codeBuilder.append(InstructionSet.TAX.getInstruction() + "\n");
-            }
-            if (((Id) node.getLeft()).getPrefix().equals(" ")) {
+            if (((Id) node.getLeft()).getPrefix().equals("#")) {
+                node.getLeft().accept(this);
+                codeBuilder.append(InstructionSet.TXA.getInstruction() + "\n");
+                codeBuilder.append(InstructionSet.TAY.getInstruction() + "\n");
+                node.getRight().accept(this);
                 if (node.getRight() instanceof IntNum ||
-                    node.getRight() instanceof FloatNum ||
-                    node.getRight() instanceof Bool ||
-                    node.getRight() instanceof Id) {
+                        node.getRight() instanceof FloatNum ||
+                        node.getRight() instanceof Bool ||
+                        node.getRight() instanceof Id) {
                     codeBuilder.append(InstructionSet.TXA.getInstruction() + "\n");
                 }
-                codeBuilder.append(InstructionSet.TAY.getInstruction() + "\n");
-                codeBuilder.append(InstructionSet.LDA.getInstruction()+ " #1\n");
-                codeBuilder.append(InstructionSet.STA.getInstruction() + " $0200, y\n");
+                codeBuilder.append(InstructionSet.STA.getInstruction() + " $0100, y\n");
             } else {
+                node.getRight().accept(this);
+                if (node.getRight() instanceof ArithmeticOp) {
+                    clearTheBottomOfStackForArithmeticOp();
+                    codeBuilder.append(InstructionSet.TAX.getInstruction() + "\n");
+                } else if (node.getRight() instanceof ComparisonOp) {
+                    pullAccumulator();
+                    codeBuilder.append(InstructionSet.TAX.getInstruction() + "\n");
+                }
                 storeXRegisterInVariable(node.getVariable());
             }
         // Går ind i nedenstående hvis det er en pointerDcl
@@ -282,6 +284,13 @@ public class CodeGenerator implements Visitor {
                     codeBuilder.append(InstructionSet.LDX.getInstruction() + " $0100, y" + "\n");
                     break;
                 case "#":
+                    codeBuilder.append(InstructionSet.TSX.getInstruction() + "\n");
+                    for (int i = 0; i < stackAddress - symbolTables.get(getScopeLevel()).lookup(node.getName()).getMemoryAddress(); i++) {
+                        codeBuilder.append(InstructionSet.INX.getInstruction() + "\n");
+                    }
+                    codeBuilder.append(InstructionSet.TXA.getInstruction() + "\n");
+                    codeBuilder.append(InstructionSet.TAY.getInstruction() + "\n");
+                    codeBuilder.append(InstructionSet.LDX.getInstruction() + " $0100, y" + "\n");
                     break;
                 case "&":
                     codeBuilder.append(InstructionSet.TSX.getInstruction() + "\n");
