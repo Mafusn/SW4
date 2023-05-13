@@ -119,6 +119,30 @@ public class CodeGenerator implements Visitor {
                         codeBuilder.append(InstructionSet.INX.getInstruction() + "\n");
                         codeBuilder.append(InstructionSet.LDA.getInstruction() + " #" + highBits + "\n");
                         codeBuilder.append(InstructionSet.STA.getInstruction() + " $0, x\n");
+                    } else {
+                        node.getRight().accept(this);
+                        if (node.getRight() instanceof IntNum ||
+                                node.getRight() instanceof FloatNum ||
+                                node.getRight() instanceof Bool ||
+                                node.getRight() instanceof Id) {
+                            codeBuilder.append(InstructionSet.TXA.getInstruction() + "\n");
+                        }
+                        if (node.getRight() instanceof ArithmeticOp) {
+                            clearTheBottomOfStackForArithmeticOp();
+                        } else if (node.getRight() instanceof ComparisonOp) {
+                            pullAccumulator();
+                        }
+                        codeBuilder.append(InstructionSet.STA.getInstruction() + " $0100\n");
+                        node.getLeft().accept(this);
+                        codeBuilder.append(InstructionSet.LDA.getInstruction() + " $0, x\n");
+                        codeBuilder.append(InstructionSet.ADC.getInstruction() + " $0100\n");
+                        codeBuilder.append(InstructionSet.BCC.getInstruction() + " pointerJump" + labelCount + "\n");
+                        codeBuilder.append(InstructionSet.INX.getInstruction() + "\n");
+                        codeBuilder.append(InstructionSet.LDA.getInstruction() + " $0, x\n");
+                        codeBuilder.append(InstructionSet.ADC.getInstruction() + " #1\n");
+                        codeBuilder.append(InstructionSet.STA.getInstruction() + " $0, x\n");
+                        codeBuilder.append("pointerJump" + labelCount + ":\n");
+                        labelCount++;
                     }
                 } else {
                     node.getRight().accept(this);

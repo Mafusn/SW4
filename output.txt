@@ -1,4 +1,4 @@
-LDX #0
+LDX #2
 TXA
 PHA
 TSX
@@ -9,24 +9,30 @@ STX $01
 LDX #0
 TXA
 PHA
+LDX #2
+STX $0100
 TSX
+INX
 INX
 TXA
 TAY
 LDX $0100, y
-LDA #0
-STA $0, x
-INX
-LDA #2
-STA $0, x
-LDX #1
-TXA
+STX $0101
+LDA $0100
+CLC
+ADC $0101
 STA $0100
 TSX
 INX
 TXA
 TAY
 LDX $0100, y
-LDA $0100
-STA ($00, x)
+LDA $0, x
+ADC $0100
+BCC pointerJump0
+INX
+LDA $0, x
+ADC #1
+STA $0, x
+pointerJump0:
 BRK
