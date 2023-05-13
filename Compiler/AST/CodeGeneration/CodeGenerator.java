@@ -134,11 +134,12 @@ public class CodeGenerator implements Visitor {
                         }
                         codeBuilder.append(InstructionSet.STA.getInstruction() + " $0100\n");
                         node.getLeft().accept(this);
-                        codeBuilder.append(InstructionSet.LDA.getInstruction() + " $0, x\n");
-                        codeBuilder.append(InstructionSet.ADC.getInstruction() + " $0100\n");
+                        codeBuilder.append(InstructionSet.LDA.getInstruction() + " $0100\n");
+                        codeBuilder.append(InstructionSet.STA.getInstruction() + " $0, x\n");
                         codeBuilder.append(InstructionSet.BCC.getInstruction() + " pointerJump" + labelCount + "\n");
                         codeBuilder.append(InstructionSet.INX.getInstruction() + "\n");
                         codeBuilder.append(InstructionSet.LDA.getInstruction() + " $0, x\n");
+                        codeBuilder.append(InstructionSet.CLC.getInstruction() + "\n");
                         codeBuilder.append(InstructionSet.ADC.getInstruction() + " #1\n");
                         codeBuilder.append(InstructionSet.STA.getInstruction() + " $0, x\n");
                         codeBuilder.append("pointerJump" + labelCount + ":\n");
@@ -355,6 +356,7 @@ public class CodeGenerator implements Visitor {
                     break;
             }
         } else {
+            // Hvis det er en pointer vi læser skal vi læse dens første plads den kigger på og ikke dens reele værdi.
             codeBuilder.append(InstructionSet.TSX.getInstruction() + "\n");
             for (int i = 0; i < stackAddress - symbolTables.get(getScopeLevel()).lookup(node.getName()).getMemoryAddress(); i++) {
                 codeBuilder.append(InstructionSet.INX.getInstruction() + "\n");
@@ -460,6 +462,8 @@ public class CodeGenerator implements Visitor {
     }
 
     public void visit(WhileLoop node) {
+        int label = labelCount;
+        labelCount++;
         codeBuilder.append("while" + whileLoopCount + ":\n");
         node.getLeft().accept(this);
         if (node.getLeft() instanceof Bool) {
@@ -470,12 +474,11 @@ public class CodeGenerator implements Visitor {
             pullAccumulator();
         }
         codeBuilder.append(InstructionSet.CMP.getInstruction() + " #1\n");
-        codeBuilder.append(InstructionSet.BNE.getInstruction() + " end" + labelCount + "\n");
+        codeBuilder.append(InstructionSet.BNE.getInstruction() + " end" + label + "\n");
         node.getRight().accept(this);
         codeBuilder.append(InstructionSet.JMP.getInstruction() + " while" + whileLoopCount + "\n");
         whileLoopCount++;
-        codeBuilder.append("end" + labelCount + ":\n");
-        labelCount++;
+        codeBuilder.append("end" + label + ":\n");
     }
 
     public void clearTheBottomOfStackForArithmeticOp() {
