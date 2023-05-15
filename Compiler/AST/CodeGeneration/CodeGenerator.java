@@ -400,7 +400,7 @@ public class CodeGenerator implements Visitor {
             codeBuilder.append(InstructionSet.TAY.getInstruction() + "\n");
             codeBuilder.append(InstructionSet.LDX.getInstruction() + " $0100, y" + "\n");
             if (node.getParent() instanceof ArithmeticOp &&
-                    symbolTables.get(getScopeLevel()).lookup(node.getName()).getType() instanceof PointerType) {
+                symbolTables.get(getScopeLevel()).lookup(node.getName()).getType() instanceof PointerType) {
                 codeBuilder.append(InstructionSet.TXA.getInstruction() + "\n");
                 codeBuilder.append(InstructionSet.TAY.getInstruction() + "\n");
                 codeBuilder.append(InstructionSet.LDX.getInstruction() + " $0, y\n");
