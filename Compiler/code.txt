@@ -1,9 +1,7 @@
-
 int c = 2;
 float d;
 pointer ptr = &c;
 pointer ptr2 = &d;
-#ptr = *ptr + *ptr2;
-#ptr = 2.0;
+ptr = 1;
 
 END;
