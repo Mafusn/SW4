@@ -80,6 +80,9 @@ INX
 TXA
 TAY
 LDX $0100, y
+TXA
+TAY
+LDX $0, y
 STX $0100
 LDX #1
 STX $0101
@@ -92,9 +95,7 @@ INX
 TXA
 TAY
 LDX $0100, y
-LDA $0, x
-CLC
-ADC $0100
+LDA $0100
 STA $0, x
 BCC pointerJump2
 INX
@@ -126,6 +127,9 @@ INX
 TXA
 TAY
 LDX $0100, y
+TXA
+TAY
+LDX $0, y
 STX $0100
 LDX #1
 STX $0101
@@ -138,9 +142,7 @@ INX
 TXA
 TAY
 LDX $0100, y
-LDA $0, x
-CLC
-ADC $0100
+LDA $0100
 STA $0, x
 BCC pointerJump3
 INX
@@ -206,6 +208,9 @@ INX
 TXA
 TAY
 LDX $0100, y
+TXA
+TAY
+LDX $0, y
 STX $0100
 LDX #1
 STX $0101
@@ -218,9 +223,7 @@ INX
 TXA
 TAY
 LDX $0100, y
-LDA $0, x
-CLC
-ADC $0100
+LDA $0100
 STA $0, x
 BCC pointerJump6
 INX
@@ -252,6 +255,9 @@ INX
 TXA
 TAY
 LDX $0100, y
+TXA
+TAY
+LDX $0, y
 STX $0100
 LDX #1
 STX $0101
@@ -264,9 +270,7 @@ INX
 TXA
 TAY
 LDX $0100, y
-LDA $0, x
-CLC
-ADC $0100
+LDA $0100
 STA $0, x
 BCC pointerJump7
 INX
@@ -290,6 +294,9 @@ INX
 TXA
 TAY
 LDX $0100, y
+TXA
+TAY
+LDX $0, y
 STX $0100
 LDX #1
 STX $0101
@@ -302,9 +309,7 @@ INX
 TXA
 TAY
 LDX $0100, y
-LDA $0, x
-CLC
-ADC $0100
+LDA $0100
 STA $0, x
 BCC pointerJump8
 INX
@@ -370,6 +375,9 @@ INX
 TXA
 TAY
 LDX $0100, y
+TXA
+TAY
+LDX $0, y
 STX $0100
 LDX #1
 STX $0101
@@ -382,9 +390,7 @@ INX
 TXA
 TAY
 LDX $0100, y
-LDA $0, x
-CLC
-ADC $0100
+LDA $0100
 STA $0, x
 BCC pointerJump11
 INX
@@ -416,6 +422,9 @@ INX
 TXA
 TAY
 LDX $0100, y
+TXA
+TAY
+LDX $0, y
 STX $0100
 LDX #1
 STX $0101
@@ -428,9 +437,7 @@ INX
 TXA
 TAY
 LDX $0100, y
-LDA $0, x
-CLC
-ADC $0100
+LDA $0100
 STA $0, x
 BCC pointerJump12
 INX
@@ -454,6 +461,9 @@ INX
 TXA
 TAY
 LDX $0100, y
+TXA
+TAY
+LDX $0, y
 STX $0100
 LDX #1
 STX $0101
@@ -466,9 +476,7 @@ INX
 TXA
 TAY
 LDX $0100, y
-LDA $0, x
-CLC
-ADC $0100
+LDA $0100
 STA $0, x
 BCC pointerJump13
 INX
@@ -492,6 +500,9 @@ INX
 TXA
 TAY
 LDX $0100, y
+TXA
+TAY
+LDX $0, y
 STX $0100
 LDX #1
 STX $0101
@@ -504,9 +515,7 @@ INX
 TXA
 TAY
 LDX $0100, y
-LDA $0, x
-CLC
-ADC $0100
+LDA $0100
 STA $0, x
 BCC pointerJump14
 INX
@@ -572,6 +581,9 @@ INX
 TXA
 TAY
 LDX $0100, y
+TXA
+TAY
+LDX $0, y
 STX $0100
 LDX #1
 STX $0101
@@ -584,9 +596,7 @@ INX
 TXA
 TAY
 LDX $0100, y
-LDA $0, x
-CLC
-ADC $0100
+LDA $0100
 STA $0, x
 BCC pointerJump17
 INX
@@ -612,6 +622,9 @@ INX
 TXA
 TAY
 LDX $0100, y
+TXA
+TAY
+LDX $0, y
 STX $0100
 LDX #1
 STX $0101
@@ -624,9 +637,7 @@ INX
 TXA
 TAY
 LDX $0100, y
-LDA $0, x
-CLC
-ADC $0100
+LDA $0100
 STA $0, x
 BCC pointerJump18
 INX
@@ -650,6 +661,9 @@ INX
 TXA
 TAY
 LDX $0100, y
+TXA
+TAY
+LDX $0, y
 STX $0100
 LDX #1
 STX $0101
@@ -662,9 +676,7 @@ INX
 TXA
 TAY
 LDX $0100, y
-LDA $0, x
-CLC
-ADC $0100
+LDA $0100
 STA $0, x
 BCC pointerJump19
 INX
@@ -688,6 +700,9 @@ INX
 TXA
 TAY
 LDX $0100, y
+TXA
+TAY
+LDX $0, y
 STX $0100
 LDX #1
 STX $0101
@@ -700,9 +715,7 @@ INX
 TXA
 TAY
 LDX $0100, y
-LDA $0, x
-CLC
-ADC $0100
+LDA $0100
 STA $0, x
 BCC pointerJump20
 INX
@@ -712,6 +725,150 @@ ADC #1
 STA $0, x
 pointerJump20:
 LDX #8
+TXA
+STA $0100
+TSX
+INX
+TXA
+TAY
+LDX $0100, y
+LDA $0100
+STA ($00, x)
+TSX
+INX
+TXA
+TAY
+LDX $0100, y
+LDA #239
+STA $0, x
+INX
+LDA #3
+STA $0, x
+LDX #1
+TXA
+STA $0100
+TSX
+INX
+TXA
+TAY
+LDX $0100, y
+LDA $0100
+STA ($00, x)
+TSX
+INX
+TXA
+TAY
+LDX $0100, y
+TXA
+TAY
+LDX $0, y
+STX $0100
+LDX #1
+STX $0101
+LDA $0100
+CLC
+ADC $0101
+STA $0100
+TSX
+INX
+TXA
+TAY
+LDX $0100, y
+LDA $0100
+STA $0, x
+BCC pointerJump21
+INX
+LDA $0, x
+CLC
+ADC #1
+STA $0, x
+pointerJump21:
+LDX #1
+TXA
+STA $0100
+TSX
+INX
+TXA
+TAY
+LDX $0100, y
+LDA $0100
+STA ($00, x)
+TSX
+INX
+TXA
+TAY
+LDX $0100, y
+TXA
+TAY
+LDX $0, y
+STX $0100
+LDX #32
+STX $0101
+LDA $0100
+CLC
+ADC $0101
+STA $0100
+TSX
+INX
+TXA
+TAY
+LDX $0100, y
+LDA $0100
+STA $0, x
+BCC pointerJump22
+INX
+LDA $0, x
+CLC
+ADC #1
+STA $0, x
+pointerJump22:
+LDX #1
+TXA
+STA $0100
+TSX
+INX
+TXA
+TAY
+LDX $0100, y
+LDA $0100
+STA ($00, x)
+TSX
+INX
+TXA
+TAY
+LDX $0100, y
+TXA
+TAY
+LDX $0, y
+STX $0100
+LDX #1
+STX $0101
+LDA $0100
+SBC $0101
+BCS carry23
+ADC #1
+CLC
+JMP carryend23
+carry23:
+CLC
+ADC #1
+carryend23:
+STA $0100
+TSX
+INX
+TXA
+TAY
+LDX $0100, y
+LDA $0100
+STA $0, x
+BCC pointerJump24
+INX
+LDA $0, x
+CLC
+ADC #1
+STA $0, x
+pointerJump24:
+LDX #1
 TXA
 STA $0100
 TSX

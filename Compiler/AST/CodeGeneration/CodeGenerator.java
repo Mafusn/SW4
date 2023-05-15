@@ -134,18 +134,8 @@ public class CodeGenerator implements Visitor {
                         }
                         codeBuilder.append(InstructionSet.STA.getInstruction() + " $0100\n");
                         node.getLeft().accept(this);
-                        codeBuilder.append(InstructionSet.LDA.getInstruction() + " $0, x\n");
-                        codeBuilder.append(InstructionSet.CLC.getInstruction() + "\n");
-                        codeBuilder.append(InstructionSet.ADC.getInstruction() + " $0100\n");
+                        codeBuilder.append(InstructionSet.LDA.getInstruction() + " $0100\n");
                         codeBuilder.append(InstructionSet.STA.getInstruction() + " $0, x\n");
-                        codeBuilder.append(InstructionSet.BCC.getInstruction() + " pointerJump" + labelCount + "\n");
-                        codeBuilder.append(InstructionSet.INX.getInstruction() + "\n");
-                        codeBuilder.append(InstructionSet.LDA.getInstruction() + " $0, x\n");
-                        codeBuilder.append(InstructionSet.CLC.getInstruction() + "\n");
-                        codeBuilder.append(InstructionSet.ADC.getInstruction() + " #1\n");
-                        codeBuilder.append(InstructionSet.STA.getInstruction() + " $0, x\n");
-                        codeBuilder.append("pointerJump" + labelCount + ":\n");
-                        labelCount++;
                     }
                 } else {
                     node.getRight().accept(this);
@@ -189,8 +179,11 @@ public class CodeGenerator implements Visitor {
             }
         // Går ind i nedenstående hvis det er en compond assignment.
         } else {
-            if (node.getRight() instanceof ArithmeticOp) {
+            if (node.getLeft().getType(symbolTables.get(getScopeLevel())) instanceof PointerType) {
                 node.getLeft().accept(this);
+                codeBuilder.append(InstructionSet.TXA.getInstruction() + "\n");
+                codeBuilder.append(InstructionSet.TAY.getInstruction() + "\n");
+                codeBuilder.append(InstructionSet.LDX.getInstruction() + " $0, y\n");
                 codeBuilder.append(InstructionSet.STX.getInstruction() + " $01" + String.format("%02d", arithmeticOpCount) + "\n");
                 arithmeticOpCount++;
                 if (node.getCompAssOp().equals(OperationSet.COMPASSPLUS.getOp())) {
@@ -202,31 +195,66 @@ public class CodeGenerator implements Visitor {
                     System.out.println(node.getVariable() + ": has an " + e);
                 }
                 node.getRight().accept(this);
-                clearTheBottomOfStackForArithmeticOp();
-            } else {
-                node.getLeft().accept(this);
-                codeBuilder.append(InstructionSet.TXA.getInstruction() + "\n");
-                node.getRight().accept(this);
-                codeBuilder.append(InstructionSet.STX.getInstruction() + " $0100\n");
-                // Alt det her er blot til at plusse eller minus variablen med en konstant.
-                if (node.getCompAssOp().equals("+=")) {
-                    codeBuilder.append(InstructionSet.CLC.getInstruction() + "\n");
-                    codeBuilder.append(InstructionSet.ADC.getInstruction() + " $0100\n");
-                } else {
-                    codeBuilder.append(InstructionSet.SBC.getInstruction() + " $0100\n");
-                    codeBuilder.append(InstructionSet.BCS.getInstruction() + " carry" + labelCount + "\n");
-                    codeBuilder.append(InstructionSet.ADC.getInstruction() + " #1\n");
-                    codeBuilder.append(InstructionSet.CLC.getInstruction() + "\n");
-                    codeBuilder.append(InstructionSet.JMP.getInstruction() + " carryend" + labelCount + "\n");
-                    codeBuilder.append("carry" + labelCount + ":\n");
-                    codeBuilder.append(InstructionSet.CLC.getInstruction() + "\n");
-                    codeBuilder.append(InstructionSet.ADC.getInstruction() + " #1\n");
-                    codeBuilder.append("carryend" + labelCount + ":\n");
-                    labelCount++;
+                if (node.getRight() instanceof IntNum ||
+                        node.getRight() instanceof FloatNum ||
+                        node.getRight() instanceof Bool ||
+                        node.getRight() instanceof Id) {
+                    codeBuilder.append(InstructionSet.STX.getInstruction() + " $01" + String.format("%02d", arithmeticOpCount) + "\n");
+                    arithmeticOpCount++;
                 }
+                clearTheBottomOfStackForArithmeticOp();
+                codeBuilder.append(InstructionSet.STA.getInstruction() + " $0100\n");
+                node.getLeft().accept(this);
+                codeBuilder.append(InstructionSet.LDA.getInstruction() + " $0100\n");
+                codeBuilder.append(InstructionSet.STA.getInstruction() + " $0, x\n");
+                codeBuilder.append(InstructionSet.BCC.getInstruction() + " pointerJump" + labelCount + "\n");
+                codeBuilder.append(InstructionSet.INX.getInstruction() + "\n");
+                codeBuilder.append(InstructionSet.LDA.getInstruction() + " $0, x\n");
+                codeBuilder.append(InstructionSet.CLC.getInstruction() + "\n");
+                codeBuilder.append(InstructionSet.ADC.getInstruction() + " #1\n");
+                codeBuilder.append(InstructionSet.STA.getInstruction() + " $0, x\n");
+                codeBuilder.append("pointerJump" + labelCount + ":\n");
+                labelCount++;
+            } else {
+                if (node.getRight() instanceof ArithmeticOp) {
+                    node.getLeft().accept(this);
+                    codeBuilder.append(InstructionSet.STX.getInstruction() + " $01" + String.format("%02d", arithmeticOpCount) + "\n");
+                    arithmeticOpCount++;
+                    if (node.getCompAssOp().equals(OperationSet.COMPASSPLUS.getOp())) {
+                        operators.add("+");
+                    } else if (node.getCompAssOp().equals(OperationSet.COMPASSMINUS.getOp())) {
+                        operators.add("-");
+                    } else {
+                        RuntimeException e = new RuntimeException("invalid operator");
+                        System.out.println(node.getVariable() + ": has an " + e);
+                    }
+                    node.getRight().accept(this);
+                    clearTheBottomOfStackForArithmeticOp();
+                } else {
+                    node.getLeft().accept(this);
+                    codeBuilder.append(InstructionSet.TXA.getInstruction() + "\n");
+                    node.getRight().accept(this);
+                    codeBuilder.append(InstructionSet.STX.getInstruction() + " $0100\n");
+                    // Alt det her er blot til at plusse eller minus variablen med en konstant.
+                    if (node.getCompAssOp().equals("+=")) {
+                        codeBuilder.append(InstructionSet.CLC.getInstruction() + "\n");
+                        codeBuilder.append(InstructionSet.ADC.getInstruction() + " $0100\n");
+                    } else {
+                        codeBuilder.append(InstructionSet.SBC.getInstruction() + " $0100\n");
+                        codeBuilder.append(InstructionSet.BCS.getInstruction() + " carry" + labelCount + "\n");
+                        codeBuilder.append(InstructionSet.ADC.getInstruction() + " #1\n");
+                        codeBuilder.append(InstructionSet.CLC.getInstruction() + "\n");
+                        codeBuilder.append(InstructionSet.JMP.getInstruction() + " carryend" + labelCount + "\n");
+                        codeBuilder.append("carry" + labelCount + ":\n");
+                        codeBuilder.append(InstructionSet.CLC.getInstruction() + "\n");
+                        codeBuilder.append(InstructionSet.ADC.getInstruction() + " #1\n");
+                        codeBuilder.append("carryend" + labelCount + ":\n");
+                        labelCount++;
+                    }
+                }
+                codeBuilder.append(InstructionSet.TAX.getInstruction() + "\n");
+                storeXRegisterInVariable(node.getVariable());
             }
-            codeBuilder.append(InstructionSet.TAX.getInstruction() + "\n");
-            storeXRegisterInVariable(node.getVariable());
         }
     }
 
@@ -354,9 +382,12 @@ public class CodeGenerator implements Visitor {
             codeBuilder.append(InstructionSet.TXA.getInstruction() + "\n");
             codeBuilder.append(InstructionSet.TAY.getInstruction() + "\n");
             codeBuilder.append(InstructionSet.LDX.getInstruction() + " $0100, y" + "\n");
-            /*codeBuilder.append(InstructionSet.TXA.getInstruction() + "\n");
-            codeBuilder.append(InstructionSet.TAY.getInstruction() + "\n");
-            codeBuilder.append(InstructionSet.LDX.getInstruction() + " $0, y\n");*/
+            if (node.getParent() instanceof ArithmeticOp &&
+                symbolTables.get(getScopeLevel()).lookup(node.getName()).getType() instanceof PointerType) {
+                codeBuilder.append(InstructionSet.TXA.getInstruction() + "\n");
+                codeBuilder.append(InstructionSet.TAY.getInstruction() + "\n");
+                codeBuilder.append(InstructionSet.LDX.getInstruction() + " $0, y\n");
+            }
         }
     }
 
