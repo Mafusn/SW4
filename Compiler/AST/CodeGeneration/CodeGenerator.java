@@ -207,11 +207,27 @@ public class CodeGenerator implements Visitor {
                 node.getLeft().accept(this);
                 codeBuilder.append(InstructionSet.LDA.getInstruction() + " $0100\n");
                 codeBuilder.append(InstructionSet.STA.getInstruction() + " $0, x\n");
-                codeBuilder.append(InstructionSet.BCC.getInstruction() + " pointerJump" + labelCount + "\n");
+                if (node.getCompAssOp().equals(OperationSet.COMPASSPLUS.getOp())) {
+                    codeBuilder.append(InstructionSet.BCC.getInstruction() + " pointerJump" + labelCount + "\n");
+                } else {
+                    codeBuilder.append(InstructionSet.BPL.getInstruction() + " pointerJump" + labelCount + "\n");
+                }
                 codeBuilder.append(InstructionSet.INX.getInstruction() + "\n");
                 codeBuilder.append(InstructionSet.LDA.getInstruction() + " $0, x\n");
-                codeBuilder.append(InstructionSet.CLC.getInstruction() + "\n");
-                codeBuilder.append(InstructionSet.ADC.getInstruction() + " #1\n");
+                if (node.getCompAssOp().equals(OperationSet.COMPASSPLUS.getOp())) {
+                    codeBuilder.append(InstructionSet.CLC.getInstruction() + "\n");
+                    codeBuilder.append(InstructionSet.ADC.getInstruction() + " #1\n");
+                } else if (node.getCompAssOp().equals(OperationSet.COMPASSMINUS.getOp())) {
+                    codeBuilder.append(InstructionSet.SBC.getInstruction() + " #1\n");
+                    codeBuilder.append(InstructionSet.BCS.getInstruction() + " carry" + labelCount + "\n");
+                    codeBuilder.append(InstructionSet.ADC.getInstruction() + " #1\n");
+                    codeBuilder.append(InstructionSet.CLC.getInstruction() + "\n");
+                    codeBuilder.append(InstructionSet.JMP.getInstruction() + " carryend" + labelCount + "\n");
+                    codeBuilder.append("carry" + labelCount + ":\n");
+                    codeBuilder.append(InstructionSet.CLC.getInstruction() + "\n");
+                    codeBuilder.append(InstructionSet.ADC.getInstruction() + " #1\n");
+                    codeBuilder.append("carryend" + labelCount + ":\n");
+                }
                 codeBuilder.append(InstructionSet.STA.getInstruction() + " $0, x\n");
                 codeBuilder.append("pointerJump" + labelCount + ":\n");
                 labelCount++;
@@ -232,15 +248,16 @@ public class CodeGenerator implements Visitor {
                     clearTheBottomOfStackForArithmeticOp();
                 } else {
                     node.getLeft().accept(this);
-                    codeBuilder.append(InstructionSet.TXA.getInstruction() + "\n");
-                    node.getRight().accept(this);
                     codeBuilder.append(InstructionSet.STX.getInstruction() + " $0100\n");
-                    // Alt det her er blot til at plusse eller minus variablen med en konstant.
+                    node.getRight().accept(this);
+                    codeBuilder.append(InstructionSet.STX.getInstruction() + " $0101\n");
+                    codeBuilder.append(InstructionSet.LDA.getInstruction() + " $0100\n");
+                    // Alt det her er blot til at plusse eller minus variablen med en konstant/variabel.
                     if (node.getCompAssOp().equals("+=")) {
                         codeBuilder.append(InstructionSet.CLC.getInstruction() + "\n");
-                        codeBuilder.append(InstructionSet.ADC.getInstruction() + " $0100\n");
+                        codeBuilder.append(InstructionSet.ADC.getInstruction() + " $0101\n");
                     } else {
-                        codeBuilder.append(InstructionSet.SBC.getInstruction() + " $0100\n");
+                        codeBuilder.append(InstructionSet.SBC.getInstruction() + " $0101\n");
                         codeBuilder.append(InstructionSet.BCS.getInstruction() + " carry" + labelCount + "\n");
                         codeBuilder.append(InstructionSet.ADC.getInstruction() + " #1\n");
                         codeBuilder.append(InstructionSet.CLC.getInstruction() + "\n");
