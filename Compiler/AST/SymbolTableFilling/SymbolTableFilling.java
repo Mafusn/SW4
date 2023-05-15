@@ -13,6 +13,7 @@ public class SymbolTableFilling implements Visitor {
     private Map<String,Symbol> symbolTable = new HashMap<>();
     private ArrayList<SymbolTableFilling> symbolTableFillings;
     private SymbolTableFilling parent;
+    //private boolean isLocalScope;
 
     public SymbolTableFilling(ArrayList<SymbolTableFilling> symbolTableFillings, int scopeLevel) {
         this.symbolTableFillings = symbolTableFillings;
@@ -39,6 +40,7 @@ public class SymbolTableFilling implements Visitor {
     public SymbolTableFilling enterScope() {
         SymbolTableFilling symbolTableFilling = new SymbolTableFilling(symbolTableFillings, scopeLevel + 1);
         symbolTableFilling.parent = this;
+        //symbolTableFilling.isLocalScope = isLocalScope;
         symbolTableFillings.add(symbolTableFilling);
         return symbolTableFilling;
     }
@@ -57,9 +59,8 @@ public class SymbolTableFilling implements Visitor {
 
     @Override
     public void visit(Block node) {
-        SymbolTableFilling symbolTableFilling = enterScope();
         for(Node n : node.getChildren()){
-            n.accept(symbolTableFilling);
+            n.accept(this);
         }
     }
 
@@ -108,14 +109,16 @@ public class SymbolTableFilling implements Visitor {
     @Override
     public void visit(IfStmt node) {
         node.getLeft().accept(this);
-        node.getRight().accept(this);
+        SymbolTableFilling symbolTableFilling = enterScope();
+        node.getRight().accept(symbolTableFilling);
     }
 
     @Override
     public void visit(IfElseStmt node) {
         node.getCondition().accept(this);
         node.getLeft().accept(this);
-        node.getRight().accept(this);
+        SymbolTableFilling symbolTableFilling = enterScope();
+        node.getRight().accept(symbolTableFilling);
     }
 
     @Override
@@ -148,7 +151,8 @@ public class SymbolTableFilling implements Visitor {
     @Override
     public void visit(WhileLoop node) {
         node.getLeft().accept(this);
-        node.getRight().accept(this);
+        SymbolTableFilling symbolTableFilling = enterScope();
+        node.getRight().accept(symbolTableFilling);
     }
 
     @Override
@@ -160,8 +164,32 @@ public class SymbolTableFilling implements Visitor {
         }
     }
 
+    @Override
+    public void visit(Procedure node) {
+        Symbol symbol = lookup(node.getId());
+        if (symbol == null) {
+            error("variable " + node.getId() + " is not declared");
+        }
+        node.getLeft().accept(this);
+        node.getRight().accept(this);
+    }
+
+    @Override
+    public void visit(ProcedureDcl node) {
+        if (symbolTable.get(node.getId()) == null) {
+            symbolTable.put(node.getId(), new Symbol(node.getId(), new ProcedureType(), scopeLevel));
+        } else {
+            error("variable " + node.getId() + " is already declared");
+        }
+
+        SymbolTableFilling symbolTableFilling = enterScope();
+        if (node.getLeft() != null) {
+            node.getLeft().accept(symbolTableFilling);
+        }
+        node.getRight().accept(symbolTableFilling);
+    }
+
     private void error(String message) {
         throw new Error(message);
     }
-
 }

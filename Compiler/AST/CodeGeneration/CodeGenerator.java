@@ -322,18 +322,20 @@ public class CodeGenerator implements Visitor {
         codeBuilder.append(InstructionSet.EOR.getInstruction() + " #1\n");
     }
 
-    /*@Override
-    public void visit(Proc node) {
-        for (Id idNode: node.getParams()) {
-            idnode.accept(this);
+    public void visit(Procedure node) {
+        /*
+        for (Node param : node.getParams()) {
+            param.accept(this);
             codeBuilder.append(InstructionSet.TXA.getInstruction() + "\n");
             pushAccumulator();
         }
-        node.getBlock().accept(this);
-        for (Id idNode: node.getParams()) {
+        node.getRight().accept(this);
+        for (Node param : node.getParams()) {
             pullAccumulator();
         }
-    }*/
+
+         */
+    }
 
     @Override
     public void visit(Prog node) {
@@ -371,6 +373,11 @@ public class CodeGenerator implements Visitor {
         whileLoopCount++;
         codeBuilder.append("end" + labelCount + ":\n");
         labelCount++;
+    }
+
+    @Override
+    public void visit(ProcedureDcl node) {
+
     }
 
     public void clearTheBottomOfStackForArithmeticOp() {

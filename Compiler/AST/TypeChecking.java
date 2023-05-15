@@ -26,11 +26,11 @@ public class TypeChecking implements Visitor {
             if (node.getRight() instanceof Id) {
                 String prefix = ((Id) node.getRight()).getPrefix();
                 if (prefix.equals(OperationSet.ADDRESS.getOp())) {
-                    symbol.setPointAtType(rhsType);
+                    symbol.setLocalType(rhsType);
                 }
             }
             // Check that the types match
-            if (!symbol.getPointAtType().isAssignable(rhsType)) {
+            if (!symbol.getLocalType().isAssignable(rhsType)) {
                 //throw new TypeMismatchException("Type mismatch in assignment");
                 error("Type mismatch in assignment " + node.getVariable());
             }
@@ -49,7 +49,7 @@ public class TypeChecking implements Visitor {
         Type rightType = node.getRight().getType(symbolTables.get(scopeLevel));
 
         if (!(leftType.isEqual(rightType))) {
-            error("Binary operator used with incompatible types");
+            error("Comparison operator used with incompatible types");
         }
 
         leftType.getResultType(node.getOperator(), rightType);
@@ -79,7 +79,7 @@ public class TypeChecking implements Visitor {
         Type rightType = node.getRight().getType(symbolTables.get(scopeLevel));
 
         if (!(leftType.isEqual(rightType))) {
-            error("Computing operator used with incompatible types");
+            error("Arithmetic operator used with incompatible types");
         }
 
         if (leftType instanceof IntType && rightType instanceof IntType) {
@@ -87,7 +87,7 @@ public class TypeChecking implements Visitor {
         } else if (leftType instanceof FloatType && rightType instanceof FloatType) {
             node.setType(new FloatType());
         } else {
-            error("Computing operator used with incompatible types");
+            error("Arithmetic operator used with incompatible types");
         }
     }
 
@@ -174,6 +174,30 @@ public class TypeChecking implements Visitor {
         }
 
         node.getRight().accept(this);
+    }
+
+    @Override
+    public void visit(Procedure node) {
+        if (node.getLeft() != null) {
+            Type paramType = node.getLeft().getType(symbolTables.get(scopeLevel));
+        }
+
+/*
+        if ((paramType == node.)) {
+
+        }
+
+        error("Type mismatch in procedure parameter " + node.getVariable());
+
+         */
+
+        node.getRight().accept(this);
+    }
+
+    @Override
+    public void visit(ProcedureDcl node) {
+
+
     }
 
     private void error(String message) {

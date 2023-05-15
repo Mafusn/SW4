@@ -1,9 +1,17 @@
-
-int c = 2;
-float d;
-pointer ptr = &c;
-pointer ptr2 = &d;
-#ptr = *ptr + *ptr2;
-#ptr = 2.0;
+int a = 2;
+boolean c = true;
+proc procedure(int a) {
+    int x;
+    int y;
+}
+proc procedure2(float b) {
+    b = 2.0 + 4.0;
+    int y;
+}
+proc procedure3() {
+    int x;
+    int y;
+}
+procedure2(4.0);
 
 END;

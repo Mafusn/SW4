@@ -81,7 +81,6 @@ public class PrettyPrint implements Visitor {
 
     @Override
     public void visit(BoolDcl node) {
-        sb.append("\n");
         printIndent();
         sb.append("boolean " + node.getId());
     }
@@ -180,6 +179,28 @@ public class PrettyPrint implements Visitor {
         printIndent();
         sb.append("while (");
         node.getLeft().accept(this);
+        sb.append(")");
+        node.getRight().accept(this);
+    }
+
+    @Override
+    public void visit(Procedure node) {
+        sb.append("\n");
+        node.getLeft().accept(this);
+        sb.append("(");
+        node.getRight().accept(this);
+        sb.append(")");
+    }
+
+    @Override
+    public void visit(ProcedureDcl node) {
+        printIndent();
+        sb.append("\n");
+        sb.append("proc " + node.getId());
+        sb.append("(");
+        if (node.getLeft() != null) {
+            node.getLeft().accept(this);
+        }
         sb.append(")");
         node.getRight().accept(this);
     }

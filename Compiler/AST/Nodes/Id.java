@@ -48,11 +48,12 @@ public class Id extends Node {
     public Type getType(SymbolTableFilling symbolTable) {
         if (this.type == null) {
             Symbol symbol = symbolTable.lookup(id);
-            if (prefix.equals(OperationSet.HASHTAG.getOp()) || prefix.equals(OperationSet.MULTIPLY.getOp())) {
-                setType(symbol.getPointAtType());
-            } else {
-                setType(symbol.getType());
+            if (prefix != null) {
+                if (prefix.equals(OperationSet.HASHTAG.getOp()) || prefix.equals(OperationSet.MULTIPLY.getOp())) {
+                    setType(symbol.getLocalType());
+                }
             }
+            setType(symbol.getType());
         }
         return this.type;
     }

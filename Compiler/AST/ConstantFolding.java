@@ -225,6 +225,16 @@ public class ConstantFolding implements Visitor {
 
     }
 
+    @Override
+    public void visit(Procedure node) {
+        node.getRight().accept(this);
+    }
+
+    @Override
+    public void visit(ProcedureDcl node) {
+
+    }
+
     private void replaceParentChild(Node parent, Node node, Node newChild) {
         if (parent.getLeft().equals(node)) {
             parent.setLeft(newChild);
