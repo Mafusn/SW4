@@ -15,7 +15,7 @@ public class Id extends Node {
     private String address;
 
     public Id(String id){
-        this.prefix = null;
+        this.prefix = " ";
         this.id = id;
     }
 
