@@ -12,11 +12,15 @@ public class Procedure extends Node {
     private String id;
     private Type type;
 
-    public Procedure(String id, Node left, Node right) {
+    public Procedure(String id, Node procName, Node param) {
         this.id = id;
-        this.left = left;
-        this.right = right;
-        this.type = new ProcedureType();
+        this.left = procName;
+        this.right = param;
+    }
+
+    public Procedure(String id, Node procName) {
+        this.id = id;
+        this.left = procName;
     }
 
     public String getId() {

@@ -188,7 +188,9 @@ public class PrettyPrint implements Visitor {
         sb.append("\n");
         node.getLeft().accept(this);
         sb.append("(");
-        node.getRight().accept(this);
+        if (node.getRight() != null) {
+            node.getRight().accept(this);
+        }
         sb.append(")");
     }
 

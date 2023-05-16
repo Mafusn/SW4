@@ -7,7 +7,8 @@ PARSER_BEGIN(Compiler)
 import AST.*;
 import AST.CodeGeneration.CodeGenerator;
 import AST.Nodes.*;
-import AST.SymbolTableFilling.SymbolTableFilling;
+import AST.Types.*;
+import AST.SymbolTableFilling.SymbolTableFilling;import AST.Types.ProcedureType;
 import java.util.ArrayList;
 
 public class Compiler {
@@ -125,29 +126,12 @@ Node Stmt() :
     Token prefix2 = null;
     Token tAddress = null;
     Token compAssOp = null;
-}
-{ ( prefix = < HASHTAG > )? t = < ID > ( proc = ProcedureCall() | ( ( compAssOp = < PLUS > | compAssOp = < MINUS > )? < ASSIGN > ( prefix2 = < ADDRESS > tAddress = < ID > | expr = Expr() ) ) ) < END_OF_LINE >
-{
     Id id;
     AssignmentOp assignmentOp;
-    if (prefix != null) {
-        id = new Id(prefix.image, t.image);
-    } else {
-        id = new Id(t.image);
-    }
-    if (proc != null) {
-        return new Procedure(t.image, id, proc);
-    }
-    if (compAssOp != null) {
-        assignmentOp = new AssignmentOp(t.image, id, expr, compAssOp.image);
-    } else {
-        assignmentOp = new AssignmentOp(t.image, id, expr);
-    }
-    if (tAddress != null) {
-        Id address = new Id(prefix2.image, tAddress.image);
-        assignmentOp.setRight(address);
-    }
-    return assignmentOp;
+}
+{ LOOKAHEAD(2) node = Assignment()
+{
+    return node;
 }
 | node = Dcl()
 {
@@ -161,15 +145,48 @@ Node Stmt() :
 {
     return node;
 }
+| LOOKAHEAD(2) node = Procedure()
+{
+    return node;
+}
 }
 
-Node ProcedureCall() :
+Node Assignment() :
 {
-    Node val;
+    Token t;
+    Token compAssOp;
+    Token tAddress = null;
+    Token prefix = null;
+    Node expr = null;
 }
-{ < LPAREN > ( val = Val() ) < RPAREN >
+{ LOOKAHEAD(2) t = < ID > ( compAssOp = < PLUS > | compAssOp = < MINUS > ) < ASSIGN > expr = Expr() < END_OF_LINE >
 {
-    return val;
+    return new AssignmentOp(t.image, new Id(t.image), expr, compAssOp.image);
+}
+| LOOKAHEAD(2) t = < ID > < ASSIGN > ( prefix = < ADDRESS > tAddress = < ID > | expr = Expr() ) < END_OF_LINE >
+{
+    if (prefix != null) {
+        return new AssignmentOp(t.image, new Id(t.image), new Id(prefix.image, tAddress.image));
+    }
+    return new AssignmentOp(t.image, new Id(t.image), expr);
+}
+| prefix = < HASHTAG > t = < ID > < ASSIGN > expr = Expr() < END_OF_LINE >
+{
+    return new AssignmentOp(t.image, new Id(prefix.image, t.image), expr);
+}
+}
+
+Node Procedure() :
+{
+    Token t;
+    Node val = null;
+}
+{ t = < ID > < LPAREN > ( val = Val() )? < RPAREN > < END_OF_LINE >
+{
+    if (val != null) {
+        return new Procedure(t.image, new Id(t.image), val);
+    }
+    return new Procedure(t.image, new Id(t.image));
 }
 }
 
@@ -222,18 +239,37 @@ Node Dcl() :
 
 Node ProcedureDcl() :
 {
+    Token t;
+    Token type = null;
+    Token tParam = null;
     Node param = null;
     Node block;
-    Token t;
-    Token tParam = null;
 }
 { < PROCEDURE > t = < ID >
-< LPAREN > ( ( < INTDCL > tParam = < ID > { param = new IntDcl(tParam.image); } ) | ( < FLOATDCL > tParam = < ID > { param = new FloatDcl(tParam.image); } ) | ( < BOOLDCL > tParam = < ID > { param = new BoolDcl(tParam.image); } ) | ( < POINTERDCL > tParam = < ID > { param = new PointerDcl(tParam.image); } ) )? < RPAREN >
+< LPAREN > ( type = < INTDCL > tParam = < ID > { param = new IntDcl(tParam.image); } | type = < FLOATDCL > tParam = < ID > { param = new FloatDcl(tParam.image); } | type = < BOOLDCL > tParam = < ID > { param = new BoolDcl(tParam.image); } | type = < POINTERDCL > tParam = < ID > { param = new PointerDcl(tParam.image); } )? < RPAREN >
 < LBRACE > block = Block() < RBRACE >
 {
-    if (tParam != null) {
-        return new ProcedureDcl(t.image, param, block);
+    if (type != null) {
+        ProcedureDcl proc = new ProcedureDcl(t.image, param, block);
+        switch (type.image) {
+            case "int":
+                proc.setType(new IntType());
+                break;
+            case "float":
+                proc.setType(new FloatType());
+                break;
+            case "boolean":
+                proc.setType(new BooleanType());
+                break;
+            case "pointer":
+                proc.setType(new PointerType());
+                break;
+            default:
+                proc.setType(new ProcedureType());
+        }
+        return proc;
     }
+
     return new ProcedureDcl(t.image, block);
 }
 }

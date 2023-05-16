@@ -3,7 +3,9 @@
 import AST.*;
 import AST.CodeGeneration.CodeGenerator;
 import AST.Nodes.*;
+import AST.Types.*;
 import AST.SymbolTableFilling.SymbolTableFilling;
+import AST.Types.ProcedureType;
 import java.util.ArrayList;
 
 /** Token Manager. */

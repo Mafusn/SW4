@@ -9,11 +9,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class SymbolTableFilling implements Visitor {
-    private int scopeLevel = 0;
+    private int scopeLevel;
     private Map<String,Symbol> symbolTable = new HashMap<>();
     private ArrayList<SymbolTableFilling> symbolTableFillings;
     private SymbolTableFilling parent;
-    //private boolean isLocalScope;
 
     public SymbolTableFilling(ArrayList<SymbolTableFilling> symbolTableFillings, int scopeLevel) {
         this.symbolTableFillings = symbolTableFillings;
@@ -40,7 +39,6 @@ public class SymbolTableFilling implements Visitor {
     public SymbolTableFilling enterScope() {
         SymbolTableFilling symbolTableFilling = new SymbolTableFilling(symbolTableFillings, scopeLevel + 1);
         symbolTableFilling.parent = this;
-        //symbolTableFilling.isLocalScope = isLocalScope;
         symbolTableFillings.add(symbolTableFilling);
         return symbolTableFilling;
     }
@@ -171,13 +169,16 @@ public class SymbolTableFilling implements Visitor {
             error("variable " + node.getId() + " is not declared");
         }
         node.getLeft().accept(this);
-        node.getRight().accept(this);
+
+        if (node.getRight() != null) {
+            node.getRight().accept(this);
+        }
     }
 
     @Override
     public void visit(ProcedureDcl node) {
         if (symbolTable.get(node.getId()) == null) {
-            symbolTable.put(node.getId(), new Symbol(node.getId(), new ProcedureType(), scopeLevel));
+            symbolTable.put(node.getId(), new Symbol(node.getId(), node.getType(this), scopeLevel));
         } else {
             error("variable " + node.getId() + " is already declared");
         }

@@ -19,7 +19,6 @@ public class ProcedureDcl extends Node {
         this.id = id;
         this.left = param;
         this.right = block;
-        this.type = new ProcedureType();
     }
 
     public void accept(Visitor v){
@@ -33,6 +32,10 @@ public class ProcedureDcl extends Node {
     @Override
     public Type getType(SymbolTableFilling symbolTable) {
         return this.type;
+    }
+
+    public void setType(Type type) {
+        this.type = type;
     }
 
     @Override
