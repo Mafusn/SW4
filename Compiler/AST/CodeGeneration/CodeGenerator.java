@@ -98,6 +98,10 @@ public class CodeGenerator implements Visitor {
                         node.getRight() instanceof Bool ||
                         node.getRight() instanceof Id) {
                     codeBuilder.append(InstructionSet.TXA.getInstruction() + "\n");
+                } else if (node.getRight() instanceof ArithmeticOp) {
+                    clearTheBottomOfStackForArithmeticOp();
+                } else if (node.getRight() instanceof ComparisonOp) {
+                    pullAccumulator();
                 }
                 codeBuilder.append(InstructionSet.STA.getInstruction() + " $0100\n");
                 node.getLeft().accept(this);
@@ -371,9 +375,8 @@ public class CodeGenerator implements Visitor {
                     codeBuilder.append(InstructionSet.TXA.getInstruction() + "\n");
                     codeBuilder.append(InstructionSet.TAY.getInstruction() + "\n");
                     codeBuilder.append(InstructionSet.LDX.getInstruction() + " $0100, y" + "\n");
-                    codeBuilder.append(InstructionSet.TXA.getInstruction() + "\n");
-                    codeBuilder.append(InstructionSet.TAY.getInstruction() + "\n");
-                    codeBuilder.append(InstructionSet.LDX.getInstruction() + " $0100, y" + "\n");
+                    codeBuilder.append(InstructionSet.LDA.getInstruction() + " ($0, x)\n");
+                    codeBuilder.append(InstructionSet.TAX.getInstruction() + "\n");
                     break;
                 case "#":
                     codeBuilder.append(InstructionSet.TXA.getInstruction() + "\n");
