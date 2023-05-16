@@ -31,7 +31,7 @@ public class TypeChecking implements Visitor {
                 }
             }
             // Check that the types match
-            if (!symbol.getPointAtType().isAssignable(rhsType)) {
+            if (!symbol.getLocalType().isAssignable(rhsType)) {
                 //throw new TypeMismatchException("Type mismatch in assignment");
                 error("Type mismatch in assignment " + node.getVariable());
             }
@@ -50,7 +50,7 @@ public class TypeChecking implements Visitor {
         Type rightType = node.getRight().getType(symbolTables.get(scopeLevel));
 
         if (!(leftType.isEqual(rightType))) {
-            error("Binary operator used with incompatible types");
+            error("Comparison operator used with incompatible types");
         }
 
         leftType.getResultType(node.getOperator(), rightType);
@@ -175,6 +175,26 @@ public class TypeChecking implements Visitor {
         }
 
         node.getRight().accept(this);
+    }
+
+    @Override
+    public void visit(Procedure node) {
+        Type procType = node.getLeft().getType(symbolTables.get(scopeLevel));
+        if (node.getRight() != null) {
+            Type paramType = node.getRight().getType(symbolTables.get(scopeLevel));
+            if (!(paramType.isEqual(procType))) {
+                error("Type mismatch in parameter in procedure " + node.getId());
+            }
+        } else {
+            if (!(procType instanceof ProcedureType)) {
+                error("Type mismatch in parameter in procedure " + node.getId());
+            }
+        }
+    }
+
+    @Override
+    public void visit(ProcedureDcl node) {
+
     }
 
     private void error(String message) {

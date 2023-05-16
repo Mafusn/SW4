@@ -79,7 +79,11 @@ public interface CompilerConstants {
   /** RegularExpression Id. */
   int WHILE = 39;
   /** RegularExpression Id. */
-  int ID = 40;
+  int PROCEDURE = 40;
+  /** RegularExpression Id. */
+  int COMMA = 41;
+  /** RegularExpression Id. */
+  int ID = 42;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -126,6 +130,8 @@ public interface CompilerConstants {
     "\"#\"",
     "\"END\"",
     "\"while\"",
+    "\"proc\"",
+    "\",\"",
     "<ID>",
   };
 

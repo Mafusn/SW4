@@ -20,4 +20,6 @@ public interface Visitor {
     void visit(Prog node);
     void visit(PointerDcl node);
     void visit(WhileLoop node);
+    void visit(Procedure node);
+    void visit(ProcedureDcl node);
 }
