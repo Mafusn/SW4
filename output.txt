@@ -1,7 +1,0 @@
-LDX #2
-TXA
-PHA
-LDX #1
-TXA
-PHA
-BRK

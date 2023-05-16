@@ -22,11 +22,12 @@ public class TypeChecking implements Visitor {
 
         // Get the symbol for the variable being assigned to
         Symbol symbol = symbolTables.get(scopeLevel).lookup(node.getVariable());
+
         if (symbol.getType() instanceof PointerType) {
             if (node.getRight() instanceof Id) {
                 String prefix = ((Id) node.getRight()).getPrefix();
-                if (prefix.equals(OperationSet.ADDRESS.getOp())) {
-                    symbol.setLocalType(rhsType);
+                if (prefix != null && prefix.equals(OperationSet.ADDRESS.getOp())) {
+                    symbol.setPointAtType(rhsType);
                 }
             }
             // Check that the types match

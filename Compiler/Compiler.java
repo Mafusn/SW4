@@ -23,7 +23,7 @@ public class Compiler implements CompilerConstants {
             prog.accept(prettyPrint);
             System.out.println(prettyPrint.getResult());
             System.out.println();
-            System.out.print("Syntax is good\n");
+            System.out.println("Syntax is good");
             prog.accept(symbolTableFilling);
             System.out.println("Symbol table is good");
             prog.accept(typeChecking);
