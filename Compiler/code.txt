@@ -1,16 +1,22 @@
 int a = 2;
-boolean c = true;
+boolean b = true;
+
 proc procedure(int a) {
     a = 3;
 }
 proc procedure2(boolean b) {
-    int y;
+    int y = 325;
+    if (y > 200) {
+        b = false;
+    } else {
+        b = true;
+    }
 }
 proc procedure3() {
     int x;
     int y;
 }
 procedure3();
-procedure2(4.0);
-procedure(c);
+procedure2(b);
+procedure(a);
 END;

@@ -181,7 +181,7 @@ public class TypeChecking implements Visitor {
         Type procType = node.getLeft().getType(symbolTables.get(scopeLevel));
         if (node.getRight() != null) {
             Type paramType = node.getRight().getType(symbolTables.get(scopeLevel));
-            if (paramType.isEqual(procType)) {
+            if (!(paramType.isEqual(procType))) {
                 error("Type mismatch in parameter in procedure " + node.getId());
             }
         } else {
