@@ -227,12 +227,12 @@ public class ConstantFolding implements Visitor {
 
     @Override
     public void visit(Procedure node) {
-        node.getRight().accept(this);
+
     }
 
     @Override
     public void visit(ProcedureDcl node) {
-
+        node.getRight().accept(this);
     }
 
     private void replaceParentChild(Node parent, Node node, Node newChild) {

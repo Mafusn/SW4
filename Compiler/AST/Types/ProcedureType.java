@@ -1,6 +1,8 @@
 package AST.Types;
 
 public class ProcedureType extends Type {
+    public static final ProcedureType INSTANCE = new ProcedureType();
+
     @Override
     public boolean isAssignable(Type other) {
         return false;
@@ -8,7 +10,7 @@ public class ProcedureType extends Type {
 
     @Override
     public boolean isEqual(Type other) {
-        return false;
+        return other instanceof ProcedureType;
     }
 
     @Override
