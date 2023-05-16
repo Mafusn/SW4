@@ -50,7 +50,7 @@ public class Id extends Node {
             Symbol symbol = symbolTable.lookup(id);
             if (prefix != null) {
                 if (prefix.equals(OperationSet.HASHTAG.getOp()) || prefix.equals(OperationSet.MULTIPLY.getOp())) {
-                    setType(symbol.getLocalType());
+                    setType(symbol.getPointAtType());
                 }
             }
             setType(symbol.getType());

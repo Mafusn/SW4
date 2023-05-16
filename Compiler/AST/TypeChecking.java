@@ -31,7 +31,7 @@ public class TypeChecking implements Visitor {
                 }
             }
             // Check that the types match
-            if (!symbol.getLocalType().isAssignable(rhsType)) {
+            if (!symbol.getPointAtType().isAssignable(rhsType)) {
                 //throw new TypeMismatchException("Type mismatch in assignment");
                 error("Type mismatch in assignment " + node.getVariable());
             }
