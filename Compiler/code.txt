@@ -1,0 +1,12 @@
+proc p(int b) {
+    b = 5;
+}
+proc main() {
+    int a = 3;
+    p(a);
+}
+int a = 4;
+p(a);
+main();
+int b = 5;
+END;

@@ -473,27 +473,22 @@ public class CodeGenerator implements Visitor {
         codeBuilder.append(InstructionSet.EOR.getInstruction() + " #1\n");
     }
 
-    public void visit(Procedure node) {
-        /*
-        for (Node param : node.getParams()) {
-            param.accept(this);
-            codeBuilder.append(InstructionSet.TXA.getInstruction() + "\n");
-            pushAccumulator();
-        }
-        node.getRight().accept(this);
-        for (Node param : node.getParams()) {
-            pullAccumulator();
-        }
-
-         */
-    }
 
     @Override
     public void visit(Prog node) {
         for(Node n : node.getChildren()){
-            n.accept(this);
+            if (!(n instanceof ProcedureDcl)) {
+                n.accept(this);
+            }
         }
-        codeBuilder.append(InstructionSet.BRK.getInstruction() + "\n");
+        codeBuilder.append(InstructionSet.JMP.getInstruction() + " Final\n");
+        for(Node n : node.getChildren()){
+            if (n instanceof ProcedureDcl) {
+                n.accept(this);
+            }
+        }
+
+        codeBuilder.append("Final:\n");
     }
 
     @Override
@@ -521,9 +516,30 @@ public class CodeGenerator implements Visitor {
         codeBuilder.append("end" + label + ":\n");
     }
 
+    public void visit(Procedure node) {
+        if (node.getRight() != null) {
+            node.getRight().accept(this);
+            codeBuilder.append(InstructionSet.TXA.getInstruction() + "\n");
+        }
+        codeBuilder.append(InstructionSet.JSR.getInstruction() + " " + node.getId() + "\n");
+    }
+
     @Override
     public void visit(ProcedureDcl node) {
-
+        codeBuilder.append(node.getId() + ":\n");
+        // De her inkrements og dekrements sørger for at resten af koden ikke skal ændres (God spaghetti).
+        if (node.getLeft() != null) {
+            scopeLevel++;
+            blockCount++;
+            node.getLeft().accept(this);
+            scopeLevel--;
+            blockCount--;
+        }
+        node.getRight().accept(this);
+        if (node.getLeft() != null) {
+            pullAccumulator();
+        }
+        codeBuilder.append(InstructionSet.RTS.getInstruction() + "\n");
     }
 
     public void clearTheBottomOfStackForArithmeticOp() {

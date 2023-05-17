@@ -1,0 +1,38 @@
+LDX #4
+TXA
+PHA
+TSX
+INX
+TXA
+TAY
+LDX $0100, y
+TXA
+JSR p
+JSR main
+LDX #5
+TXA
+PHA
+JMP Final
+p:
+PHA
+LDX #5
+TXA
+TSX
+INX
+STA $0100, x
+PLA
+RTS
+main:
+LDX #3
+TXA
+PHA
+TSX
+INX
+TXA
+TAY
+LDX $0100, y
+TXA
+JSR p
+PLA
+RTS
+Final:
