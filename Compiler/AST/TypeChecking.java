@@ -194,7 +194,7 @@ public class TypeChecking implements Visitor {
 
     @Override
     public void visit(ProcedureDcl node) {
-
+        node.getRight().accept(this);
     }
 
     private void error(String message) {

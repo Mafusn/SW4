@@ -481,12 +481,14 @@ public class CodeGenerator implements Visitor {
                 n.accept(this);
             }
         }
-        codeBuilder.append(InstructionSet.BRK.getInstruction() + "\n");
+        codeBuilder.append(InstructionSet.JMP.getInstruction() + " Final\n");
         for(Node n : node.getChildren()){
             if (n instanceof ProcedureDcl) {
                 n.accept(this);
             }
         }
+
+        codeBuilder.append("Final:\n");
     }
 
     @Override
@@ -515,55 +517,28 @@ public class CodeGenerator implements Visitor {
     }
 
     public void visit(Procedure node) {
-        /*
-        for (Node param : node.getParams()) {
-            param.accept(this);
+        if (node.getRight() != null) {
+            node.getRight().accept(this);
             codeBuilder.append(InstructionSet.TXA.getInstruction() + "\n");
-            pushAccumulator();
         }
-        node.getRight().accept(this);
-        for (Node param : node.getParams()) {
-            pullAccumulator();
-        }
-         */
+        codeBuilder.append(InstructionSet.JSR.getInstruction() + " " + node.getId() + "\n");
     }
 
     @Override
     public void visit(ProcedureDcl node) {
         codeBuilder.append(node.getId() + ":\n");
-        codeBuilder.append(InstructionSet.TSX.getInstruction() + "\n");
-        if (node.getLeft() instanceof IntDcl) {
-            IntDcl idNode = (IntDcl) node.getLeft();
-            for (int i = 0; i < stackAddress - symbolTables.get(getScopeLevel()).lookup(idNode.getId()).getMemoryAddress(); i++) {
-                codeBuilder.append(InstructionSet.INX.getInstruction() + "\n");
-            }
-        } else if (node.getLeft() instanceof FloatDcl) {
-            FloatDcl idNode = (FloatDcl) node.getLeft();
-            for (int i = 0; i < stackAddress - symbolTables.get(getScopeLevel()).lookup(idNode.getId()).getMemoryAddress(); i++) {
-                codeBuilder.append(InstructionSet.INX.getInstruction() + "\n");
-            }
-        } else if (node.getLeft() instanceof PointerDcl) {
-            PointerDcl idNode = (PointerDcl) node.getLeft();
-            for (int i = 0; i < stackAddress - symbolTables.get(getScopeLevel()).lookup(idNode.getId()).getMemoryAddress(); i++) {
-                codeBuilder.append(InstructionSet.INX.getInstruction() + "\n");
-            }
-        } else if (node.getLeft() instanceof BoolDcl) {
-            BoolDcl idNode = (BoolDcl) node.getLeft();
-            for (int i = 0; i < stackAddress - symbolTables.get(getScopeLevel()).lookup(idNode.getId()).getMemoryAddress(); i++) {
-                codeBuilder.append(InstructionSet.INX.getInstruction() + "\n");
-            }
+        // De her inkrements og dekrements sørger for at resten af koden ikke skal ændres (God spaghetti).
+        if (node.getLeft() != null) {
+            scopeLevel++;
+            blockCount++;
+            node.getLeft().accept(this);
+            scopeLevel--;
+            blockCount--;
         }
-        codeBuilder.append(InstructionSet.INX.getInstruction() + "\n");
-        codeBuilder.append(InstructionSet.INX.getInstruction() + "\n");
-        codeBuilder.append(InstructionSet.LDA.getInstruction() + " $0100, x" + "\n");
-        // alle de her skal inkrementeres og dekrementeres for ikke at ødelægge resten af koden.
-        scopeLevel++;
-        blockCount++;
-        node.getLeft().accept(this);
-        scopeLevel--;
-        blockCount--;
         node.getRight().accept(this);
-        pullAccumulator();
+        if (node.getLeft() != null) {
+            pullAccumulator();
+        }
         codeBuilder.append(InstructionSet.RTS.getInstruction() + "\n");
     }
 
