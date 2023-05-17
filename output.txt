@@ -1,4 +1,10 @@
-LDX #4
+PHA
+TSX
+INX
+STX $00
+LDX #1
+STX $01
+LDX #0
 TXA
 PHA
 TSX
@@ -6,33 +12,41 @@ INX
 TXA
 TAY
 LDX $0100, y
-TXA
-JSR p
-JSR main
+LDA #0
+STA $0, x
+INX
+LDA #2
+STA $0, x
 LDX #5
 TXA
+STA $0100
+TSX
+INX
+TXA
+TAY
+LDX $0100, y
+LDA $0100
+STA ($00, x)
+TSX
+INX
+TXA
+TAY
+LDX $0100, y
+LDA ($0, x)
+TAX
+STX $0100
+LDX #3
+STX $0101
+LDA $0100
+SBC $0101
+BCS carry0
+ADC #1
+CLC
+JMP carryend0
+carry0:
+CLC
+ADC #1
+carryend0:
 PHA
 JMP Final
-p:
-PHA
-LDX #5
-TXA
-TSX
-INX
-STA $0100, x
-PLA
-RTS
-main:
-LDX #3
-TXA
-PHA
-TSX
-INX
-TXA
-TAY
-LDX $0100, y
-TXA
-JSR p
-PLA
-RTS
 Final:

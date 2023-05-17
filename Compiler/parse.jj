@@ -27,7 +27,7 @@ public class Compiler {
             prog.accept(prettyPrint);
             System.out.println(prettyPrint.getResult());
             System.out.println();
-            System.out.print("Syntax is good\n");
+            System.out.println("Syntax is good");
             prog.accept(symbolTableFilling);
             System.out.println("Symbol table is good");
             prog.accept(typeChecking);
@@ -222,7 +222,7 @@ Node Dcl() :
     }
     return new BoolDcl(t.image);
 }
-| < POINTERDCL > t = < ID > ( < ASSIGN > prefix = < ADDRESS > tAddress = < ID > )?
+| < POINTERDCL > t = < ID > ( < ASSIGN > prefix = < ADDRESS > tAddress = < ID > )? < END_OF_LINE >
 {
     if (tAddress != null) {
         PointerDcl pointerDcl = new PointerDcl(t.image);

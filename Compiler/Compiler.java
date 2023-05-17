@@ -304,6 +304,7 @@ if (expr != null) {
         jj_la1[9] = jj_gen;
         ;
       }
+      jj_consume_token(END_OF_LINE);
 if (tAddress != null) {
         PointerDcl pointerDcl = new PointerDcl(t.image);
         Id id = new Id(prefix.image, tAddress.image);
