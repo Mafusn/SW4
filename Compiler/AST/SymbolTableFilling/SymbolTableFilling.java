@@ -114,9 +114,10 @@ public class SymbolTableFilling implements Visitor {
     @Override
     public void visit(IfElseStmt node) {
         node.getCondition().accept(this);
-        node.getLeft().accept(this);
-        SymbolTableFilling symbolTableFilling = enterScope();
-        node.getRight().accept(symbolTableFilling);
+        SymbolTableFilling symbolTableFilling1 = enterScope();
+        node.getLeft().accept(symbolTableFilling1);
+        SymbolTableFilling symbolTableFilling2 = enterScope();
+        node.getRight().accept(symbolTableFilling2);
     }
 
     @Override

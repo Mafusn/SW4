@@ -23,6 +23,7 @@ public class CodeGenerator implements Visitor {
     private int whileLoopCount = 0;
     private int pointerCounter = 0;
     private int blockCount = 0;
+    private boolean isProcedure = false;
     // Gør det muligt at bruge float i vores kode, og kan adskille dem fra hinanden for 1/8.
     // Eksempel: 0,124 = 0, 0,125 = 1, 0,25 = 2
     // Maks værdi er 31,875
@@ -61,12 +62,10 @@ public class CodeGenerator implements Visitor {
     }
 
     private void storeXRegisterInVariable(String id) {
-        Symbol symbol = symbolTables.get(getScopeLevel()).lookup(id);
+        //Symbol symbol = symbolTables.get(getScopeLevel()).lookup(id);
         codeBuilder.append(InstructionSet.TXA.getInstruction() + "\n");
         codeBuilder.append(InstructionSet.TSX.getInstruction() + "\n");
-        for (int i = 0; i < stackAddress - symbol.getMemoryAddress(); i++) {
-            codeBuilder.append(InstructionSet.INX.getInstruction() + "\n");
-        }
+        getValueOfIdFromStack(id);
         codeBuilder.append(InstructionSet.STA.getInstruction() + " $0100, x" + "\n");
     }
 
@@ -366,9 +365,7 @@ public class CodeGenerator implements Visitor {
         // Man skriver $01 foran adressen fordi den metode man kalder efter er 8-bit og derfor kun 2 decimaler.
         // Når vi skriver $01 foran ender vi i stacken.
         codeBuilder.append(InstructionSet.TSX.getInstruction() + "\n");
-        for (int i = 0; i < stackAddress - symbolTables.get(getScopeLevel()).lookup(node.getName()).getMemoryAddress(); i++) {
-            codeBuilder.append(InstructionSet.INX.getInstruction() + "\n");
-        }
+        getValueOfIdFromStack(node.getName());
         if (!node.getPrefix().equals(" ")) {
             switch (node.getPrefix()) {
                 case "*":
@@ -526,6 +523,7 @@ public class CodeGenerator implements Visitor {
 
     @Override
     public void visit(ProcedureDcl node) {
+        isProcedure = true;
         codeBuilder.append(node.getId() + ":\n");
         // De her inkrements og dekrements sørger for at resten af koden ikke skal ændres (God spaghetti).
         if (node.getLeft() != null) {
@@ -540,6 +538,7 @@ public class CodeGenerator implements Visitor {
             pullAccumulator();
         }
         codeBuilder.append(InstructionSet.RTS.getInstruction() + "\n");
+        isProcedure = false;
     }
 
     public void clearTheBottomOfStackForArithmeticOp() {
@@ -614,5 +613,15 @@ public class CodeGenerator implements Visitor {
         pushAccumulator();
         labelCount++;
         binOperatorCount++;
+    }
+
+    private void getValueOfIdFromStack(String id) {
+        if (isProcedure && getScopeLevel() - symbolTables.get(getScopeLevel()).lookup(id).getScopeLevel() > 0 && symbolTables.get(getScopeLevel()).lookup(id).getScopeLevel() < 1) {
+            codeBuilder.append(InstructionSet.INX.getInstruction() + "\n");
+            codeBuilder.append(InstructionSet.INX.getInstruction() + "\n");
+        }
+        for (int i = 0; i < stackAddress - symbolTables.get(getScopeLevel()).lookup(id).getMemoryAddress(); i++) {
+            codeBuilder.append(InstructionSet.INX.getInstruction() + "\n");
+        }
     }
 }
