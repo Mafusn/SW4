@@ -1,10 +1,7 @@
 int a = 0;
-pointer apointer = &a;
-proc p(pointer b) {
-  b = 510;
-  #b = 1;
+if (a == 1) {
+    a = 1;
+} else {
+    a = 2;
 }
-
-p(apointer);
-
 END;

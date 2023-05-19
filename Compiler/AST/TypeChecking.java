@@ -130,12 +130,15 @@ public class TypeChecking implements Visitor {
         if (!(conditionType instanceof BooleanType)) {
             error("If-else statement condition must be boolean");
         }
+        System.out.println("IfElseStmt1");
         node.getLeft().accept(this);
+        System.out.println("IfElseStmt2");
         node.getRight().accept(this);
     }
 
     @Override
     public void visit(IntDcl node) {
+        System.out.println("IntDcl");
     }
 
     @Override
