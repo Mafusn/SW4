@@ -129,7 +129,7 @@ Node Stmt() :
     Id id;
     AssignmentOp assignmentOp;
 }
-{ LOOKAHEAD(2) node = Assignment()
+{ LOOKAHEAD(2) node = Assignment() < END_OF_LINE >
 {
     return node;
 }
@@ -145,7 +145,7 @@ Node Stmt() :
 {
     return node;
 }
-| LOOKAHEAD(2) node = Procedure()
+| LOOKAHEAD(2) node = Procedure() < END_OF_LINE >
 {
     return node;
 }
@@ -159,18 +159,18 @@ Node Assignment() :
     Token prefix = null;
     Node expr = null;
 }
-{ LOOKAHEAD(2) t = < ID > ( compAssOp = < PLUS > | compAssOp = < MINUS > ) < ASSIGN > expr = Expr() < END_OF_LINE >
+{ LOOKAHEAD(2) t = < ID > ( compAssOp = < PLUS > | compAssOp = < MINUS > ) < ASSIGN > expr = Expr()
 {
     return new AssignmentOp(t.image, new Id(t.image), expr, compAssOp.image);
 }
-| LOOKAHEAD(2) t = < ID > < ASSIGN > ( prefix = < ADDRESS > tAddress = < ID > | expr = Expr() ) < END_OF_LINE >
+| LOOKAHEAD(2) t = < ID > < ASSIGN > ( prefix = < ADDRESS > tAddress = < ID > | expr = Expr() )
 {
     if (prefix != null) {
         return new AssignmentOp(t.image, new Id(t.image), new Id(prefix.image, tAddress.image));
     }
     return new AssignmentOp(t.image, new Id(t.image), expr);
 }
-| prefix = < HASHTAG > t = < ID > < ASSIGN > expr = Expr() < END_OF_LINE >
+| prefix = < HASHTAG > t = < ID > < ASSIGN > expr = Expr()
 {
     return new AssignmentOp(t.image, new Id(prefix.image, t.image), expr);
 }
@@ -181,7 +181,7 @@ Node Procedure() :
     Token t;
     Node val = null;
 }
-{ t = < ID > < LPAREN > ( val = Val() )? < RPAREN > < END_OF_LINE >
+{ t = < ID > < LPAREN > ( val = Val() )? < RPAREN >
 {
     if (val != null) {
         return new Procedure(t.image, new Id(t.image), val);
