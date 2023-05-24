@@ -5,6 +5,7 @@ import AST.Types.Type;
 public class Symbol {
     private String name;
     private Type type;
+    private Type pointAtType;
     private int scopeLevel;
     private int memoryAddress;
 
@@ -32,5 +33,13 @@ public class Symbol {
 
     public void setMemoryAddress(int memoryAddress) {
         this.memoryAddress = memoryAddress;
+    }
+
+    public Type getPointAtType() {
+        return pointAtType;
+    }
+
+    public void setPointAtType(Type pointAtType) {
+        this.pointAtType = pointAtType;
     }
 }

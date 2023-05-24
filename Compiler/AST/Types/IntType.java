@@ -1,6 +1,6 @@
 package AST.Types;
 
-import AST.Nodes.IntNum;
+import AST.OperationSet;
 
 public class IntType extends Type{
     public static final IntType INSTANCE = new IntType();
@@ -27,12 +27,14 @@ public class IntType extends Type{
     public Type getResultType(String operator, Type other) {
         if (other instanceof IntType) {
             // Arithmetic operators return an int result when both operands are ints
-            return switch (operator) {
-                case "+", "-" -> IntType.INSTANCE;
-                // Comparison operators return a boolean result
-                case "<", "<=", ">", ">=", "==", "!=" -> BooleanType.INSTANCE;
-                default -> null;
-            };
+            if (operator.equals(OperationSet.PLUS.getOp()) || operator.equals(OperationSet.MINUS.getOp())
+                || operator.equals(OperationSet.MULTIPLY.getOp()) || operator.equals(OperationSet.DIVIDE.getOp())) {
+                return IntType.INSTANCE;
+            } else if (operator.equals(OperationSet.LESSTHAN.getOp()) || operator.equals(OperationSet.LESSEQUAL.getOp())
+                || operator.equals(OperationSet.GREATERTHAN.getOp()) || operator.equals(OperationSet.GREATEREQUAL.getOp())
+                || operator.equals(OperationSet.EQUAL.getOp()) || operator.equals(OperationSet.NOTEQUAL.getOp())) {
+                return BooleanType.INSTANCE;
+            }
         }
         return null;
     }

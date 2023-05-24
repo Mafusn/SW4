@@ -36,9 +36,4 @@ public class FloatDcl extends Node {
         FloatDcl floatDcl = (FloatDcl) o;
         return id.equals(floatDcl.id) && type.equals(floatDcl.type);
     }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, type);
-    }
 }

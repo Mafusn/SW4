@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class SymbolTableFilling implements Visitor {
-    private int scopeLevel = 0;
+    private int scopeLevel;
     private Map<String,Symbol> symbolTable = new HashMap<>();
     private ArrayList<SymbolTableFilling> symbolTableFillings;
     private SymbolTableFilling parent;
@@ -32,6 +32,7 @@ public class SymbolTableFilling implements Visitor {
         if (symbol == null && parent != null) {
             return parent.lookup(id);
         }
+
         return symbol;
     }
 
@@ -44,21 +45,20 @@ public class SymbolTableFilling implements Visitor {
 
     @Override
     public void visit(AssignmentOp node) {
-        node.getDeclaration().accept(this);
-        node.getExpression().accept(this);
+        node.getLeft().accept(this);
+        node.getRight().accept(this);
     }
 
     @Override
     public void visit(ComparisonOp node) {
-        node.getLeftOperand().accept(this);
-        node.getRightOperand().accept(this);
+        node.getLeft().accept(this);
+        node.getRight().accept(this);
     }
 
     @Override
     public void visit(Block node) {
-        SymbolTableFilling symbolTableFilling = enterScope();
         for(Node n : node.getChildren()){
-            n.accept(symbolTableFilling);
+            n.accept(this);
         }
     }
 
@@ -78,8 +78,8 @@ public class SymbolTableFilling implements Visitor {
 
     @Override
     public void visit(ArithmeticOp node) {
-        node.getLeftOperand().accept(this);
-        node.getRightOperand().accept(this);
+        node.getLeft().accept(this);
+        node.getRight().accept(this);
     }
 
     @Override
@@ -106,15 +106,18 @@ public class SymbolTableFilling implements Visitor {
 
     @Override
     public void visit(IfStmt node) {
-        node.getCondition().accept(this);
-        node.getThenBlock().accept(this);
+        node.getLeft().accept(this);
+        SymbolTableFilling symbolTableFilling = enterScope();
+        node.getRight().accept(symbolTableFilling);
     }
 
     @Override
     public void visit(IfElseStmt node) {
         node.getCondition().accept(this);
-        node.getThenBlock().accept(this);
-        node.getElseBlock().accept(this);
+        SymbolTableFilling symbolTableFilling1 = enterScope();
+        node.getLeft().accept(symbolTableFilling1);
+        SymbolTableFilling symbolTableFilling2 = enterScope();
+        node.getRight().accept(symbolTableFilling2);
     }
 
     @Override
@@ -133,7 +136,7 @@ public class SymbolTableFilling implements Visitor {
 
     @Override
     public void visit(NegationOp node) {
-        node.getExpression().accept(this);
+        node.getLeft().accept(this);
     }
 
     @Override
@@ -146,12 +149,49 @@ public class SymbolTableFilling implements Visitor {
 
     @Override
     public void visit(WhileLoop node) {
-        node.getCondition().accept(this);
-        node.getBlock().accept(this);
+        node.getLeft().accept(this);
+        SymbolTableFilling symbolTableFilling = enterScope();
+        node.getRight().accept(symbolTableFilling);
+    }
+
+    @Override
+    public void visit(PointerDcl node) {
+        if (symbolTable.get(node.getId()) == null) {
+            symbolTable.put(node.getId(), new Symbol(node.getId(), new PointerType(), scopeLevel));
+        } else {
+            error("variable " + node.getId() + " is already declared");
+        }
+    }
+
+    @Override
+    public void visit(Procedure node) {
+        Symbol symbol = lookup(node.getId());
+        if (symbol == null) {
+            error("variable " + node.getId() + " is not declared");
+        }
+        node.getLeft().accept(this);
+
+        if (node.getRight() != null) {
+            node.getRight().accept(this);
+        }
+    }
+
+    @Override
+    public void visit(ProcedureDcl node) {
+        if (symbolTable.get(node.getId()) == null) {
+            symbolTable.put(node.getId(), new Symbol(node.getId(), node.getType(this), scopeLevel));
+        } else {
+            error("variable " + node.getId() + " is already declared");
+        }
+
+        SymbolTableFilling symbolTableFilling = enterScope();
+        if (node.getLeft() != null) {
+            node.getLeft().accept(symbolTableFilling);
+        }
+        node.getRight().accept(symbolTableFilling);
     }
 
     private void error(String message) {
         throw new Error(message);
     }
-
 }

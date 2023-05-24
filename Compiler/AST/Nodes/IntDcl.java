@@ -36,9 +36,4 @@ public class IntDcl extends Node {
         IntDcl intDcl = (IntDcl) o;
         return id.equals(intDcl.id) && type.equals(intDcl.type);
     }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, type);
-    }
 }

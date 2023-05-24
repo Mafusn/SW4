@@ -1,5 +1,7 @@
 package AST.Types;
 
+import AST.OperationSet;
+
 public class BooleanType extends Type{
     public static final BooleanType INSTANCE = new BooleanType();
 
@@ -19,19 +21,14 @@ public class BooleanType extends Type{
 
     @Override
     public Type getResultType(String operator, Type other) {
-        switch (operator) {
-            case "==":
-            case "!=":
-            case "<":
-            case ">":
-            case "<=":
-            case ">=":
+        if (operator.equals(OperationSet.EQUAL.getOp()) || operator.equals(OperationSet.NOTEQUAL.getOp()) ||
+                operator.equals(OperationSet.LESSTHAN.getOp()) || operator.equals(OperationSet.GREATERTHAN.getOp()) ||
+                operator.equals(OperationSet.LESSEQUAL.getOp()) || operator.equals(OperationSet.GREATEREQUAL.getOp())) {
+            return BooleanType.INSTANCE;
+        } else if (operator.equals(OperationSet.AND.getOp()) || operator.equals(OperationSet.OR.getOp())) {
+            if (other instanceof BooleanType) {
                 return BooleanType.INSTANCE;
-            case "&&":
-            case "||":
-                if (other instanceof BooleanType) {
-                    return BooleanType.INSTANCE;
-                }
+            }
         }
         return null;
     }

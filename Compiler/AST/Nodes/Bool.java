@@ -9,8 +9,8 @@ public class Bool extends Node {
     private boolean value;
     private Type type;
 
-    public Bool(String value){
-        this.value = Boolean.parseBoolean(value);
+    public Bool(Boolean value){
+        this.value = value;
         this.type = new BooleanType();
     }
 
@@ -34,5 +34,4 @@ public class Bool extends Node {
         Bool bool = (Bool) o;
         return value == bool.value && type.equals(bool.type);
     }
-
 }

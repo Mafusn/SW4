@@ -26,47 +26,43 @@ public class PrettyPrint implements Visitor {
 
     @Override
     public void visit(AssignmentOp node) {
-
-        if (node.getCompAssOp() == "notCompAssOp") {
-            switch (node.getDeclaration().getClass().getSimpleName()) {
-                case "FloatDcl", "IntDcl", "BoolDcl" -> {
-                    node.getDeclaration().accept(this);
+        if (node.getCompAssOp() == null) {
+            switch (node.getLeft().getClass().getSimpleName()) {
+                case "FloatDcl", "IntDcl", "BoolDcl, PointerDcl" -> {
+                    node.getLeft().accept(this);
                     sb.append(" = ");
-                    node.getExpression().accept(this);
+                    node.getRight().accept(this);
                 }
                 default -> {
                     sb.append("\n");
                     printIndent();
-                    node.getDeclaration().accept(this);
+                    node.getLeft().accept(this);
                     sb.append(" = ");
-                    node.getExpression().accept(this);
+                    node.getRight().accept(this);
                 }
             }
         } else {
-            switch (node.getCompAssOp()) {
-                case "+=" -> {
-                    sb.append("\n");
-                    printIndent();
-                    node.getDeclaration().accept(this); // variable not declaration, but works because it is still child 1
-                    sb.append(" += ");
-                    node.getExpression().accept(this);
-                }
-                case "-=" -> {
-                    sb.append("\n");
-                    printIndent();
-                    node.getDeclaration().accept(this); // variable not declaration, but works because it is still child 1
-                    sb.append(" -= ");
-                    node.getExpression().accept(this);
-                }
+            if (node.getCompAssOp().equals(OperationSet.COMPASSPLUS.getOp())) {
+                sb.append("\n");
+                printIndent();
+                node.getLeft().accept(this); // variable not declaration, but works because it is still child 1
+                sb.append(" += ");
+                node.getRight().accept(this);
+            } else if (node.getCompAssOp().equals(OperationSet.COMPASSMINUS.getOp())) {
+                sb.append("\n");
+                printIndent();
+                node.getLeft().accept(this); // variable not declaration, but works because it is still child 1
+                sb.append(" -= ");
+                node.getRight().accept(this);
             }
         }
     }
 
     @Override
     public void visit(ComparisonOp node) {
-        node.getLeftOperand().accept(this);
+        node.getLeft().accept(this);
         sb.append(" " + node.getOperator() + " ");
-        node.getRightOperand().accept(this);
+        node.getRight().accept(this);
     }
 
     @Override
@@ -85,16 +81,15 @@ public class PrettyPrint implements Visitor {
 
     @Override
     public void visit(BoolDcl node) {
-        sb.append("\n");
         printIndent();
         sb.append("boolean " + node.getId());
     }
 
     @Override
     public void visit(ArithmeticOp node) {
-        node.getLeftOperand().accept(this);
+        node.getLeft().accept(this);
         sb.append(" " + node.getOperator() + " ");
-        node.getRightOperand().accept(this);
+        node.getRight().accept(this);
     }
 
     @Override
@@ -111,6 +106,15 @@ public class PrettyPrint implements Visitor {
 
     @Override
     public void visit(Id node) {
+        if (node.getPrefix() != null) {
+            if (node.getPrefix().equals(OperationSet.MULTIPLY.getOp())) {
+                sb.append("*");
+            } else if (node.getPrefix().equals(OperationSet.HASHTAG.getOp())) {
+                sb.append("#");
+            } else if (node.getPrefix().equals(OperationSet.ADDRESS.getOp())) {
+                sb.append("&");
+            }
+        }
         sb.append(node.getName());
     }
 
@@ -119,9 +123,9 @@ public class PrettyPrint implements Visitor {
         sb.append("\n");
         printIndent();
         sb.append("if(");
-        node.getCondition().accept(this);
+        node.getLeft().accept(this);
         sb.append(")");
-        node.getThenBlock().accept(this);
+        node.getRight().accept(this);
     }
 
     @Override
@@ -131,11 +135,11 @@ public class PrettyPrint implements Visitor {
         sb.append("if(");
         node.getCondition().accept(this);
         sb.append(")");
-        node.getThenBlock().accept(this);
+        node.getLeft().accept(this);
         sb.append("\n");
         printIndent();
         sb.append("else");
-        node.getElseBlock().accept(this);
+        node.getRight().accept(this);
     }
 
     @Override
@@ -153,7 +157,7 @@ public class PrettyPrint implements Visitor {
     @Override
     public void visit(NegationOp node) {
         sb.append("!(");
-        node.getExpression().accept(this);
+        node.getLeft().accept(this);
         sb.append(")");
     }
 
@@ -165,12 +169,41 @@ public class PrettyPrint implements Visitor {
     }
 
     @Override
+    public void visit(PointerDcl node) {
+        printIndent();
+        sb.append("pointer " + node.getId());
+    }
+
     public void visit(WhileLoop node) {
         sb.append("\n");
         printIndent();
         sb.append("while (");
-        node.getCondition().accept(this);
+        node.getLeft().accept(this);
         sb.append(")");
-        node.getBlock().accept(this);
+        node.getRight().accept(this);
+    }
+
+    @Override
+    public void visit(Procedure node) {
+        sb.append("\n");
+        node.getLeft().accept(this);
+        sb.append("(");
+        if (node.getRight() != null) {
+            node.getRight().accept(this);
+        }
+        sb.append(")");
+    }
+
+    @Override
+    public void visit(ProcedureDcl node) {
+        printIndent();
+        sb.append("\n");
+        sb.append("proc " + node.getId());
+        sb.append("(");
+        if (node.getLeft() != null) {
+            node.getLeft().accept(this);
+        }
+        sb.append(")");
+        node.getRight().accept(this);
     }
 }
