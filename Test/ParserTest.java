@@ -95,9 +95,11 @@ class ParserTest {
         BoolDcl boolDcl = new BoolDcl("fooBar");
         FloatDcl floatDcl = new FloatDcl("thisIsA_boolean2023");
         IntDcl intDcl = new IntDcl("a123456");
+        PointerDcl pointerDcl = new PointerDcl("ptr");
         expectedAST.addChild(boolDcl);
         expectedAST.addChild(floatDcl);
         expectedAST.addChild(intDcl);
+        expectedAST.addChild(pointerDcl);
 
         // [WHEN] We try to parse the code from the file
         try {
