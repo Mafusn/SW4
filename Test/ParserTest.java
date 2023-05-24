@@ -191,6 +191,7 @@ class ParserTest {
         // [WHEN] We try to parse the code from the file
         try {
             Prog AST = (Prog) compiler.Prog();
+          
             // [THEN] Assert that the created AST is equal to the expected AST
             assertTrue(AST.equals(expectedAST));
         } catch (Throwable e) {
@@ -225,6 +226,7 @@ class ParserTest {
         // [WHEN] We try to parse the code from the file
         try {
             Prog AST = (Prog) compiler.Prog();
+
             // [THEN] Assert that the created AST is equal to the expected AST
             assertTrue(AST.equals(expectedAST));
         } catch (Throwable e) {
@@ -240,14 +242,17 @@ class ParserTest {
 
         // [GIVEN] That we create the expected AST from the code from the file
         Prog expectedAST = new Prog();
+      
         AssignmentOp floatAssign = new AssignmentOp("a", new Id("a"), new FloatNum(3.14F));
         AssignmentOp floatAssign2 = new AssignmentOp("b", new Id("b"), new FloatNum(0.025F));
+
         expectedAST.addChild(floatAssign);
         expectedAST.addChild(floatAssign2);
 
         // [WHEN] We try to parse the code from the file
         try {
             Prog AST = (Prog) compiler.Prog();
+
             // [THEN] Assert that the created AST is equal to the expected AST
             assertTrue(AST.equals(expectedAST));
         } catch (Throwable e) {
@@ -293,6 +298,7 @@ class ParserTest {
         // [WHEN] We try to parse the code from the file
         try {
             Prog AST = (Prog) compiler.Prog();
+
             // [THEN] Assert that the created AST is equal to the expected AST
             assertTrue(AST.equals(expectedAST));
         } catch (Throwable e) {
@@ -311,12 +317,14 @@ class ParserTest {
 
         AssignmentOp boolAssign = new AssignmentOp("a", new Id("a"), new Bool(true));
         AssignmentOp boolAssign2 = new AssignmentOp("b", new Id("b"), new Bool(false));
+
         expectedAST.addChild(boolAssign);
         expectedAST.addChild(boolAssign2);
 
         // [WHEN] We try to parse the code from the file
         try {
             Prog AST = (Prog) compiler.Prog();
+
             // [THEN] Assert that the created AST is equal to the expected AST
             assertTrue(AST.equals(expectedAST));
         } catch (Throwable e) {
@@ -351,6 +359,7 @@ class ParserTest {
         // [WHEN] We try to parse the code from the file
         try {
             Prog AST = (Prog) compiler.Prog();
+
             // [THEN] Assert that the created AST is equal to the expected AST
             assertTrue(AST.equals(expectedAST));
         } catch (Throwable e) {
@@ -366,8 +375,10 @@ class ParserTest {
 
         // [GIVEN] That we create the expected AST from the code from the file
         Prog expectedAST = new Prog();
+
         AssignmentOp intAssign = new AssignmentOp("a", new IntDcl("a"), new IntNum(3));
         AssignmentOp intAssign2 = new AssignmentOp("b", new IntDcl("b"), new IntNum(12));
+
         expectedAST.addChild(intAssign);
         expectedAST.addChild(intAssign2);
 
@@ -422,14 +433,17 @@ class ParserTest {
 
         // [GIVEN] That we create the expected AST from the code from the file
         Prog expectedAST = new Prog();
+
         AssignmentOp floatAssign = new AssignmentOp("a", new FloatDcl("a"), new FloatNum(8.32F));
         AssignmentOp floatAssign2 = new AssignmentOp("b", new FloatDcl("b"), new FloatNum(0.97F));
+
         expectedAST.addChild(floatAssign);
         expectedAST.addChild(floatAssign2);
 
         // [WHEN] We try to parse the code from the file
         try {
             Prog AST = (Prog) compiler.Prog();
+
             // [THEN] Assert that the created AST is equal to the expected AST
             assertTrue(AST.equals(expectedAST));
         } catch (Throwable e) {
@@ -475,6 +489,7 @@ class ParserTest {
         // [WHEN] We try to parse the code from the file
         try {
             Prog AST = (Prog) compiler.Prog();
+
             // [THEN] Assert that the created AST is equal to the expected AST
             assertTrue(AST.equals(expectedAST));
         } catch (Throwable e) {
@@ -490,8 +505,10 @@ class ParserTest {
 
         // [GIVEN] That we create the expected AST from the code from the file
         Prog expectedAST = new Prog();
+
         AssignmentOp boolAssign = new AssignmentOp("p", new BoolDcl("p"), new Bool(true));
         AssignmentOp boolAssign2 = new AssignmentOp("q",new BoolDcl("q"), new Bool(false));
+
         expectedAST.addChild(boolAssign);
         expectedAST.addChild(boolAssign2);
 
@@ -513,9 +530,11 @@ class ParserTest {
 
         // [GIVEN] That we create the expected AST from the code from the file
         Prog expectedAST = new Prog();
+
         AssignmentOp intAssign = new AssignmentOp("a", new IntDcl("a"), new IntNum(1));
         AssignmentOp boolAssign = new AssignmentOp("b", new BoolDcl("b"), new Bool(false));
         AssignmentOp floatAssign = new AssignmentOp("c", new FloatDcl("c"), new FloatNum(6.2F));
+
         expectedAST.addChild(intAssign);
         expectedAST.addChild(boolAssign);
         expectedAST.addChild(floatAssign);
@@ -589,6 +608,7 @@ class ParserTest {
         Block block = new Block();
         block.addChild(assigning);
         IfStmt ifStmt = new IfStmt (binOp, block);
+
         expectedAST.addChild(ifStmt);
 
         // [WHEN] We try to parse the code from the file
@@ -613,11 +633,14 @@ class ParserTest {
         ComparisonOp binOp = new ComparisonOp(new IntNum(1), ">", new IntNum(2));
         AssignmentOp assigning = new AssignmentOp("t", new Id("t"), new Bool(true));
         AssignmentOp assigning2 = new AssignmentOp("t", new Id("t"), new Bool (false));
+
         Block block = new Block();
         block.addChild(assigning);
         Block block2 = new Block();
         block2.addChild(assigning2);
+
         IfElseStmt ifElseStmt = new IfElseStmt(binOp, block, block2);
+
         expectedAST.addChild(ifElseStmt);
 
         // [WHEN] We try to parse the code from the file
@@ -672,6 +695,7 @@ class ParserTest {
 
         // elseBlock
         AssignmentOp assigning = new AssignmentOp("b", new Id("b"), new FloatNum(3.5F));
+
         Block elseBlock = new Block();
         elseBlock.addChild(assigning);
 
