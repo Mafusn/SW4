@@ -3,10 +3,7 @@ import AST.Visitor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.io.FileNotFoundException;
-
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.*;
 
 public class VisitorTest implements Visitor {
     private boolean isProgVisited = false;
@@ -25,6 +22,9 @@ public class VisitorTest implements Visitor {
     private boolean isIntNumVisited = false;
     private boolean isNegationOpVisited = false;
     private boolean isWhileLoopVisited = false;
+    private boolean isPointerDclVisited = false;
+    private boolean isProcedureVisited = false;
+    private boolean isProcedureDclVisited = false;
 
     private void resetBoolValues() {
         isProgVisited = false;
@@ -43,6 +43,9 @@ public class VisitorTest implements Visitor {
         isIntNumVisited = false;
         isNegationOpVisited = false;
         isWhileLoopVisited = false;
+        isPointerDclVisited = false;
+        isProcedureVisited = false;
+        isProcedureDclVisited = false;
     }
 
     @BeforeEach
@@ -92,7 +95,7 @@ public class VisitorTest implements Visitor {
 
     @Test
     void VisitorBoolTest() {
-        Bool bool = new Bool("true");
+        Bool bool = new Bool(true);
         bool.accept(this);
 
         assertTrue(isBoolVisited);
@@ -116,7 +119,7 @@ public class VisitorTest implements Visitor {
 
     @Test
     void VisitorFloatNumTest() {
-        FloatNum floatNum = new FloatNum("2.0");
+        FloatNum floatNum = new FloatNum(2.0F);
         floatNum.accept(this);
 
         assertTrue(isFloatNumVisited);
@@ -148,7 +151,7 @@ public class VisitorTest implements Visitor {
 
     @Test
     void VisitorIntNumTest() {
-        IntNum intNum = new IntNum("2");
+        IntNum intNum = new IntNum(2);
         intNum.accept(this);
 
         assertTrue(isIntNumVisited);
@@ -176,6 +179,30 @@ public class VisitorTest implements Visitor {
         whileLoop.accept(this);
 
         assertTrue(isWhileLoopVisited);
+    }
+
+    @Test
+    void VisitorPointerDclTest() {
+        PointerDcl pointerDcl = new PointerDcl("test");
+        pointerDcl.accept(this);
+
+        assertTrue(isPointerDclVisited);
+    }
+
+    @Test
+    void VisitorProcedureTest() {
+        Procedure procedure = new Procedure("test", new Id("test"));
+        procedure.accept(this);
+
+        assertTrue(isProcedureVisited);
+    }
+
+    @Test
+    void VisitorProcedureDclTest() {
+        ProcedureDcl procedureDcl = new ProcedureDcl("test", new Block());
+        procedureDcl.accept(this);
+
+        assertTrue(isProcedureDclVisited);
     }
 
     @Override
@@ -256,5 +283,20 @@ public class VisitorTest implements Visitor {
     @Override
     public void visit(WhileLoop node) {
         isWhileLoopVisited = true;
+    }
+
+    @Override
+    public void visit(PointerDcl node) {
+        isPointerDclVisited = true;
+    }
+
+    @Override
+    public void visit(Procedure node) {
+        isProcedureVisited = true;
+    }
+
+    @Override
+    public void visit(ProcedureDcl node) {
+        isProcedureDclVisited = true;
     }
 }

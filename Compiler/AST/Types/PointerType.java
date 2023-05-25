@@ -8,7 +8,7 @@ public class PointerType extends Type {
 
     @Override
     public boolean isEqual(Type other) {
-        return false;
+        return other instanceof PointerType;
     }
 
     @Override
