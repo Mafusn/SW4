@@ -83,6 +83,10 @@ public class CodeGenerator implements Visitor {
         }
     }
 
+    public StringBuilder getCodeBuilder() {
+        return codeBuilder;
+    }
+
     @Override
     public void visit(AssignmentOp node) {
         // If statement som tjekker om det er en reassignment, pointerDcl eller compound assignment.
@@ -113,7 +117,6 @@ public class CodeGenerator implements Visitor {
                         int value = intNum.getValue();
                         int highBits = value / 255;
                         value = value % 255;
-                        // System.out.println("value: " + value + " highBits: " + highBits);
                         // Nu Skal vi store value på den første plads på zero-page og highBits på den næste plads.
                         node.getLeft().accept(this);
                         // Nu har vi værdien af pointeren i x-register

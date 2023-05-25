@@ -1,8 +1,14 @@
+import AST.CodeGeneration.CodeGenerator;
+import AST.CodeGeneration.InstructionSet;
+import AST.ConstantFolding;
 import AST.Nodes.*;
+import AST.SymbolTableFilling.SymbolTableFilling;
+import AST.TypeChecking;
 import org.junit.jupiter.api.Test;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -721,6 +727,40 @@ class ParserTest {
             Prog AST = (Prog) compiler.Prog();
             // [THEN] Assert that the created AST is equal to the expected AST
             assertTrue(AST.equals(expectedAST));
+        } catch (Throwable e) {
+            System.out.println("Syntax error: " + e.getMessage());
+            assert false;
+        }
+    }
+
+    @Test
+    void integrationTestIntDcl() throws FileNotFoundException {
+        ArrayList<SymbolTableFilling> symbolTableFillings = new ArrayList<>();
+        SymbolTableFilling symbolTableFilling = new SymbolTableFilling(symbolTableFillings , 0);
+        TypeChecking typeChecking = new TypeChecking(symbolTableFillings);
+        ConstantFolding constantFolding = new ConstantFolding();
+        CodeGenerator codeGenerator = new CodeGenerator(symbolTableFillings);
+
+        // [GIVEN] That we run the parser with a file
+        Compiler compiler = readFileToParse("Test/TestCode/intDcl.txt");
+
+        // [GIVEN] That we create the expected StringBuilder from the code from the file
+        StringBuilder expectedCode = new StringBuilder();
+        expectedCode.append(InstructionSet.PHA.getInstruction() + "\n");
+        expectedCode.append(InstructionSet.PHA.getInstruction() + "\n");
+        expectedCode.append(InstructionSet.PHA.getInstruction() + "\n");
+        expectedCode.append(InstructionSet.JMP.getInstruction() + " Final\n");
+        expectedCode.append("Final:\n");
+
+        // [WHEN] We try to parse the code from the file
+        try {
+            Prog AST = (Prog) compiler.Prog();
+            AST.accept(symbolTableFilling);
+            AST.accept(typeChecking);
+            AST.accept(constantFolding);
+            AST.accept(codeGenerator);
+            // [THEN] Assert that the created StringBuilder is equal to the expected StringBuilder
+            assertTrue(codeGenerator.getCodeBuilder().toString().equals(expectedCode.toString()));
         } catch (Throwable e) {
             System.out.println("Syntax error: " + e.getMessage());
             assert false;
