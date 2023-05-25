@@ -1,3 +1,2 @@
 # SW4
-Compiler from our brand new programming language to assembly 6502.
-
+In order to run this compiler, you must edit the text in the code.txt file and then run the Java file called "Compiler".
